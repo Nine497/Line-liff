@@ -8,14 +8,16 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./components/ui/dialog";
+import { Dialog, DialogContent } from "./components/ui/dialog";
 import { Label } from "./components/ui/label";
 import { Input } from "./components/ui/input";
 import { Select } from "./components/ui/select";
 import { Textarea } from "./components/ui/textarea";
+import { Form, FormDescription, FormField, FormLabel } from "./components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { cn } from "./lib/utils";
 
@@ -713,37 +715,38 @@ function App() {
 
       {showCreateForm && (
         <Dialog open={showCreateForm} className="overflow-y-auto" onClick={() => setShowCreateForm(false)}>
-          <DialogContent className="w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-hidden" onClick={(event) => event.stopPropagation()}>
-            <DialogHeader className="flex items-start justify-between gap-4 border-b px-6 pt-6 pb-4">
-              <div>
-                <DialogTitle>เพิ่มงานใหม่</DialogTitle>
-                <DialogDescription>กรอกข้อมูลงานใหม่ของคุณ</DialogDescription>
-              </div>
-              <Button
-                variant="ghost"
-                type="button"
-                className="h-10 w-10 p-0"
-                onClick={() => setShowCreateForm(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogHeader>
-
-            <div className="max-h-[calc(100vh-12rem)] overflow-y-auto px-6 pb-6">
-              {formSuccess && (
-                <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                  ✓ {formSuccess}
-                </div>
-              )}
-              {formError && (
-                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-pre-line">
-                  ✕ {formError}
-                </div>
-              )}
-
-              <form onSubmit={handleCreateTask} className="flex flex-col gap-4">
+          <DialogContent className="w-full max-w-2xl">
+            <Card className="overflow-hidden">
+              <CardHeader className="flex items-start justify-between gap-4 border-b px-6 pt-6 pb-4">
                 <div>
-                  <Label htmlFor="title">ชื่องาน *</Label>
+                  <CardTitle>เพิ่มงานใหม่</CardTitle>
+                  <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  type="button"
+                  className="h-10 w-10 p-0"
+                  onClick={() => setShowCreateForm(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+
+              <CardContent className="grid gap-6 px-6 pb-6 pt-0">
+                {formSuccess && (
+                  <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                    ✓ {formSuccess}
+                  </div>
+                )}
+                {formError && (
+                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-pre-line">
+                    ✕ {formError}
+                  </div>
+                )}
+
+                <Form onSubmit={handleCreateTask}>
+                <FormField>
+                  <FormLabel htmlFor="title">ชื่องาน *</FormLabel>
                   <Input
                     id="title"
                     type="text"
@@ -757,13 +760,11 @@ function App() {
                     disabled={isSubmitting}
                     maxLength={100}
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formData.title.length}/100 ตัวอักษร
-                  </p>
-                </div>
+                  <FormDescription>{formData.title.length}/100 ตัวอักษร</FormDescription>
+                </FormField>
 
-                <div>
-                  <Label htmlFor="start_time">เวลา *</Label>
+                <FormField>
+                  <FormLabel htmlFor="start_time">เวลา *</FormLabel>
                   <Input
                     id="start_time"
                     type="datetime-local"
@@ -775,10 +776,10 @@ function App() {
                     }}
                     disabled={isSubmitting}
                   />
-                </div>
+                </FormField>
 
-                <div>
-                  <Label htmlFor="location">สถานที่</Label>
+                <FormField>
+                  <FormLabel htmlFor="location">สถานที่</FormLabel>
                   <Input
                     id="location"
                     type="text"
@@ -788,10 +789,10 @@ function App() {
                     disabled={isSubmitting}
                     maxLength={100}
                   />
-                </div>
+                </FormField>
 
-                <div>
-                  <Label htmlFor="type">ประเภท</Label>
+                <FormField>
+                  <FormLabel htmlFor="type">ประเภท</FormLabel>
                   <Select
                     id="type"
                     value={taskTypes.length ? formData.type_id ?? "" : formData.type}
@@ -832,10 +833,10 @@ function App() {
                       ))
                     )}
                   </Select>
-                </div>
+                </FormField>
 
-                <div>
-                  <Label htmlFor="participants">กำหนดผู้เข้าร่วม</Label>
+                <FormField>
+                  <FormLabel htmlFor="participants">กำหนดผู้เข้าร่วม</FormLabel>
                   <ComboboxChips
                     options={users.map((user) => ({
                       value: user.id,
@@ -846,13 +847,13 @@ function App() {
                     placeholder={users.length ? "" : "กำลังโหลดผู้ใช้..."}
                     disabled={isSubmitting}
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <FormDescription>
                     เลือกผู้ใช้เพื่อเข้าร่วมงานโดยพิมพ์เพื่อกรองและคลิกเลือก
-                  </p>
-                </div>
+                  </FormDescription>
+                </FormField>
 
-                <div>
-                  <Label htmlFor="description">รายละเอียด</Label>
+                <FormField>
+                  <FormLabel htmlFor="description">รายละเอียด</FormLabel>
                   <Textarea
                     id="description"
                     placeholder="รายละเอียดเพิ่มเติม (ไม่จำเป็น)"
@@ -862,12 +863,10 @@ function App() {
                     disabled={isSubmitting}
                     maxLength={500}
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {formData.description.length}/500 ตัวอักษร
-                  </p>
-                </div>
+                  <FormDescription>{formData.description.length}/500 ตัวอักษร</FormDescription>
+                </FormField>
 
-                <DialogFooter className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+                <CardFooter className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
                   <Button
                     type="submit"
                     className="w-full sm:w-auto"
@@ -895,10 +894,11 @@ function App() {
                   >
                     ยกเลิก
                   </Button>
-                </DialogFooter>
-              </form>
-            </div>
-          </DialogContent>
+                </CardFooter>
+              </Form>
+            </CardContent>
+          </Card>
+        </DialogContent>
         </Dialog>
       )}
     </main>
