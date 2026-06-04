@@ -733,7 +733,7 @@ function App() {
                 </Button>
               </CardHeader>
 
-              <CardContent className="grid gap-6 px-6 pb-6 pt-0">
+              <CardContent className="grid gap-4 px-4 pb-4 pt-4">
                 {formSuccess && (
                   <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
                     ✓ {formSuccess}
