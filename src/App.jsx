@@ -138,6 +138,7 @@ function App() {
           });
 
           const result = await response.json().catch(() => ({}));
+          console.log("User upsert result:", result);
           if (!response.ok) {
             throw new Error(result.error?.message || result.error || response.statusText);
           }
@@ -272,7 +273,7 @@ function App() {
         title: formData.title.trim(),
         description: formData.description.trim() || null,
         start_time: new Date(formData.start_time).toISOString(),
-        creator_id: currentUser.user_id || null,
+        creator_id: currentUser.id ?? currentUser.user_id ?? null,
         location: formData.location.trim() || null,
         type_id: formData.type_id,
         participant_ids: selectedParticipantIds,
