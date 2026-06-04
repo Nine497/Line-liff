@@ -114,16 +114,18 @@ export function ComboboxChips({
 
       {open && filteredOptions.length > 0 && (
         <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-md border bg-card shadow-lg">
-          {filteredOptions.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-              onClick={() => handleAddValue(option.value)}
-            >
-              {option.label}
-            </button>
-          ))}
+          <div className="max-h-56 overflow-y-auto">
+            {filteredOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                onClick={() => handleAddValue(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

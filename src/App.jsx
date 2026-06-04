@@ -184,6 +184,13 @@ function App() {
   const [formSuccess, setFormSuccess] = useState("");
   const isDark = theme === "dark";
 
+  useEffect(() => {
+    document.body.style.overflow = showCreateForm ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showCreateForm]);
+
   const weeks = useMemo(() => {
     const calendar = new Calendar(month.year, month.month);
     return calendar.generate({ withStaticLength: true });
@@ -705,13 +712,13 @@ function App() {
       </div>
 
       {showCreateForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader>
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
+          <Card className="w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-hidden shadow-2xl">
+            <CardHeader className="border-b px-6 py-5">
               <CardTitle>เพิ่มงานใหม่</CardTitle>
               <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="max-h-[calc(100vh-12rem)] overflow-y-auto px-6 py-5">
               {formSuccess && (
                 <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
                   ✓ {formSuccess}
