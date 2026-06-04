@@ -186,8 +186,6 @@ function App() {
             );
           }
 
-          nextUser =
-            result.user ?? userObj;
 
         } catch (err) {
 
@@ -197,11 +195,11 @@ function App() {
           );
         }
 
-        setCurrentUser(nextUser);
+        setCurrentUser(result.user);
 
         console.log(
           "Current user:",
-          nextUser
+          result.user
         );
 
         await Promise.all([
