@@ -109,56 +109,132 @@ function App() {
   }, [selectedKey]);
 
   useEffect(() => {
+
     const initApp = async () => {
+
       setIsInitializing(true);
+
       try {
+
         const liff = await initLiff();
+
         if (!liff) {
+
           setIsInitializing(false);
+
           return;
         }
 
-        const profile = await liff.getProfile();
+        const profile =
+          await liff.getProfile();
 
         if (!profile?.userId) {
-          throw new Error("LIFF profile missing userId");
+
+          throw new Error(
+            "LIFF profile missing userId"
+          );
         }
 
         const userObj = {
-          user_id: profile.userId,
-          display_name: profile.displayName,
-          picture_url: profile.pictureUrl ?? null,
+          user_id:
+            profile.userId,
+
+          display_name:
+            profile.displayName,
+
+          picture_url:
+            profile.pictureUrl ?? null,
         };
 
-        try {
-          const response = await fetch(`${apiUrl}/users`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(userObj),
-          });
+        let nextUser = userObj;
 
-          const result = await response.json().catch(() => ({}));
-          console.log("User upsert result:", result);
+        try {
+
+          const response =
+            await fetch(
+              `${apiUrl}/users`,
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+
+                body: JSON.stringify(
+                  userObj
+                ),
+              }
+            );
+
+          const result =
+            await response
+              .json()
+              .catch(() => ({}));
+
+          console.log(
+            "User upsert result:",
+            result
+          );
+
           if (!response.ok) {
-            throw new Error(result.error?.message || result.error || response.statusText);
+
+            throw new Error(
+              result.error?.message ||
+              result.error ||
+              response.statusText
+            );
           }
 
-          setCurrentUser(result.user ?? userObj);
-          console.log("User upsert currentUser:", currentUser);
-        } catch (err) {
-          console.error("Failed to upsert user to backend", err);
-          setCurrentUser(userObj);
-        }
-      } catch (error) {
-        console.error("LIFF init failed", error);
-      }
+          nextUser =
+            result.user ?? userObj;
 
-      await Promise.all([fetchTaskEvents(), fetchTaskTypes(), fetchUsers()]);
-      setIsInitializing(false);
+        } catch (err) {
+
+          console.error(
+            "Failed to upsert user to backend",
+            err
+          );
+        }
+
+        setCurrentUser(nextUser);
+
+        console.log(
+          "Current user:",
+          nextUser
+        );
+
+        await Promise.all([
+          fetchTaskEvents(),
+          fetchTaskTypes(),
+          fetchUsers(),
+        ]);
+
+      } catch (error) {
+
+        console.error(
+          "LIFF init failed",
+          error
+        );
+
+      } finally {
+
+        setIsInitializing(false);
+      }
     };
 
     initApp();
+
   }, []);
+
+  useEffect(() => {
+
+    console.log(
+      "currentUser updated:",
+      currentUser
+    );
+
+  }, [currentUser]);
 
   async function fetchTaskEvents() {
     try {
