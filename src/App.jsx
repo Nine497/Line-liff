@@ -15,6 +15,7 @@ import { Label } from "./components/ui/label";
 import { Input } from "./components/ui/input";
 import { Select } from "./components/ui/select";
 import { Textarea } from "./components/ui/textarea";
+import { ComboboxChips } from "./components/ui/combobox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { cn } from "./lib/utils";
 
@@ -818,31 +819,18 @@ function App() {
 
                 <div>
                   <Label htmlFor="participants">กำหนดผู้เข้าร่วม</Label>
-                  <Select
-                    id="participants"
-                    multiple
-                    value={selectedParticipantIds.map(String)}
-                    onChange={(e) => {
-                      const values = Array.from(e.target.selectedOptions, (option) => option.value);
-                      setSelectedParticipantIds(values.map((value) => Number(value)));
-                    }}
+                  <ComboboxChips
+                    options={users.map((user) => ({
+                      value: user.id,
+                      label: user.display_name || user.line_id || `User ${user.id}`,
+                    }))}
+                    selectedValues={selectedParticipantIds}
+                    onValueChange={(values) => setSelectedParticipantIds(values)}
+                    placeholder={users.length ? "ค้นหาผู้ใช้เพื่อเชิญ" : "กำลังโหลดผู้ใช้..."}
                     disabled={isSubmitting}
-                    className="min-h-[120px]"
-                  >
-                    {users.length ? (
-                      users.map((user) => (
-                        <option key={user.id} value={user.id}>
-                          {user.display_name || user.line_id || `User ${user.id}`}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="" disabled>
-                        กำลังโหลดผู้ใช้...
-                      </option>
-                    )}
-                  </Select>
+                  />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    เลือกผู้ใช้เพื่อเข้าร่วม (กด Ctrl/Cmd เพื่อเลือกหลายคน)
+                    เลือกผู้ใช้เพื่อเข้าร่วมงานโดยพิมพ์เพื่อกรองและคลิกเลือก
                   </p>
                 </div>
 
