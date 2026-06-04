@@ -7,6 +7,7 @@ export const initLiff = async () => {
 
     if (!liff.isLoggedIn()) {
         liff.login();
+        return null;
     }
 
     return liff;

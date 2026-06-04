@@ -200,7 +200,13 @@ function App() {
     const initApp = async () => {
       try {
         const liff = await initLiff();
+        if (!liff) return;
+
         const profile = await liff.getProfile();
+
+        if (!profile?.userId) {
+          throw new Error("LIFF profile missing userId");
+        }
 
         const userObj = {
           user_id: profile.userId,
@@ -210,13 +216,18 @@ function App() {
 
         setCurrentUser(userObj);
 
-        // Try to persist user profile to backend (upsert)
         try {
-          await fetch(`${apiUrl}/users`, {
+          const response = await fetch(`${apiUrl}/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(userObj),
           });
+
+          if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+            throw new Error(errorBody.error?.message || errorBody.error || response.statusText);
+          }
+          console.log("LIFF profile", profile);
         } catch (err) {
           console.error("Failed to upsert user to backend", err);
         }
@@ -232,7 +243,6 @@ function App() {
 
   async function fetchTaskEvents() {
     try {
-      console.log("LIFF profile", currentUser);
       const response = await fetch(`${apiUrl}/tasks`);
       if (!response.ok) throw new Error("Failed to load tasks from backend");
 
