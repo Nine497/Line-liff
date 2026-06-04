@@ -713,13 +713,24 @@ function App() {
       </div>
 
       {showCreateForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
-          <Card className="w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-hidden shadow-2xl">
-            <CardHeader className="border-b px-6 py-5">
-              <CardTitle>เพิ่มงานใหม่</CardTitle>
-              <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
-            </CardHeader>
-            <CardContent className="max-h-[calc(100vh-12rem)] overflow-y-auto px-6 py-5">
+        <Dialog open={showCreateForm} className="overflow-y-auto" onClick={() => setShowCreateForm(false)}>
+          <DialogContent className="w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-hidden" onClick={(event) => event.stopPropagation()}>
+            <DialogHeader className="flex items-start justify-between gap-4 border-b px-6 pt-6 pb-4">
+              <div>
+                <DialogTitle>เพิ่มงานใหม่</DialogTitle>
+                <DialogDescription>กรอกข้อมูลงานใหม่ของคุณ</DialogDescription>
+              </div>
+              <Button
+                variant="ghost"
+                type="button"
+                className="h-10 w-10 p-0"
+                onClick={() => setShowCreateForm(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogHeader>
+
+            <div className="max-h-[calc(100vh-12rem)] overflow-y-auto px-6 pb-6">
               {formSuccess && (
                 <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
                   ✓ {formSuccess}
@@ -737,8 +748,7 @@ function App() {
                   <Input
                     id="title"
                     type="text"
-                    className={formError.includes("ชื่องาน") ? "border-red-500" : ""
-                    }
+                    className={formError.includes("ชื่องาน") ? "border-red-500" : ""}
                     placeholder="เช่น ประชุมทีม"
                     value={formData.title}
                     onChange={(e) => {
@@ -858,10 +868,10 @@ function App() {
                   </p>
                 </div>
 
-                <div className="flex gap-2 pt-2">
+                <DialogFooter className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
                   <Button
                     type="submit"
-                    className="flex-1"
+                    className="w-full sm:w-auto"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -876,7 +886,7 @@ function App() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1"
+                    className="w-full sm:w-auto"
                     onClick={() => {
                       setShowCreateForm(false);
                       setFormError("");
@@ -886,11 +896,11 @@ function App() {
                   >
                     ยกเลิก
                   </Button>
-                </div>
+                </DialogFooter>
               </form>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </main>
   );
