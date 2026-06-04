@@ -160,6 +160,7 @@ function App() {
   const [showMine, setShowMine] = useState(false);
   const [events, setEvents] = useState(seededEvents);
   const [currentUser, setCurrentUser] = useState({});
+  const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -198,9 +199,13 @@ function App() {
 
   useEffect(() => {
     const initApp = async () => {
+      setIsInitializing(true);
       try {
         const liff = await initLiff();
-        if (!liff) return;
+        if (!liff) {
+          setIsInitializing(false);
+          return;
+        }
 
         const profile = await liff.getProfile();
 
@@ -214,8 +219,6 @@ function App() {
           picture_url: profile.pictureUrl ?? null,
         };
 
-        setCurrentUser(userObj);
-
         try {
           const response = await fetch(`${apiUrl}/users`, {
             method: "POST",
@@ -223,19 +226,22 @@ function App() {
             body: JSON.stringify(userObj),
           });
 
+          const result = await response.json().catch(() => ({}));
           if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({}));
-            throw new Error(errorBody.error?.message || errorBody.error || response.statusText);
+            throw new Error(result.error?.message || result.error || response.statusText);
           }
-          console.log("LIFF profile", profile);
+
+          setCurrentUser(result.user ?? userObj);
         } catch (err) {
           console.error("Failed to upsert user to backend", err);
+          setCurrentUser(userObj);
         }
       } catch (error) {
         console.error("LIFF init failed", error);
       }
 
       await fetchTaskEvents();
+      setIsInitializing(false);
     };
 
     initApp();
@@ -363,6 +369,11 @@ function App() {
   return (
     <main className={cn("min-h-svh bg-background text-foreground", isDark && "dark")}>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 sm:px-6 lg:px-8">
+        {isInitializing ? (
+          <div className="rounded-lg bg-muted p-4 text-center text-sm text-muted-foreground">
+            กำลังโหลดข้อมูลผู้ใช้และงานจากระบบ...
+          </div>
+        ) : null}
         <nav className="flex items-center justify-between gap-3">
           <a className="flex items-center gap-3 font-semibold" href="#calendarjs">
             <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
