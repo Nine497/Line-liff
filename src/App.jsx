@@ -631,13 +631,11 @@ function App() {
                         <div className="flex items-start gap-3">
                           <div>
                             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                              <time className="font-semibold">{event.time}</time>
-                              <span>•</span>
-                              <span>{event.team}</span>
+                              <time className="font-semibold">{event.title}</time>
                             </div>
-                            <p className="mt-2 text-lg font-semibold">{event.title}</p>
+                            <p className="mt-2 text-lg font-semibold">{event.type?.name ?? "ไม่ระบุ"}</p>
                             <p className="mt-1 text-sm text-muted-foreground">
-                              โดย {event.creator?.display_name ?? "ไม่ระบุ"} • {event.type} • {event.location}
+                              โดย {event.creator?.display_name ?? "ไม่ระบุ"} • {event.location}
                             </p>
                           </div>
                         </div>
