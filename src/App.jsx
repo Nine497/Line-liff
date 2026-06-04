@@ -243,6 +243,9 @@ function App() {
       if (!response.ok) throw new Error("Failed to load tasks from backend");
 
       const tasks = await response.json();
+      if (tasks.length != 0) {
+        console.log("Loaded tasks:", tasks);
+      }
       const tasksWithParticipants = await Promise.all(
         tasks.map(async (task) => {
           let participants = [];
