@@ -367,19 +367,47 @@ function App() {
   }
 
   return (
-    <main className={cn("min-h-svh bg-background text-foreground", isDark && "dark")}>
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 sm:px-6 lg:px-8">
-        {isInitializing ? (
-          <div className="rounded-lg bg-muted p-4 text-center text-sm text-muted-foreground">
-            กำลังโหลดข้อมูลผู้ใช้และงานจากระบบ...
+    <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
+      {isInitializing ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/75 backdrop-blur-md">
+          <div className="flex min-w-[320px] flex-col items-center gap-4 rounded-3xl border border-border bg-card/95 p-6 text-center shadow-2xl">
+            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted">
+              {currentUser.picture_url ? (
+                <img
+                  src={currentUser.picture_url}
+                  alt={currentUser.display_name ?? "Current user"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-3xl font-semibold text-primary">
+                  {currentUser.display_name?.[0] ?? "U"}
+                </span>
+              )}
+            </div>
+            <div>
+              <p className="text-lg font-semibold">กำลังโหลดข้อมูลผู้ใช้และงาน</p>
+              <p className="mt-2 text-sm text-muted-foreground">โปรดรอสักครู่ ข้อมูลจาก LIFF และ backend กำลังถูกดึงเข้ามา</p>
+            </div>
           </div>
-        ) : null}
+        </div>
+      ) : null}
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 sm:px-6 lg:px-8">
         <nav className="flex items-center justify-between gap-3">
           <a className="flex items-center gap-3 font-semibold" href="#calendarjs">
-            <span className="grid size-9 place-items-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-              L
+            <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm">
+              {currentUser.picture_url ? (
+                <img
+                  src={currentUser.picture_url}
+                  alt={currentUser.display_name ?? "Current user"}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-lg font-semibold">
+                  {currentUser.display_name?.[0] ?? "L"}
+                </span>
+              )}
             </span>
-            <span>ศรชล. Scheduler</span>
+            <span>{currentUser.display_name ? currentUser.display_name : "ศรชล. Scheduler"}</span>
           </a>
 
           <div className="flex items-center gap-2">
