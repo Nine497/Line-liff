@@ -657,7 +657,7 @@ function App() {
                   <div className="rounded-lg border border-dashed p-4">
                     <p className="font-medium">ยังไม่มีนัดหมาย</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      เพิ่มช่วงเวลาสำหรับลูกค้า walk-in หรือประชุมทีมได้เลย
+                      lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget consectetur sagittis, nisl nunc consectetur nisi, euismod aliquam nisl nunc euismod nisi.
                     </p>
                   </div>
                 )}
@@ -665,21 +665,6 @@ function App() {
                   <Plus data-icon="inline-start" />
                   เพิ่มช่วงเวลา
                 </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardDescription>เวลาว่าง</CardDescription>
-                <CardTitle>72%</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex h-20 items-end gap-2" aria-hidden="true">
-                  <span className="h-8 flex-1 rounded-md bg-primary/50" />
-                  <span className="h-12 flex-1 rounded-md bg-primary/70" />
-                  <span className="h-16 flex-1 rounded-md bg-primary" />
-                  <span className="h-10 flex-1 rounded-md bg-primary/60" />
-                </div>
               </CardContent>
             </Card>
           </aside>
