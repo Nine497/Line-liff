@@ -144,6 +144,7 @@ function App() {
           }
 
           setCurrentUser(result.user ?? userObj);
+          console.log("User upsert currentUser:", currentUser);
         } catch (err) {
           console.error("Failed to upsert user to backend", err);
           setCurrentUser(userObj);
