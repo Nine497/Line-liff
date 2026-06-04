@@ -11,6 +11,10 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
+import { Label } from "./components/ui/label";
+import { Input } from "./components/ui/input";
+import { Select } from "./components/ui/select";
+import { Textarea } from "./components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { cn } from "./lib/utils";
 
@@ -167,9 +171,13 @@ function App() {
     location: "",
     start_time: "",
     team: "",
+    type_id: null,
     type: "ประชุม",
     description: "",
   });
+  const [taskTypes, setTaskTypes] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedParticipantIds, setSelectedParticipantIds] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
@@ -240,7 +248,7 @@ function App() {
         console.error("LIFF init failed", error);
       }
 
-      await fetchTaskEvents();
+      await Promise.all([fetchTaskEvents(), fetchTaskTypes(), fetchUsers()]);
       setIsInitializing(false);
     };
 
@@ -286,6 +294,42 @@ function App() {
     }
   }
 
+  async function fetchTaskTypes() {
+    try {
+      const response = await fetch(`${apiUrl}/tasks/types`);
+      if (!response.ok) throw new Error("Failed to load task types");
+
+      const types = await response.json();
+      if (Array.isArray(types) && types.length > 0) {
+        setTaskTypes(types);
+        setFormData((prev) => {
+          const matched = types.find((item) => item.name === prev.type || item.id === prev.type_id);
+          return {
+            ...prev,
+            type_id: matched?.id ?? types[0].id,
+            type: matched?.name ?? types[0].name,
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Failed to load task types from backend", error);
+    }
+  }
+
+  async function fetchUsers() {
+    try {
+      const response = await fetch(`${apiUrl}/users`);
+      if (!response.ok) throw new Error("Failed to load users");
+
+      const userList = await response.json();
+      if (Array.isArray(userList)) {
+        setUsers(userList);
+      }
+    } catch (error) {
+      console.error("Failed to load users from backend", error);
+    }
+  }
+
   function moveMonth(direction) {
     setMonth((current) => {
       const nextMonth = current.month + direction;
@@ -325,10 +369,10 @@ function App() {
         title: formData.title.trim(),
         description: formData.description.trim() || null,
         start_time: new Date(formData.start_time).toISOString(),
-        creator_name: currentUser.display_name || "Unknown",
+        creator_id: currentUser.user_id || null,
         location: formData.location.trim() || null,
-        team: formData.team.trim() || null,
-        type: formData.type || "ประชุม",
+        type_id: formData.type_id,
+        participant_ids: selectedParticipantIds,
       };
 
       const response = await fetch(`${apiUrl}/tasks`, {
@@ -348,10 +392,11 @@ function App() {
           title: "",
           location: "",
           start_time: "",
-          team: "",
-          type: "ประชุม",
+          type_id: taskTypes.length ? taskTypes[0].id : null,
+          type: taskTypes.length ? taskTypes[0].name : "ประชุม",
           description: "",
         });
+        setSelectedParticipantIds([]);
         setFormError("");
         setFormSuccess("");
         setShowCreateForm(false);
@@ -386,7 +431,7 @@ function App() {
             </div>
             <div>
               <p className="text-lg font-semibold">กำลังโหลดข้อมูลผู้ใช้และงาน</p>
-              <p className="mt-2 text-sm text-muted-foreground">โปรดรอสักครู่ ข้อมูลจาก LIFF และ backend กำลังถูกดึงเข้ามา</p>
+              <p className="mt-2 text-sm text-muted-foreground">โปรดรอสักครู่ กำลังเรียกข้อมูลจาก LIFF และฐานข้อมูล</p>
             </div>
           </div>
         </div>
@@ -435,10 +480,11 @@ function App() {
               </Badge>
               <div className="flex flex-col gap-2">
                 <CardTitle className="text-3xl leading-tight sm:text-4xl">
-                  จัดตารางนัดหมายสำหรับทีมที่ทำงานผ่าน LINE
+                  จัดการตารางนัดหมายงาน ศร.ชล.
                 </CardTitle>
                 <CardDescription className="max-w-2xl text-base leading-7">
-                  ปฏิทินจาก CalendarJS พร้อมรายการนัดหมาย เวลาว่าง และ UI ที่เหมาะกับทั้งมือถือใน LIFF และหน้าจอ PC
+                  ระบบปฏิทินสำหรับเพิ่มและติดตามงาน ของ ศร.ชล.
+                  ใช้งานได้ทั้งบน LIFF และ Desktop
                 </CardDescription>
               </div>
             </CardHeader>
@@ -678,14 +724,12 @@ function App() {
 
               <form onSubmit={handleCreateTask} className="flex flex-col gap-4">
                 <div>
-                  <label className="block text-sm font-medium">ชื่องาน *</label>
-                  <input
+                  <Label htmlFor="title">ชื่องาน *</Label>
+                  <Input
+                    id="title"
                     type="text"
-                    className={cn(
-                      "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors",
-                      "border-input focus:border-primary focus:outline-none",
-                      formError.includes("ชื่องาน") && "border-red-500"
-                    )}
+                    className={formError.includes("ชื่องาน") ? "border-red-500" : ""
+                    }
                     placeholder="เช่น ประชุมทีม"
                     value={formData.title}
                     onChange={(e) => {
@@ -701,14 +745,11 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium">เวลา *</label>
-                  <input
+                  <Label htmlFor="start_time">เวลา *</Label>
+                  <Input
+                    id="start_time"
                     type="datetime-local"
-                    className={cn(
-                      "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors",
-                      "border-input focus:border-primary focus:outline-none",
-                      formError.includes("เวลา") && "border-red-500"
-                    )}
+                    className={formError.includes("เวลา") ? "border-red-500" : ""}
                     value={formData.start_time}
                     onChange={(e) => {
                       setFormData({ ...formData, start_time: e.target.value });
@@ -719,10 +760,10 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium">สถานที่</label>
-                  <input
+                  <Label htmlFor="location">สถานที่</Label>
+                  <Input
+                    id="location"
                     type="text"
-                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none"
                     placeholder="เช่น ห้องประชุม A"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -732,38 +773,83 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium">ทีม</label>
-                  <input
-                    type="text"
-                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none"
-                    placeholder="เช่น ทีม LINE OA"
-                    value={formData.team}
-                    onChange={(e) => setFormData({ ...formData, team: e.target.value })}
-                    disabled={isSubmitting}
-                    maxLength={100}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium">ประเภท</label>
-                  <select
-                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none"
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  <Label htmlFor="type">ประเภท</Label>
+                  <Select
+                    id="type"
+                    value={taskTypes.length ? formData.type_id ?? "" : formData.type}
+                    onChange={(e) => {
+                      if (taskTypes.length) {
+                        const selected = taskTypes.find((item) => String(item.id) === e.target.value);
+                        setFormData({
+                          ...formData,
+                          type_id: selected?.id ?? null,
+                          type: selected?.name ?? formData.type,
+                        });
+                      } else {
+                        setFormData({
+                          ...formData,
+                          type: e.target.value,
+                        });
+                      }
+                    }}
                     disabled={isSubmitting}
                   >
-                    <option>ประชุม</option>
-                    <option>เดโม</option>
-                    <option>สรุปงาน</option>
-                    <option>แชร์ทรัพยากร</option>
-                    <option>เช็คอิน</option>
-                  </select>
+                    {taskTypes.length ? (
+                      taskTypes.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))
+                    ) : (
+                      [
+                        "ประชุม",
+                        "เดโม",
+                        "สรุปงาน",
+                        "แชร์ทรัพยากร",
+                        "เช็คอิน",
+                      ].map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))
+                    )}
+                  </Select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium">รายละเอียด</label>
-                  <textarea
-                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none resize-none"
+                  <Label htmlFor="participants">กำหนดผู้เข้าร่วม</Label>
+                  <Select
+                    id="participants"
+                    multiple
+                    value={selectedParticipantIds.map(String)}
+                    onChange={(e) => {
+                      const values = Array.from(e.target.selectedOptions, (option) => option.value);
+                      setSelectedParticipantIds(values.map((value) => Number(value)));
+                    }}
+                    disabled={isSubmitting}
+                    className="min-h-[120px]"
+                  >
+                    {users.length ? (
+                      users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.display_name || user.line_id || `User ${user.id}`}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        กำลังโหลดผู้ใช้...
+                      </option>
+                    )}
+                  </Select>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    เลือกผู้ใช้เพื่อเข้าร่วม (กด Ctrl/Cmd เพื่อเลือกหลายคน)
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="description">รายละเอียด</Label>
+                  <Textarea
+                    id="description"
                     placeholder="รายละเอียดเพิ่มเติม (ไม่จำเป็น)"
                     rows={3}
                     value={formData.description}
