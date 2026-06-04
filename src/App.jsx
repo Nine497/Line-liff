@@ -833,7 +833,7 @@ function App() {
                     }))}
                     selectedValues={selectedParticipantIds}
                     onValueChange={(values) => setSelectedParticipantIds(values)}
-                    placeholder={users.length ? "ค้นหาผู้ใช้เพื่อเชิญ" : "กำลังโหลดผู้ใช้..."}
+                    placeholder={users.length ? "" : "กำลังโหลดผู้ใช้..."}
                     disabled={isSubmitting}
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
