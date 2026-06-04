@@ -396,6 +396,37 @@ function App() {
     }
   }
 
+  const handleUpload =
+    async (e) => {
+
+      const file =
+        e.target.files[0];
+
+      if (!file) return;
+
+      const formData =
+        new FormData();
+
+      formData.append(
+        "file",
+        file
+      );
+
+      const response =
+        await fetch(
+          `${apiUrl}/tasks/import`,
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+      const result =
+        await response.json();
+
+      console.log(result);
+    };
+
   return (
     <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
       {isInitializing ? (
@@ -454,6 +485,11 @@ function App() {
               <Plus data-icon="inline-start" />
               เพิ่มงาน
             </Button>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleUpload}
+            />
           </div>
         </nav>
 
