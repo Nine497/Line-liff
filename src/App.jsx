@@ -40,116 +40,8 @@ const monthNames = [
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 
-const seededEvents = {
-  "2026-6-4": [
-    {
-      id: "2026-6-4-1",
-      time: "09:30",
-      title: "เริ่มต้นใช้งานลูกค้า",
-      creator: {
-        user_id: "U10001",
-        display_name: "พี่เอ",
-      },
-      participants: [
-        { user_id: "U10001", display_name: "พี่เอ", status: "going" },
-        { user_id: "U10002", display_name: "น้องบี", status: "going" },
-        { user_id: "U10003", display_name: "บอสชล", status: "pending" },
-      ],
-      team: "ทีม LINE OA",
-      status: "ยืนยันแล้ว",
-      type: "ประชุม",
-      location: "ห้องประชุม A",
-    },
-    {
-      id: "2026-6-4-2",
-      time: "13:00",
-      title: "รีวิวขั้นตอนจองคิว",
-      creator: {
-        user_id: "U10002",
-        display_name: "น้องบี",
-      },
-      participants: [
-        { user_id: "U10002", display_name: "น้องบี", status: "going" },
-        { user_id: "U10004", display_name: "พี่ต้น", status: "pending" },
-      ],
-      team: "ทีมโปรดักต์",
-      status: "รอตรวจ",
-      type: "สรุปงาน",
-      location: "ห้องประชุม B",
-    },
-    {
-      id: "2026-6-4-3",
-      time: "16:15",
-      title: "เผยแพร่เวลาว่าง",
-      creator: {
-        user_id: "U10005",
-        display_name: "คุณแอน",
-      },
-      participants: [
-        { user_id: "U10005", display_name: "คุณแอน", status: "going" },
-      ],
-      team: "กลุ่มทดลอง SaaS",
-      status: "พร้อม",
-      type: "แชร์ทรัพยากร",
-      location: "ออนไลน์",
-    },
-  ],
-  "2026-6-6": [
-    {
-      id: "2026-6-6-1",
-      time: "10:00",
-      title: "ประชุมทีมปฏิบัติการ",
-      creator: {
-        user_id: "U10003",
-        display_name: "บอสชล",
-      },
-      participants: [
-        { user_id: "U10003", display_name: "บอสชล", status: "going" },
-        { user_id: "U10006", display_name: "น้องแจน", status: "going" },
-      ],
-      team: "ฝ่ายซัพพอร์ต",
-      status: "ยืนยันแล้ว",
-      type: "ประชุมทีม",
-      location: "ห้องประชุม C",
-    },
-  ],
-  "2026-6-11": [
-    {
-      id: "2026-6-11-1",
-      time: "11:30",
-      title: "เชื่อมต่อ CalendarJS",
-      creator: {
-        user_id: "U10005",
-        display_name: "คุณแอน",
-      },
-      participants: [
-        { user_id: "U10005", display_name: "คุณแอน", status: "going" },
-        { user_id: "U10002", display_name: "น้องบี", status: "pending" },
-      ],
-      team: "Frontend",
-      status: "พร้อม",
-      type: "เช็คอิน",
-      location: "ออนไลน์",
-    },
-    {
-      id: "2026-6-11-2",
-      time: "15:00",
-      title: "เดโมให้ลูกค้า",
-      creator: {
-        user_id: "U10003",
-        display_name: "บอสชล",
-      },
-      participants: [
-        { user_id: "U10003", display_name: "บอสชล", status: "going" },
-        { user_id: "U10004", display_name: "พี่ต้น", status: "going" },
-      ],
-      team: "ฝ่ายขาย",
-      status: "ยืนยันแล้ว",
-      type: "เดโม",
-      location: "ห้องประชุม D",
-    },
-  ],
-};
+const today = new Date();
+const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
 const tabLabels = [
   ["calendar", "ปฏิทิน"],
@@ -164,9 +56,9 @@ function App() {
   const [view, setView] = useState("calendar");
   const [theme, setTheme] = useState("light");
   const [month, setMonth] = useState({ year: 2026, month: 6 });
-  const [selectedKey, setSelectedKey] = useState("2026-6-4");
+  const [selectedKey, setSelectedKey] = useState(todayKey);
   const [showMine, setShowMine] = useState(false);
-  const [events, setEvents] = useState(seededEvents);
+  const [events, setEvents] = useState({});
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -647,7 +539,7 @@ function App() {
               <CardContent className="flex flex-col gap-3">
                 {filteredEvents.length ? (
                   filteredEvents.map((event) => {
-                    const attendees = event.participants.filter((participant) => participant.status === "going");
+                    const attendees = (event.participants ?? []).filter((participant) => participant?.status === "going");
 
                     return (
                       <div
@@ -663,7 +555,7 @@ function App() {
                             </div>
                             <p className="mt-2 text-lg font-semibold">{event.title}</p>
                             <p className="mt-1 text-sm text-muted-foreground">
-                              โดย {event.creator.display_name} • {event.type} • {event.location}
+                              โดย {event.creator?.display_name ?? "ไม่ระบุ"} • {event.type} • {event.location}
                             </p>
                           </div>
                         </div>
@@ -674,7 +566,7 @@ function App() {
                               key={participant.user_id}
                               className="rounded-full border border-input px-2 py-1 text-xs"
                             >
-                              {participant.display_name}
+                              {participant.display_name ?? "ไม่ระบุ"}
                             </span>
                           ))}
                         </div>
@@ -839,9 +731,9 @@ function App() {
                   <FormField>
                     <FormLabel htmlFor="participants">กำหนดผู้เข้าร่วม</FormLabel>
                     <ComboboxChips
-                      options={users.map((user) => ({
-                        value: user.id,
-                        label: user.display_name || user.line_id || `User ${user.id}`,
+                      options={users.filter(Boolean).map((user) => ({
+                        value: user?.id,
+                        label: user?.display_name || user?.line_id || `User ${user?.id ?? "?"}`,
                       }))}
                       selectedValues={selectedParticipantIds}
                       onValueChange={(values) => setSelectedParticipantIds(values)}
