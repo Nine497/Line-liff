@@ -17,6 +17,7 @@ import { Label } from "./components/ui/label";
 import { Input } from "./components/ui/input";
 import { Select } from "./components/ui/select";
 import { Textarea } from "./components/ui/textarea";
+import { ComboboxChips } from "./components/ui/combobox";
 import { Form, FormDescription, FormField, FormLabel } from "./components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { cn } from "./lib/utils";
