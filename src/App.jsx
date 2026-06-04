@@ -205,6 +205,7 @@ function App() {
 
   async function fetchTaskEvents() {
     try {
+      console.log("LIFF profile", currentUser);
       const response = await fetch(`${apiUrl}/tasks`);
       if (!response.ok) throw new Error("Failed to load tasks from backend");
 
