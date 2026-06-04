@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Calendar from "calendarjs";
-import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun, X } from "lucide-react";
 import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
 import { initLiff } from "./liff";
@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "./components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./components/ui/dialog";
 import { Label } from "./components/ui/label";
 import { Input } from "./components/ui/input";
 import { Select } from "./components/ui/select";
@@ -712,13 +713,24 @@ function App() {
       </div>
 
       {showCreateForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
-          <Card className="w-full max-w-2xl max-h-[calc(100vh-4rem)] overflow-hidden shadow-2xl">
-            <CardHeader className="border-b px-6 py-5">
-              <CardTitle>เพิ่มงานใหม่</CardTitle>
-              <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
-            </CardHeader>
-            <CardContent className="max-h-[calc(100vh-12rem)] overflow-y-auto px-6 py-5">
+        <Dialog open={showCreateForm} className="overflow-y-auto" onClick={() => setShowCreateForm(false)}>
+          <DialogContent className="w-full max-w-2xl max-h-[calc(100vh-4rem)]">
+            <DialogHeader className="flex items-start justify-between gap-4 border-b px-6 pt-6 pb-4">
+              <div>
+                <DialogTitle>เพิ่มงานใหม่</DialogTitle>
+                <DialogDescription>กรอกข้อมูลงานใหม่ของคุณ</DialogDescription>
+              </div>
+              <Button
+                variant="ghost"
+                type="button"
+                onClick={() => setShowCreateForm(false)}
+                className="h-10 w-10 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogHeader>
+
+            <div className="px-6 pb-6">
               {formSuccess && (
                 <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
                   ✓ {formSuccess}
@@ -736,8 +748,7 @@ function App() {
                   <Input
                     id="title"
                     type="text"
-                    className={formError.includes("ชื่องาน") ? "border-red-500" : ""
-                    }
+                    className={formError.includes("ชื่องาน") ? "border-red-500" : ""}
                     placeholder="เช่น ประชุมทีม"
                     value={formData.title}
                     onChange={(e) => {
@@ -857,12 +868,8 @@ function App() {
                   </p>
                 </div>
 
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    type="submit"
-                    className="flex-1"
-                    disabled={isSubmitting}
-                  >
+                <DialogFooter>
+                  <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting}>
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">
                         <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
@@ -875,7 +882,7 @@ function App() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex-1"
+                    className="w-full sm:w-auto"
                     onClick={() => {
                       setShowCreateForm(false);
                       setFormError("");
@@ -885,11 +892,11 @@ function App() {
                   >
                     ยกเลิก
                   </Button>
-                </div>
+                </DialogFooter>
               </form>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </main>
   );

@@ -63,7 +63,7 @@ export function ComboboxChips({
     <div className={cn("relative", className)} ref={containerRef}>
       <div
         className={cn(
-          "min-h-[56px] flex flex-wrap items-center gap-2 rounded-md border border-input bg-background px-3 py-2 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+          "min-h-[56px] flex flex-wrap items-center gap-2 rounded-2xl border border-input bg-background px-3 py-2 transition-colors focus-within:border-primary focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           disabled && "opacity-60",
         )}
         onClick={() => {
@@ -78,12 +78,12 @@ export function ComboboxChips({
           return option ? (
             <span
               key={value}
-              className="inline-flex items-center gap-2 rounded-full bg-muted px-2 py-1 text-sm"
+              className="inline-flex items-center gap-2 rounded-full border border-input bg-muted px-2 py-1 text-sm text-foreground"
             >
               <span>{option.label}</span>
               <button
                 type="button"
-                className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="rounded-full p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 onClick={(event) => {
                   event.stopPropagation();
                   handleRemoveValue(value);
@@ -99,7 +99,7 @@ export function ComboboxChips({
         <input
           ref={inputRef}
           type="text"
-          className="min-w-[120px] flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          className="min-w-[120px] flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           placeholder={placeholder}
           value={query}
           onChange={(event) => {
@@ -113,13 +113,13 @@ export function ComboboxChips({
       </div>
 
       {open && filteredOptions.length > 0 && (
-        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-md border bg-card shadow-lg">
+        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-3xl border border-input bg-card shadow-2xl">
           <div className="max-h-56 overflow-y-auto">
             {filteredOptions.map((option) => (
               <button
                 key={option.value}
                 type="button"
-                className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                className="w-full text-left px-4 py-3 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
                 onClick={() => handleAddValue(option.value)}
               >
                 {option.label}
@@ -130,7 +130,7 @@ export function ComboboxChips({
       )}
 
       {open && filteredOptions.length === 0 && (
-        <div className="absolute z-50 mt-2 w-full rounded-md border bg-card p-3 text-sm text-muted-foreground">
+        <div className="absolute z-50 mt-2 w-full rounded-3xl border border-input bg-card p-3 text-sm text-muted-foreground shadow-2xl">
           ไม่มีตัวเลือกตรงกับคำค้นหา
         </div>
       )}
