@@ -159,7 +159,19 @@ function App() {
   const [selectedKey, setSelectedKey] = useState("2026-6-4");
   const [showMine, setShowMine] = useState(false);
   const [events, setEvents] = useState(seededEvents);
-  const [currentUser, setCurrentUser] = useState({ user_id: "U10004", display_name: "พี่ต้น" });
+  const [currentUser, setCurrentUser] = useState({});
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    location: "",
+    start_time: "",
+    team: "",
+    type: "ประชุม",
+    description: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [formSuccess, setFormSuccess] = useState("");
   const isDark = theme === "dark";
 
   const weeks = useMemo(() => {
@@ -189,10 +201,25 @@ function App() {
       try {
         const liff = await initLiff();
         const profile = await liff.getProfile();
-        setCurrentUser({
+
+        const userObj = {
           user_id: profile.userId,
           display_name: profile.displayName,
-        });
+          picture_url: profile.pictureUrl ?? null,
+        };
+
+        setCurrentUser(userObj);
+
+        // Try to persist user profile to backend (upsert)
+        try {
+          await fetch(`${apiUrl}/users`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(userObj),
+          });
+        } catch (err) {
+          console.error("Failed to upsert user to backend", err);
+        }
       } catch (error) {
         console.error("LIFF init failed", error);
       }
@@ -252,6 +279,77 @@ function App() {
     });
   }
 
+  function validateForm() {
+    const errors = [];
+    if (!formData.title.trim()) errors.push("ชื่องานห้ามว่าง");
+    if (formData.title.trim().length < 3) errors.push("ชื่องานต้องมีอย่างน้อย 3 ตัวอักษร");
+    if (!formData.start_time) errors.push("เวลาห้ามว่าง");
+
+    const selectedTime = new Date(formData.start_time);
+    const now = new Date();
+    if (selectedTime < now) errors.push("ไม่สามารถสร้างงานในอดีตได้");
+
+    return errors;
+  }
+
+  async function handleCreateTask(e) {
+    e.preventDefault();
+    setFormError("");
+    setFormSuccess("");
+
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setFormError(errors.join("\n"));
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        title: formData.title.trim(),
+        description: formData.description.trim() || null,
+        start_time: new Date(formData.start_time).toISOString(),
+        creator_name: currentUser.display_name || "Unknown",
+        location: formData.location.trim() || null,
+        team: formData.team.trim() || null,
+        type: formData.type || "ประชุม",
+      };
+
+      const response = await fetch(`${apiUrl}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "ไม่สามารถเพิ่มงานได้");
+      }
+
+      setFormSuccess("เพิ่มงานสำเร็จ!");
+      setTimeout(() => {
+        setFormData({
+          title: "",
+          location: "",
+          start_time: "",
+          team: "",
+          type: "ประชุม",
+          description: "",
+        });
+        setFormError("");
+        setFormSuccess("");
+        setShowCreateForm(false);
+      }, 500);
+
+      await fetchTaskEvents();
+    } catch (error) {
+      console.error("Error creating task:", error);
+      setFormError(error.message || "เกิดข้อผิดพลาดในการเพิ่มงาน");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <main className={cn("min-h-svh bg-background text-foreground", isDark && "dark")}>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 sm:px-6 lg:px-8">
@@ -273,9 +371,9 @@ function App() {
             >
               {isDark ? <Sun /> : <Moon />}
             </Button>
-            <Button size="sm">
+            <Button size="sm" onClick={() => setShowCreateForm(true)}>
               <Plus data-icon="inline-start" />
-              จองคิวใหม่
+              เพิ่มงาน
             </Button>
           </div>
         </nav>
@@ -485,7 +583,7 @@ function App() {
                     </p>
                   </div>
                 )}
-                <Button className="w-full">
+                <Button className="w-full" onClick={() => setShowCreateForm(true)}>
                   <Plus data-icon="inline-start" />
                   เพิ่มช่วงเวลา
                 </Button>
@@ -509,6 +607,160 @@ function App() {
           </aside>
         </section>
       </div>
+
+      {showCreateForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>เพิ่มงานใหม่</CardTitle>
+              <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {formSuccess && (
+                <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                  ✓ {formSuccess}
+                </div>
+              )}
+              {formError && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-pre-line">
+                  ✕ {formError}
+                </div>
+              )}
+
+              <form onSubmit={handleCreateTask} className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-sm font-medium">ชื่องาน *</label>
+                  <input
+                    type="text"
+                    className={cn(
+                      "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors",
+                      "border-input focus:border-primary focus:outline-none",
+                      formError.includes("ชื่องาน") && "border-red-500"
+                    )}
+                    placeholder="เช่น ประชุมทีม"
+                    value={formData.title}
+                    onChange={(e) => {
+                      setFormData({ ...formData, title: e.target.value });
+                      setFormError("");
+                    }}
+                    disabled={isSubmitting}
+                    maxLength={100}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {formData.title.length}/100 ตัวอักษร
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium">เวลา *</label>
+                  <input
+                    type="datetime-local"
+                    className={cn(
+                      "mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm transition-colors",
+                      "border-input focus:border-primary focus:outline-none",
+                      formError.includes("เวลา") && "border-red-500"
+                    )}
+                    value={formData.start_time}
+                    onChange={(e) => {
+                      setFormData({ ...formData, start_time: e.target.value });
+                      setFormError("");
+                    }}
+                    disabled={isSubmitting}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium">สถานที่</label>
+                  <input
+                    type="text"
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none"
+                    placeholder="เช่น ห้องประชุม A"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    disabled={isSubmitting}
+                    maxLength={100}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium">ทีม</label>
+                  <input
+                    type="text"
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none"
+                    placeholder="เช่น ทีม LINE OA"
+                    value={formData.team}
+                    onChange={(e) => setFormData({ ...formData, team: e.target.value })}
+                    disabled={isSubmitting}
+                    maxLength={100}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium">ประเภท</label>
+                  <select
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none"
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    disabled={isSubmitting}
+                  >
+                    <option>ประชุม</option>
+                    <option>เดโม</option>
+                    <option>สรุปงาน</option>
+                    <option>แชร์ทรัพยากร</option>
+                    <option>เช็คอิน</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium">รายละเอียด</label>
+                  <textarea
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm transition-colors focus:border-primary focus:outline-none resize-none"
+                    placeholder="รายละเอียดเพิ่มเติม (ไม่จำเป็น)"
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    disabled={isSubmitting}
+                    maxLength={500}
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {formData.description.length}/500 ตัวอักษร
+                  </p>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
+                        กำลังบันทึก...
+                      </span>
+                    ) : (
+                      "บันทึก"
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setShowCreateForm(false);
+                      setFormError("");
+                      setFormSuccess("");
+                    }}
+                    disabled={isSubmitting}
+                  >
+                    ยกเลิก
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </main>
   );
 }
