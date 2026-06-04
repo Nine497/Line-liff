@@ -716,7 +716,7 @@ function App() {
 
       {showCreateForm && (
         <Dialog open={showCreateForm} className="overflow-y-auto" onClick={() => setShowCreateForm(false)}>
-          <DialogContent className="w-full max-w-2xl">
+          <DialogContent className="w-full max-w-2xl" onClick={(event) => event.stopPropagation()}>
             <Card className="overflow-hidden">
               <CardHeader className="flex items-start justify-between gap-4 border-b px-6 pt-6 pb-4">
                 <div>
