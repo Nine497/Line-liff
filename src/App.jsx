@@ -444,6 +444,34 @@ function App() {
         ? busyParticipants
         : participants;
 
+  const renderParticipant = (participant) => {
+    const isBusy = busyParticipantIds.has(participant.id);
+
+    return (
+      <div
+        key={participant.id}
+        className="flex items-center justify-between rounded-lg border bg-background p-4"
+      >
+        <div>
+          <p className="font-medium">{participant.name}</p>
+
+          <p className="text-sm text-muted-foreground">
+            {isBusy ? "มีงานในวันนี้" : "ไม่มีงานในวันนี้"}
+          </p>
+        </div>
+
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
+            ? "bg-red-100 text-red-700"
+            : "bg-green-100 text-green-700"
+            }`}
+        >
+          {isBusy ? "ไม่ว่าง" : "ว่าง"}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
       {isInitializing ? (
