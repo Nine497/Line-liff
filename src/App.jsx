@@ -696,24 +696,13 @@ function App() {
           </aside>
         </section>
         <footer className="border-t bg-background">
-          <div className="mx-auto flex flex-col gap-3 px-0 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between text-center">
-            <div>
-              <p className="font-medium text-foreground">
-                LINE LIFF Scheduler
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4">
+          <div className="mx-auto flex flex-col items-center justify-center gap-2 px-2 py-2 text-center text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">
+              LINE LIFF Scheduler © {new Date().getFullYear()}
+            </p>
+            <div className="flex items-center gap-2">
               <span>
-                © {new Date().getFullYear()}
-              </span>
-
-              <span className="hidden sm:inline">
-                •
-              </span>
-
-              <span>
-                Powered by React &
+                Powered by React •
                 Supabase
               </span>
             </div>
