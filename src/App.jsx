@@ -707,7 +707,7 @@ function App() {
                   console.log("tab:", v);
                   setViewMode(v);
                 }}>
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-auto grid-cols-3">
                     <TabsTrigger value="available">ว่าง</TabsTrigger>
                     <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
                     <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
