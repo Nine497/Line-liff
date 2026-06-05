@@ -452,6 +452,14 @@ function App() {
         : participants;
 
   const renderParticipant = (participant) => {
+    if (!participant) {
+      return (
+        <div className="flex items-center justify-between rounded-lg border bg-background p-4">
+          ไม่มีข้อมูล
+        </div>
+      );
+    }
+
     const isBusy = busyParticipantIds.has(participant.id);
 
     return (
@@ -468,9 +476,7 @@ function App() {
         </div>
 
         <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
-            ? "bg-red-100 text-red-700"
-            : "bg-green-100 text-green-700"
+          className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
             }`}
         >
           {isBusy ? "ไม่ว่าง" : "ว่าง"}
