@@ -485,16 +485,6 @@ function App() {
       </div>
     );
   };
-  const ParticipantSkeleton = () => (
-    <div className="flex items-center justify-between rounded-lg border bg-background p-4 animate-pulse">
-      <div className="space-y-2">
-        <div className="h-4 w-32 rounded bg-muted" />
-        <div className="h-3 w-24 rounded bg-muted" />
-      </div>
-
-      <div className="h-6 w-16 rounded-full bg-muted" />
-    </div>
-  );
 
   return (
     <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
@@ -724,20 +714,38 @@ function App() {
 
                   <TabsContent value="available">
                     <div className="flex flex-col gap-3">
-                      {availableParticipants.map(renderParticipant)}
+                      {availableParticipants.length > 0 ? (
+                        availableParticipants.map(renderParticipant)
+                      ) : (
+                        <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                          ไม่มีคนว่าง
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
 
                   <TabsContent value="busy">
                     <div className="flex flex-col gap-3">
-                      {busyParticipants.map(renderParticipant)}
+                      {busyParticipants.length > 0 ? (
+                        busyParticipants.map(renderParticipant)
+                      ) : (
+                        <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                          ทุกคนว่าง
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
 
 
                   <TabsContent value="all">
                     <div className="flex flex-col gap-3">
-                      {participants.map(renderParticipant)}
+                      {participants.length > 0 ? (
+                        participants.map(renderParticipant)
+                      ) : (
+                        <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                          ไม่มีข้อมูลผู้ใช้งาน
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
 
