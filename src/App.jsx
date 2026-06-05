@@ -633,64 +633,49 @@ function App() {
             </CardHeader>
 
             <CardContent className="flex flex-col gap-5 p-4 pt-4 sm:p-5">
-              <Tabs>
-                {/* <TabsList className="w-fit">
-                  {tabLabels.map(([item, label]) => (
-                    <TabsTrigger
-                      active={view === item}
-                      key={item}
-                      onClick={() => setView(item)}
-                    >
-                      {label}
-                    </TabsTrigger>
+
+              <div className="overflow-hidden rounded-lg border">
+                <div className="grid grid-cols-7 bg-muted text-center text-xs font-medium text-muted-foreground">
+                  {weekdays.map((weekday) => (
+                    <div className="px-2 py-3" key={weekday}>
+                      {weekday}
+                    </div>
                   ))}
-                </TabsList> */}
+                </div>
+                <div className="grid grid-cols-7">
+                  {weeks.flat().map((day) => {
+                    const key = dayKey(day);
+                    const isCurrentMonth = day.month === month.month;
+                    const isSelected = key === selectedKey;
+                    const hasEvents = Boolean(events[key]);
 
-                <TabsContent>
-                  <div className="overflow-hidden rounded-lg border">
-                    <div className="grid grid-cols-7 bg-muted text-center text-xs font-medium text-muted-foreground">
-                      {weekdays.map((weekday) => (
-                        <div className="px-2 py-3" key={weekday}>
-                          {weekday}
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-7">
-                      {weeks.flat().map((day) => {
-                        const key = dayKey(day);
-                        const isCurrentMonth = day.month === month.month;
-                        const isSelected = key === selectedKey;
-                        const hasEvents = Boolean(events[key]);
-
-                        return (
-                          <button
-                            className={cn(
-                              "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
-                              !isCurrentMonth && "bg-muted/40 text-muted-foreground",
-                              isSelected && "bg-accent",
-                            )}
-                            key={key}
-                            onClick={() => setSelectedKey(key)}
-                            type="button"
-                          >
-                            <span
-                              className={cn(
-                                "grid size-7 place-items-center rounded-md text-sm font-medium",
-                                isSelected && "bg-primary text-primary-foreground",
-                              )}
-                            >
-                              {day.date}
-                            </span>
-                            {hasEvents ? (
-                              <span className="h-1.5 w-10 rounded-full bg-primary" />
-                            ) : null}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
+                    return (
+                      <button
+                        className={cn(
+                          "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
+                          !isCurrentMonth && "bg-muted/40 text-muted-foreground",
+                          isSelected && "bg-accent",
+                        )}
+                        key={key}
+                        onClick={() => setSelectedKey(key)}
+                        type="button"
+                      >
+                        <span
+                          className={cn(
+                            "grid size-7 place-items-center rounded-md text-sm font-medium",
+                            isSelected && "bg-primary text-primary-foreground",
+                          )}
+                        >
+                          {day.date}
+                        </span>
+                        {hasEvents ? (
+                          <span className="h-1.5 w-10 rounded-full bg-primary" />
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
