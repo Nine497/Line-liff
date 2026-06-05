@@ -324,7 +324,7 @@ function App() {
         creator_id: currentUser.id ?? currentUser.user_id ?? null,
         location: formData.location.trim() || null,
         type_id: formData.type_id,
-        participant_id: selectedParticipantIds,
+        participant_ids: selectedParticipantIds,
       };
 
       const response = await fetch(`${apiUrl}/tasks`, {
