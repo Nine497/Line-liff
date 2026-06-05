@@ -656,7 +656,7 @@ function App() {
                   <CardTitle>{selectedDate}</CardTitle>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                {/* <div className="grid grid-cols-2 gap-3">
                   {[
                     ["งานที่แสดง", filteredEvents.length],
                     ["ผู้เข้าร่วม", totalParticipants],
@@ -673,7 +673,7 @@ function App() {
                       </div>
                     </div>
                   ))}
-                </div>
+                </div> */}
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 {availableParticipants.length ? (
