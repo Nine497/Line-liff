@@ -488,7 +488,7 @@ function App() {
           </div>
         </nav>
 
-        <header className="grid gap-4 lg:grid-cols-[1fr_360px]">
+        {/* <header className="grid gap-4 lg:grid-cols-[1fr_360px]">
           <Card className="border-none bg-card/70 shadow-none">
             <CardHeader className="gap-3">
               <Badge className="w-fit" variant="secondary">
@@ -507,7 +507,7 @@ function App() {
           </Card>
 
           <div className="grid grid-cols-1 gap-3">
-            {/* <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
                 variant={showMine ? "outline" : "secondary"}
@@ -522,9 +522,9 @@ function App() {
               >
                 งานของฉัน
               </Button>
-            </div> */}
+            </div>
           </div>
-        </header>
+        </header> */}
 
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
           <Card className="overflow-hidden">
