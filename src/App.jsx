@@ -87,6 +87,7 @@ function App() {
   const [formSuccess, setFormSuccess] = useState("");
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = showCreateForm ? "hidden" : "";
@@ -472,6 +473,16 @@ function App() {
       </div>
     );
   };
+  const ParticipantSkeleton = () => (
+    <div className="flex items-center justify-between rounded-lg border bg-background p-4 animate-pulse">
+      <div className="space-y-2">
+        <div className="h-4 w-32 rounded bg-muted" />
+        <div className="h-3 w-24 rounded bg-muted" />
+      </div>
+
+      <div className="h-6 w-16 rounded-full bg-muted" />
+    </div>
+  );
 
   return (
     <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
@@ -696,16 +707,31 @@ function App() {
                     <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
                   </TabsList>
 
+                  {/* AVAILABLE */}
                   <TabsContent value="available">
-                    {availableParticipants.map(renderParticipant)}
+                    {loading
+                      ? Array.from({ length: 5 }).map((_, i) => (
+                        <ParticipantSkeleton key={i} />
+                      ))
+                      : availableParticipants.map(renderParticipant)}
                   </TabsContent>
 
+                  {/* BUSY */}
                   <TabsContent value="busy">
-                    {busyParticipants.map(renderParticipant)}
+                    {loading
+                      ? Array.from({ length: 5 }).map((_, i) => (
+                        <ParticipantSkeleton key={i} />
+                      ))
+                      : busyParticipants.map(renderParticipant)}
                   </TabsContent>
 
+                  {/* ALL */}
                   <TabsContent value="all">
-                    {participants.map(renderParticipant)}
+                    {loading
+                      ? Array.from({ length: 5 }).map((_, i) => (
+                        <ParticipantSkeleton key={i} />
+                      ))
+                      : participants.map(renderParticipant)}
                   </TabsContent>
 
                 </Tabs>
