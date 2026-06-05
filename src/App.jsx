@@ -677,58 +677,24 @@ function App() {
                 <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
 
                   <TabsList className="grid w-full grid-cols-3">
-
-                    <TabsTrigger value="available">
-                      ว่าง
-                    </TabsTrigger>
-
-                    <TabsTrigger value="busy">
-                      ไม่ว่าง
-                    </TabsTrigger>
-
-                    <TabsTrigger value="all">
-                      ทั้งหมด
-                    </TabsTrigger>
-
+                    <TabsTrigger value="available">ว่าง</TabsTrigger>
+                    <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
+                    <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
                   </TabsList>
 
-                  {/* CONTENT */}
-                  <TabsContent value={viewMode} className="mt-3 space-y-3">
+                  {/* AVAILABLE */}
+                  <TabsContent value="available" className="mt-3 space-y-3">
+                    {availableParticipants.map(renderParticipant)}
+                  </TabsContent>
 
-                    {filteredParticipants.length ? (
-                      filteredParticipants.map((participant) => {
-                        const isBusy = busyParticipantIds.has(participant.id);
+                  {/* BUSY */}
+                  <TabsContent value="busy" className="mt-3 space-y-3">
+                    {busyParticipants.map(renderParticipant)}
+                  </TabsContent>
 
-                        return (
-                          <div
-                            key={participant.id}
-                            className="flex items-center justify-between rounded-lg border bg-background p-4"
-                          >
-                            <div>
-                              <p className="font-medium">{participant.name}</p>
-
-                              <p className="text-sm text-muted-foreground">
-                                {isBusy ? "มีงานในวันนี้" : "ไม่มีงานในวันนี้"}
-                              </p>
-                            </div>
-
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-green-100 text-green-700"
-                                }`}
-                            >
-                              {isBusy ? "ไม่ว่าง" : "ว่าง"}
-                            </span>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="rounded-lg border border-dashed p-4">
-                        <p className="font-medium">ไม่มีข้อมูล</p>
-                      </div>
-                    )}
-
+                  {/* ALL */}
+                  <TabsContent value="all" className="mt-3 space-y-3">
+                    {participants.map(renderParticipant)}
                   </TabsContent>
 
                 </Tabs>
