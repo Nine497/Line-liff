@@ -240,6 +240,7 @@ function App() {
         setParticipants(
           result.data || []
         );
+        console.log(result);
       } catch (error) {
         console.error(error);
       }
