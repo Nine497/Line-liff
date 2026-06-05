@@ -96,12 +96,12 @@ function App() {
   const selectedEvents = events[selectedKey] ?? [];
   const filteredEvents = selectedEvents.filter((event) =>
     showMine
-      ? event.participants.some((participant) => participant.user_id === currentUser.user_id)
+      ? event.task_participants.some((participant) => participant.user_id === currentUser.user_id)
       : true,
   );
 
   const totalParticipants = filteredEvents.reduce(
-    (sum, event) => sum + event.participants.filter((participant) => participant.status === "going").length,
+    (sum, event) => sum + event.task_participants.filter((participant) => participant.status === "going").length,
     0,
   );
 
@@ -183,39 +183,42 @@ function App() {
 
   async function fetchTaskEvents() {
     try {
-      const response = await fetch(`${apiUrl}/tasks`);
-      if (!response.ok) throw new Error("Failed to load tasks from backend");
-
-      const tasks = await response.json();
-      if (tasks.length != 0) {
-        console.log("Loaded tasks:", tasks);
-      }
-      const tasksWithParticipants = await Promise.all(
-        tasks.map(async (task) => {
-          let participants = [];
-          try {
-            const partResponse = await fetch(`${apiUrl}/tasks/${task.id}/participants`);
-            if (partResponse.ok) {
-              participants = await partResponse.json();
-            }
-          } catch (error) {
-            console.error(`Failed to load participants for task ${task.id}`, error);
-          }
-
-          return {
-            ...task,
-            participants,
-          };
-        }),
+      const response = await fetch(
+        `${apiUrl}/tasks`
       );
 
-      const grouped = tasksWithParticipants.reduce((acc, task) => {
-        const date = new Date(task.start_time);
-        const key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-        acc[key] = acc[key] ?? [];
-        acc[key].push(task);
-        return acc;
-      }, {});
+      if (!response.ok) {
+        throw new Error(
+          "Failed to load tasks from backend"
+        );
+      }
+
+      const tasks =
+        await response.json();
+
+      if (tasks.length !== 0) {
+        console.log(
+          "Loaded tasks:",
+          tasks
+        );
+      }
+
+      const grouped =
+        tasks.reduce((acc, task) => {
+          const date = new Date(
+            task.start_time
+          );
+
+          const key = `${date.getFullYear()}-${date.getMonth() + 1
+            }-${date.getDate()}`;
+
+          acc[key] =
+            acc[key] ?? [];
+
+          acc[key].push(task);
+
+          return acc;
+        }, {});
 
       setEvents(grouped);
     } catch (error) {
@@ -320,7 +323,7 @@ function App() {
         creator_id: currentUser.id ?? currentUser.user_id ?? null,
         location: formData.location.trim() || null,
         type_id: formData.type_id,
-        participant_ids: selectedParticipantIds,
+        participant_id: selectedParticipantIds,
       };
 
       const response = await fetch(`${apiUrl}/tasks`, {
@@ -696,7 +699,7 @@ function App() {
           </aside>
         </section>
         <footer className="border-t bg-background">
-          <div className="mx-auto flex flex-col items-center justify-center gap-2 px-2 py-2 text-center text-sm text-muted-foreground">
+          <div className="mx-auto flex flex-col items-center justify-center gap-2 px-2 pt-2 text-center text-sm text-muted-foreground">
             <p className="font-medium text-foreground">
               LINE LIFF Scheduler © {new Date().getFullYear()}
             </p>
