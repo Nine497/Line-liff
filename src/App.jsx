@@ -27,7 +27,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { cn } from "./lib/utils";
-import { SpinnerEmpty } from "./components/ui/spinner";
+import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 const monthNames = [
   "มกราคม",
