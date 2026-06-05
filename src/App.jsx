@@ -62,6 +62,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [participants, setParticipants] = useState([]);
   const [formData, setFormData] = useState({
     title: "",
     location: "",
@@ -158,6 +159,7 @@ function App() {
           fetchTaskEvents(),
           fetchTaskTypes(),
           fetchUsers(),
+          fetchParticipants(),
         ]);
       } catch (error) {
         console.error("LIFF init failed:", error);
@@ -219,6 +221,25 @@ function App() {
       console.error(error);
     }
   }
+
+  const fetchParticipants =
+    async () => {
+      try {
+        const response =
+          await fetch(
+            `${apiUrl}/participants`
+          );
+
+        const result =
+          await response.json();
+
+        setParticipants(
+          result.data || []
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
   async function fetchTaskTypes() {
     try {
