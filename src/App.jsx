@@ -141,7 +141,11 @@ function App() {
         const result = await response.json();
 
         console.log("Backend result:", result);
-
+        if (response.status === 401) {
+          liff.logout();
+          liff.login();
+          return;
+        }
         if (!response.ok) {
           throw new Error(
             result.error || "Failed to sync user"
