@@ -228,7 +228,7 @@ function App() {
       try {
         const response =
           await fetch(
-            `${apiUrl}/participants`
+            `${apiUrl}/tasks/participants`
           );
 
         const result =
