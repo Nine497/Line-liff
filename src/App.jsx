@@ -332,36 +332,53 @@ function App() {
     }
   }
 
-  const handleUpload =
-    async (e) => {
-
-      const file =
-        e.target.files[0];
+  const handleUpload = async (e) => {
+    try {
+      const file = e.target.files[0];
 
       if (!file) return;
 
-      const formData =
-        new FormData();
+      const formData = new FormData();
 
-      formData.append(
-        "file",
-        file
-      );
+      const userId =
+        currentUser?.id ??
+        currentUser?.user_id;
 
-      const response =
-        await fetch(
-          `${apiUrl}/tasks/import`,
-          {
-            method: "POST",
-            body: formData,
-          }
+      if (userId) {
+        formData.append(
+          "user_id",
+          userId
         );
+      }
+
+      formData.append("file", file);
+
+      const response = await fetch(
+        `${apiUrl}/tasks/import`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const result =
         await response.json();
 
       console.log(result);
-    };
+
+      if (!response.ok) {
+        throw new Error(
+          result.error || "Import failed"
+        );
+      }
+
+      await fetchTaskEvents();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      e.target.value = "";
+    }
+  };
 
   return (
     <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
