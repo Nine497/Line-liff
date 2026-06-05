@@ -389,6 +389,22 @@ function App() {
     }
   };
 
+  const busyParticipantIds =
+    filteredEvents
+      .map(
+        (event) =>
+          event.participant_id
+      )
+      .filter(Boolean);
+
+  const availableParticipants =
+    participants.filter(
+      (participant) =>
+        !busyParticipantIds.includes(
+          participant.id
+        )
+    );
+
   return (
     <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
       {isInitializing ? (
@@ -638,52 +654,40 @@ function App() {
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                {filteredEvents.length ? (
-                  filteredEvents.map((event) => {
-                    const attendees = (event.participants ?? []).filter((participant) => participant?.status === "going");
-
-                    return (
+                {availableParticipants.length ? (
+                  availableParticipants.map(
+                    (participant) => (
                       <div
-                        className="flex flex-col gap-4 rounded-lg border bg-background p-4"
-                        key={event.id}
+                        key={participant.id}
+                        className="flex items-center justify-between rounded-lg border bg-background p-4"
                       >
-                        <div className="flex items-start gap-3">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                              <time className="font-semibold">{event.type?.name ?? "ไม่ระบุ"}</time>
-                            </div>
-                            <p className="mt-2 text-lg font-semibold">{event.title}</p>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              โดย {event.creator?.display_name ?? "ไม่ระบุ"} • {event.location}
-                            </p>
-                          </div>
+                        <div>
+                          <p className="font-medium">
+                            {participant.name}
+                          </p>
+
+                          <p className="text-sm text-muted-foreground">
+                            ไม่มีงานในวันนี้
+                          </p>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
-                          {attendees.map((participant) => (
-                            <span
-                              key={participant.user_id}
-                              className="rounded-full border border-input px-2 py-1 text-xs"
-                            >
-                              {participant.display_name ?? "ไม่ระบุ"}
-                            </span>
-                          ))}
-                        </div>
+                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                          ว่าง
+                        </span>
                       </div>
-                    );
-                  })
+                    )
+                  )
                 ) : (
                   <div className="rounded-lg border border-dashed p-4">
-                    <p className="font-medium">ยังไม่มีนัดหมาย</p>
+                    <p className="font-medium">
+                      ไม่มีผู้ว่าง
+                    </p>
+
                     <p className="mt-1 text-sm text-muted-foreground">
-                      lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget consectetur sagittis, nisl nunc consectetur nisi, euismod aliquam nisl nunc euismod nisi.
+                      ทุกคนมีงานในวันนี้แล้ว
                     </p>
                   </div>
                 )}
-                <Button className="w-full" onClick={() => setShowCreateForm(true)}>
-                  <Plus data-icon="inline-start" />
-                  เพิ่มช่วงเวลา
-                </Button>
               </CardContent>
             </Card>
           </aside>
