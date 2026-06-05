@@ -696,7 +696,7 @@ function App() {
           </aside>
         </section>
         <footer className="border-t bg-background">
-          <div className="mx-auto flex flex-col gap-3 px-4 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <div className="mx-auto flex flex-col gap-3 px-0 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between text-center">
             <div>
               <p className="font-medium text-foreground">
                 LINE LIFF Scheduler
