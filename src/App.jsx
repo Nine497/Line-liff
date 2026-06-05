@@ -837,19 +837,41 @@ function App() {
                     </FormField>
 
                     <FormField>
-                      <FormLabel htmlFor="participants">กำหนดผู้เข้าร่วม</FormLabel>
+                      <FormLabel htmlFor="participants">
+                        กำหนดผู้เข้าร่วม
+                      </FormLabel>
+
                       <ComboboxChips
-                        options={users.filter(Boolean).map((user) => ({
-                          value: user?.id,
-                          label: user?.display_name || user?.line_id || `User ${user?.id ?? "?"}`,
-                        }))}
-                        selectedValues={selectedParticipantIds}
-                        onValueChange={(values) => setSelectedParticipantIds(values)}
-                        placeholder={users.length ? "" : "กำลังโหลดผู้ใช้..."}
+                        options={participants
+                          .filter(Boolean)
+                          .map((participant) => ({
+                            value: participant?.name,
+                            label:
+                              participant?.name ||
+                              `Participant ${participant?.id ?? "?"}`,
+                          }))}
+
+                        selectedValues={
+                          selectedParticipantIds
+                        }
+
+                        onValueChange={(values) =>
+                          setSelectedParticipantIds(
+                            values
+                          )
+                        }
+
+                        placeholder={
+                          participants.length
+                            ? "เลือกผู้เข้าร่วม"
+                            : "กำลังโหลดผู้เข้าร่วม..."
+                        }
+
                         disabled={isSubmitting}
                       />
+
                       <FormDescription>
-                        เลือกผู้ใช้เพื่อเข้าร่วมงานโดยพิมพ์เพื่อกรองและคลิกเลือก
+                        เลือกผู้เข้าร่วมโดยพิมพ์เพื่อค้นหา
                       </FormDescription>
                     </FormField>
 
