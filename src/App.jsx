@@ -89,13 +89,6 @@ function App() {
     };
   }, [showCreateForm]);
 
-  const filteredParticipants =
-    viewMode === "available"
-      ? availableParticipants
-      : viewMode === "busy"
-        ? busyParticipants
-        : participants;
-
   const weeks = useMemo(() => {
     const calendar = new Calendar(month.year, month.month);
     return calendar.generate({ withStaticLength: true });
@@ -425,15 +418,26 @@ function App() {
 
   const busyParticipantIds = new Set(
     filteredEvents.flatMap((event) =>
-      (event.task_participants ?? []).map(
-        (tp) => tp.participant?.id
-      )
+      (event.task_participants ?? [])
+        .map((tp) => tp.participant?.id)
+        .filter(Boolean)
     )
   );
 
   const availableParticipants = participants.filter(
     (p) => !busyParticipantIds.has(p.id)
   );
+
+  const busyParticipants = participants.filter(
+    (p) => busyParticipantIds.has(p.id)
+  );
+
+  const filteredParticipants =
+    viewMode === "available"
+      ? availableParticipants
+      : viewMode === "busy"
+        ? busyParticipants
+        : participants;
 
   return (
     <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
