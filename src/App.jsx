@@ -43,13 +43,6 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 const today = new Date();
 const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-const filteredParticipants =
-  viewMode === "available"
-    ? availableParticipants
-    : viewMode === "busy"
-      ? busyParticipants
-      : participants;
-
 // const tabLabels = [
 //   ["calendar", "ปฏิทิน"],
 //   ["agenda", "รายการ"],
@@ -95,6 +88,13 @@ function App() {
       document.body.style.overflow = "";
     };
   }, [showCreateForm]);
+
+  const filteredParticipants =
+    viewMode === "available"
+      ? availableParticipants
+      : viewMode === "busy"
+        ? busyParticipants
+        : participants;
 
   const weeks = useMemo(() => {
     const calendar = new Calendar(month.year, month.month);
