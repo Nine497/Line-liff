@@ -670,52 +670,65 @@ function App() {
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
 
-                {/* Toggle */}
-                <div className="flex gap-2">
-                  <button onClick={() => setViewMode("available")}>
-                    ว่าง
-                  </button>
-                  <button onClick={() => setViewMode("busy")}>
-                    ไม่ว่าง
-                  </button>
-                  <button onClick={() => setViewMode("all")}>
-                    ทั้งหมด
-                  </button>
-                </div>
+                <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
 
-                {filteredParticipants.length ? (
-                  filteredParticipants.map((participant) => {
-                    const isBusy = busyParticipantIds.has(participant.id);
+                  {/* Tabs Header */}
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="available">
+                      ว่าง
+                    </TabsTrigger>
 
-                    return (
-                      <div
-                        key={participant.id}
-                        className="flex items-center justify-between rounded-lg border bg-background p-4"
-                      >
-                        <div>
-                          <p className="font-medium">{participant.name}</p>
+                    <TabsTrigger value="busy">
+                      ไม่ว่าง
+                    </TabsTrigger>
 
-                          <p className="text-sm text-muted-foreground">
-                            {isBusy ? "มีงานในวันนี้" : "ไม่มีงานในวันนี้"}
-                          </p>
-                        </div>
+                    <TabsTrigger value="all">
+                      ทั้งหมด
+                    </TabsTrigger>
+                  </TabsList>
 
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
-                            ? "bg-red-100 text-red-700"
-                            : "bg-green-100 text-green-700"
-                            }`}
-                        >
-                          {isBusy ? "ไม่ว่าง" : "ว่าง"}
-                        </span>
+                  {/* Content */}
+                  <TabsContent value={viewMode} className="mt-3 space-y-3">
+
+                    {filteredParticipants.length ? (
+                      filteredParticipants.map((participant) => {
+                        const isBusy = busyParticipantIds.has(participant.id);
+
+                        return (
+                          <div
+                            key={participant.id}
+                            className="flex items-center justify-between rounded-lg border bg-background p-4"
+                          >
+                            <div>
+                              <p className="font-medium">
+                                {participant.name}
+                              </p>
+
+                              <p className="text-sm text-muted-foreground">
+                                {isBusy ? "มีงานในวันนี้" : "ไม่มีงานในวันนี้"}
+                              </p>
+                            </div>
+
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-green-100 text-green-700"
+                                }`}
+                            >
+                              {isBusy ? "ไม่ว่าง" : "ว่าง"}
+                            </span>
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <div className="rounded-lg border border-dashed p-4">
+                        <p className="font-medium">ไม่มีข้อมูล</p>
                       </div>
-                    );
-                  })
-                ) : (
-                  <div className="rounded-lg border border-dashed p-4">
-                    <p className="font-medium">ไม่มีข้อมูล</p>
-                  </div>
-                )}
+                    )}
+
+                  </TabsContent>
+                </Tabs>
+
               </CardContent>
             </Card>
           </aside>
