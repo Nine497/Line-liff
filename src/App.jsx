@@ -428,20 +428,29 @@ function App() {
     }
   };
 
-  const busyParticipantIds = new Set(
-    filteredEvents.flatMap((event) =>
-      (event.task_participants ?? [])
-        .map((tp) => tp.participant?.id)
-        .filter(Boolean)
-    )
-  );
+  const busyMap = new Map();
+
+  filteredEvents.forEach((event) => {
+    const title = event?.title;
+
+    (event.task_participants ?? []).forEach((tp) => {
+      const id = tp.participant?.id;
+      if (!id) return;
+
+      if (!busyMap.has(id)) {
+        busyMap.set(id, []);
+      }
+
+      busyMap.get(id).push(title);
+    });
+  });
 
   const availableParticipants = participants.filter(
-    (p) => !busyParticipantIds.has(p.id)
+    (p) => !busyMap.has(p.id)
   );
 
   const busyParticipants = participants.filter(
-    (p) => busyParticipantIds.has(p.id)
+    (p) => busyMap.has(p.id)
   );
 
   const filteredParticipants =
@@ -453,6 +462,7 @@ function App() {
 
   const renderParticipant = (participant) => {
     console.log("Rendering participant:", participant);
+
     if (!participant) {
       return (
         <div className="flex items-center justify-between rounded-lg border bg-background p-4">
@@ -461,7 +471,8 @@ function App() {
       );
     }
 
-    const isBusy = busyParticipantIds.has(participant.id);
+    const tasks = busyMap.get(participant.id) || [];
+    const isBusy = tasks.length > 0;
 
     return (
       <div
@@ -472,12 +483,16 @@ function App() {
           <p className="font-medium">{participant.name}</p>
 
           <p className="text-sm text-muted-foreground">
-            {isBusy ? "มีงานในวันนี้" : "ไม่มีงานในวันนี้"}
+            {isBusy
+              ? `มีงาน: ${tasks.join(", ")}`
+              : "ไม่มีงานในวันนี้"}
           </p>
         </div>
 
         <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"
+          className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
+              ? "bg-red-100 text-red-700"
+              : "bg-green-100 text-green-700"
             }`}
         >
           {isBusy ? "ไม่ว่าง" : "ว่าง"}
