@@ -19,7 +19,12 @@ import { Select } from "./components/ui/select";
 import { Textarea } from "./components/ui/textarea";
 import { ComboboxChips } from "./components/ui/combobox";
 import { Form, FormDescription, FormField, FormLabel } from "./components/ui/form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { cn } from "./lib/utils";
 
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
@@ -711,8 +716,8 @@ function App() {
 
                             <span
                               className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-green-100 text-green-700"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-green-100 text-green-700"
                                 }`}
                             >
                               {isBusy ? "ไม่ว่าง" : "ว่าง"}
