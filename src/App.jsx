@@ -43,10 +43,17 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 const today = new Date();
 const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
-const tabLabels = [
-  ["calendar", "ปฏิทิน"],
-  ["agenda", "รายการ"],
-];
+const filteredParticipants =
+  viewMode === "available"
+    ? availableParticipants
+    : viewMode === "busy"
+      ? busyParticipants
+      : participants;
+
+// const tabLabels = [
+//   ["calendar", "ปฏิทิน"],
+//   ["agenda", "รายการ"],
+// ];
 
 function dayKey(day) {
   return `${day.year}-${day.month}-${day.date}`;
