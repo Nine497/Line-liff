@@ -6,8 +6,7 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from "@/components/ui/empty";
-
-import { Spinner } from "@/components/ui/spinner";
+import { PulseLoader } from "react-spinners";
 import { Button } from "@/components/ui/button";
 
 export function SpinnerEmpty({ title, description }) {
@@ -15,7 +14,7 @@ export function SpinnerEmpty({ title, description }) {
         <Empty className="w-full">
             <EmptyHeader>
                 <EmptyMedia variant="icon">
-                    <Spinner />
+                    <PulseLoader size={28} />
                 </EmptyMedia>
 
                 <EmptyTitle>
