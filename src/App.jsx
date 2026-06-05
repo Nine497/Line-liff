@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useMemo, useState } from "react";
 import Calendar from "calendarjs";
 import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun, X } from "lucide-react";
@@ -24,7 +25,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/tabs";
+} from "@/components/ui/tabs"
 import { cn } from "./lib/utils";
 
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
