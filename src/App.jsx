@@ -703,27 +703,18 @@ function App() {
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
-
+                <Tabs value={viewMode} onValueChange={(v) => {
+                  console.log("tab:", v);
+                  setViewMode(v);
+                }}>
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="available">ว่าง</TabsTrigger>
                     <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
                     <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
                   </TabsList>
 
-                  {/* AVAILABLE */}
-                  <TabsContent value="available" className="mt-3 space-y-3">
-                    {availableParticipants.map(renderParticipant)}
-                  </TabsContent>
-
-                  {/* BUSY */}
-                  <TabsContent value="busy" className="mt-3 space-y-3">
-                    {busyParticipants.map(renderParticipant)}
-                  </TabsContent>
-
-                  {/* ALL */}
-                  <TabsContent value="all" className="mt-3 space-y-3">
-                    {participants.map(renderParticipant)}
+                  <TabsContent value={viewMode} className="mt-3 space-y-3">
+                    {filteredParticipants.map(renderParticipant)}
                   </TabsContent>
 
                 </Tabs>
