@@ -1,32 +1,32 @@
-import { cn } from "../../lib/utils";
+import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { cn } from "@/lib/utils";
 
-export function Tabs({ className, ...props }) {
-  return <div className={cn("flex flex-col gap-3", className)} {...props} />;
-}
+export const Tabs = TabsPrimitive.Root;
 
-export function TabsList({ className, ...props }) {
-  return (
-    <div
-      className={cn("inline-flex h-10 items-center rounded-lg bg-muted p-1 text-muted-foreground", className)}
-      {...props}
-    />
-  );
-}
+export const TabsList = ({ className, ...props }) => (
+  <TabsPrimitive.List
+    className={cn(
+      "inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground",
+      className
+    )}
+    {...props}
+  />
+);
 
-export function TabsTrigger({ active, className, ...props }) {
-  return (
-    <button
-      className={cn(
-        "inline-flex h-8 items-center justify-center rounded-md px-3 text-sm font-medium transition-colors",
-        active && "bg-background text-foreground shadow-sm",
-        className,
-      )}
-      type="button"
-      {...props}
-    />
-  );
-}
+export const TabsTrigger = ({ className, ...props }) => (
+  <TabsPrimitive.Trigger
+    className={cn(
+      "inline-flex h-8 items-center justify-center rounded-md px-3 text-sm font-medium transition-all",
+      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+      className
+    )}
+    {...props}
+  />
+);
 
-export function TabsContent({ className, ...props }) {
-  return <div className={cn("outline-none", className)} {...props} />;
-}
+export const TabsContent = ({ className, ...props }) => (
+  <TabsPrimitive.Content
+    className={cn("mt-3 outline-none", className)}
+    {...props}
+  />
+);
