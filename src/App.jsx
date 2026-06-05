@@ -87,7 +87,8 @@ function App() {
   const [formSuccess, setFormSuccess] = useState("");
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loadingTab, setLoadingTab] = useState("available");
+  const [loading, setLoading] = useState();
 
   useEffect(() => {
     document.body.style.overflow = showCreateForm ? "hidden" : "";
@@ -699,41 +700,33 @@ function App() {
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                <Tabs defaultValue="available" className="w-full">
-
+                <Tabs
+                  defaultValue="available"
+                  onValueChange={(v) => setLoadingTab(v)}
+                >
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="available">ว่าง</TabsTrigger>
                     <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
                     <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
                   </TabsList>
 
-                  {/* AVAILABLE */}
                   <TabsContent value="available">
-                    {loading
-                      ? Array.from({ length: 5 }).map((_, i) => (
-                        <ParticipantSkeleton key={i} />
-                      ))
+                    {loadingTab === "available" && loading
+                      ? <ParticipantSkeleton />
                       : availableParticipants.map(renderParticipant)}
                   </TabsContent>
 
-                  {/* BUSY */}
                   <TabsContent value="busy">
-                    {loading
-                      ? Array.from({ length: 5 }).map((_, i) => (
-                        <ParticipantSkeleton key={i} />
-                      ))
+                    {loadingTab === "busy" && loading
+                      ? <ParticipantSkeleton />
                       : busyParticipants.map(renderParticipant)}
                   </TabsContent>
 
-                  {/* ALL */}
                   <TabsContent value="all">
-                    {loading
-                      ? Array.from({ length: 5 }).map((_, i) => (
-                        <ParticipantSkeleton key={i} />
-                      ))
+                    {loadingTab === "all" && loading
+                      ? <ParticipantSkeleton />
                       : participants.map(renderParticipant)}
                   </TabsContent>
-
                 </Tabs>
               </CardContent>
             </Card>
