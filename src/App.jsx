@@ -88,7 +88,8 @@ function App() {
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
   const [loadingTab, setLoadingTab] = useState("available");
-  const [loading, setLoading] = useState();
+  const [activeTab, setActiveTab] = useState("available");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = showCreateForm ? "hidden" : "";
@@ -237,6 +238,7 @@ function App() {
 
   const fetchParticipants =
     async () => {
+      setLoading(true);
       try {
         const response =
           await fetch(
@@ -252,6 +254,8 @@ function App() {
         console.log(result);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -702,7 +706,8 @@ function App() {
               <CardContent className="flex flex-col gap-3">
                 <Tabs
                   defaultValue="available"
-                  onValueChange={(v) => setLoadingTab(v)}
+                  value={activeTab}
+                  onValueChange={setActiveTab}
                 >
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="available">ว่าง</TabsTrigger>
@@ -711,20 +716,26 @@ function App() {
                   </TabsList>
 
                   <TabsContent value="available">
-                    {loadingTab === "available" && loading
-                      ? <ParticipantSkeleton />
+                    {loading
+                      ? Array.from({ length: 3 }).map((_, i) => (
+                        <ParticipantSkeleton key={i} />
+                      ))
                       : availableParticipants.map(renderParticipant)}
                   </TabsContent>
 
                   <TabsContent value="busy">
-                    {loadingTab === "busy" && loading
-                      ? <ParticipantSkeleton />
+                    {loading
+                      ? Array.from({ length: 3 }).map((_, i) => (
+                        <ParticipantSkeleton key={i} />
+                      ))
                       : busyParticipants.map(renderParticipant)}
                   </TabsContent>
 
                   <TabsContent value="all">
-                    {loadingTab === "all" && loading
-                      ? <ParticipantSkeleton />
+                    {loading
+                      ? Array.from({ length: 3 }).map((_, i) => (
+                        <ParticipantSkeleton key={i} />
+                      ))
                       : participants.map(renderParticipant)}
                   </TabsContent>
                 </Tabs>
