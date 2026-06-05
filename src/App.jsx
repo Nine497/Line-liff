@@ -164,6 +164,7 @@ function App() {
       } catch (error) {
         console.error("LIFF init failed:", error);
       } finally {
+        console.log("LIFF initialization completed", participants);
         setIsInitializing(false);
       }
     };
