@@ -715,7 +715,7 @@ function App() {
                     <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="available">
+                  <TabsContent value="available" className="min-h-[200px] grid gap-4" >
                     {loading
                       ? Array.from({ length: 3 }).map((_, i) => (
                         <ParticipantSkeleton key={i} />
