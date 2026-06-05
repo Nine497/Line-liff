@@ -55,6 +55,7 @@ function dayKey(day) {
 function App() {
   const [view, setView] = useState("calendar");
   const [theme, setTheme] = useState("light");
+  const [viewMode, setViewMode] = useState("available");
   const [month, setMonth] = useState({ year: 2026, month: 6 });
   const [selectedKey, setSelectedKey] = useState(todayKey);
   const [showMine, setShowMine] = useState(false);
@@ -415,21 +416,17 @@ function App() {
     }
   };
 
-  const busyParticipantIds =
-    filteredEvents
-      .map(
-        (event) =>
-          event.participant_id
+  const busyParticipantIds = new Set(
+    filteredEvents.flatMap((event) =>
+      (event.task_participants ?? []).map(
+        (tp) => tp.participant?.id
       )
-      .filter(Boolean);
+    )
+  );
 
-  const availableParticipants =
-    participants.filter(
-      (participant) =>
-        !busyParticipantIds.includes(
-          participant.id
-        )
-    );
+  const availableParticipants = participants.filter(
+    (p) => !busyParticipantIds.has(p.id)
+  );
 
   return (
     <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
@@ -661,38 +658,51 @@ function App() {
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                {availableParticipants.length ? (
-                  availableParticipants.map(
-                    (participant) => (
+
+                {/* Toggle */}
+                <div className="flex gap-2">
+                  <button onClick={() => setViewMode("available")}>
+                    ว่าง
+                  </button>
+                  <button onClick={() => setViewMode("busy")}>
+                    ไม่ว่าง
+                  </button>
+                  <button onClick={() => setViewMode("all")}>
+                    ทั้งหมด
+                  </button>
+                </div>
+
+                {filteredParticipants.length ? (
+                  filteredParticipants.map((participant) => {
+                    const isBusy = busyParticipantIds.has(participant.id);
+
+                    return (
                       <div
                         key={participant.id}
                         className="flex items-center justify-between rounded-lg border bg-background p-4"
                       >
                         <div>
-                          <p className="font-medium">
-                            {participant.name}
-                          </p>
+                          <p className="font-medium">{participant.name}</p>
 
                           <p className="text-sm text-muted-foreground">
-                            ไม่มีงานในวันนี้
+                            {isBusy ? "มีงานในวันนี้" : "ไม่มีงานในวันนี้"}
                           </p>
                         </div>
 
-                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                          ว่าง
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
+                            ? "bg-red-100 text-red-700"
+                            : "bg-green-100 text-green-700"
+                            }`}
+                        >
+                          {isBusy ? "ไม่ว่าง" : "ว่าง"}
                         </span>
                       </div>
-                    )
-                  )
+                    );
+                  })
                 ) : (
                   <div className="rounded-lg border border-dashed p-4">
-                    <p className="font-medium">
-                      ไม่มีผู้ว่าง
-                    </p>
-
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      ทุกคนมีงานในวันนี้แล้ว
-                    </p>
+                    <p className="font-medium">ไม่มีข้อมูล</p>
                   </div>
                 )}
               </CardContent>
