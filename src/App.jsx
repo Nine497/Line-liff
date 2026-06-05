@@ -452,6 +452,7 @@ function App() {
         : participants;
 
   const renderParticipant = (participant) => {
+    console.log("Rendering participant:", participant);
     if (!participant) {
       return (
         <div className="flex items-center justify-between rounded-lg border bg-background p-4">
