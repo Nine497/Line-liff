@@ -421,11 +421,6 @@ function App() {
               <Plus data-icon="inline-start" />
               เพิ่มงาน
             </Button>
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleUpload}
-            />
           </div>
         </nav>
 
@@ -474,14 +469,34 @@ function App() {
                 <span className="grid size-10 place-items-center rounded-lg bg-secondary text-secondary-foreground">
                   <CalendarDays />
                 </span>
+
                 <div className="flex flex-col gap-1">
                   <CardDescription>ปฏิทิน</CardDescription>
+
                   <CardTitle>
                     {monthNames[month.month - 1]} {month.year}
                   </CardTitle>
                 </div>
               </div>
+
               <div className="flex items-center gap-2">
+                <input
+                  id="excel-upload"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleUpload}
+                  className="hidden"
+                />
+
+                <label htmlFor="excel-upload">
+                  <Button
+                    asChild
+                    variant="outline"
+                  >
+                    <span>Import Excel</span>
+                  </Button>
+                </label>
+
                 <Button
                   aria-label="เดือนก่อนหน้า"
                   onClick={() => moveMonth(-1)}
@@ -490,6 +505,7 @@ function App() {
                 >
                   <ChevronLeft />
                 </Button>
+
                 <Button
                   aria-label="เดือนถัดไป"
                   onClick={() => moveMonth(1)}
