@@ -692,6 +692,30 @@ function App() {
                   </div>
                 )}
               </CardContent>
+              <footer className="border-t bg-background">
+                <div className="mx-auto flex flex-col gap-3 px-4 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-medium text-foreground">
+                      LINE LIFF Scheduler
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <span>
+                      © {new Date().getFullYear()}
+                    </span>
+
+                    <span className="hidden sm:inline">
+                      •
+                    </span>
+
+                    <span>
+                      Powered by React &
+                      Supabase
+                    </span>
+                  </div>
+                </div>
+              </footer>
             </Card>
           </aside>
         </section>
