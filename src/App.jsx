@@ -703,7 +703,7 @@ function App() {
                   <CardTitle>{selectedDate}</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="flex flex-col gap-3 p-4 pt-0 sm:p-5 sm:pt-0">
+              <CardContent className="flex flex-col gap-3">
                 <Tabs
                   defaultValue="available"
                   value={activeTab}
@@ -715,29 +715,25 @@ function App() {
                     <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="available" >
-                    {loading
-                      ? Array.from({ length: 3 }).map((_, i) => (
-                        <ParticipantSkeleton key={i} />
-                      ))
-                      : availableParticipants.map(renderParticipant)}
+                  <TabsContent value="available">
+                    <div className="flex flex-col gap-3">
+                      {availableParticipants.map(renderParticipant)}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="busy">
-                    {loading
-                      ? Array.from({ length: 3 }).map((_, i) => (
-                        <ParticipantSkeleton key={i} />
-                      ))
-                      : busyParticipants.map(renderParticipant)}
+                    <div className="flex flex-col gap-3">
+                      {busyParticipants.map(renderParticipant)}
+                    </div>
                   </TabsContent>
 
+
                   <TabsContent value="all">
-                    {loading
-                      ? Array.from({ length: 3 }).map((_, i) => (
-                        <ParticipantSkeleton key={i} />
-                      ))
-                      : participants.map(renderParticipant)}
+                    <div className="flex flex-col gap-3">
+                      {participants.map(renderParticipant)}
+                    </div>
                   </TabsContent>
+
                 </Tabs>
               </CardContent>
             </Card>
