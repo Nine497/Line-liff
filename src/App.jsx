@@ -674,11 +674,10 @@ function App() {
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-
                 <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
 
-                  {/* Tabs Header */}
                   <TabsList className="grid w-full grid-cols-3">
+
                     <TabsTrigger value="available">
                       ว่าง
                     </TabsTrigger>
@@ -690,9 +689,10 @@ function App() {
                     <TabsTrigger value="all">
                       ทั้งหมด
                     </TabsTrigger>
+
                   </TabsList>
 
-                  {/* Content */}
+                  {/* CONTENT */}
                   <TabsContent value={viewMode} className="mt-3 space-y-3">
 
                     {filteredParticipants.length ? (
@@ -705,9 +705,7 @@ function App() {
                             className="flex items-center justify-between rounded-lg border bg-background p-4"
                           >
                             <div>
-                              <p className="font-medium">
-                                {participant.name}
-                              </p>
+                              <p className="font-medium">{participant.name}</p>
 
                               <p className="text-sm text-muted-foreground">
                                 {isBusy ? "มีงานในวันนี้" : "ไม่มีงานในวันนี้"}
@@ -716,8 +714,8 @@ function App() {
 
                             <span
                               className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
-                                ? "bg-red-100 text-red-700"
-                                : "bg-green-100 text-green-700"
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-green-100 text-green-700"
                                 }`}
                             >
                               {isBusy ? "ไม่ว่าง" : "ว่าง"}
@@ -732,6 +730,7 @@ function App() {
                     )}
 
                   </TabsContent>
+
                 </Tabs>
 
               </CardContent>
