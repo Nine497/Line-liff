@@ -703,29 +703,27 @@ function App() {
                 </div>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                <CardContent className="flex flex-col gap-3">
-                  <Tabs defaultValue="available" className="w-full">
+                <Tabs defaultValue="available" className="w-full">
 
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="available">ว่าง</TabsTrigger>
-                      <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
-                      <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
-                    </TabsList>
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="available">ว่าง</TabsTrigger>
+                    <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
+                    <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
+                  </TabsList>
 
-                    <TabsContent value="available">
-                      {availableParticipants.map(renderParticipant)}
-                    </TabsContent>
+                  <TabsContent value="available">
+                    {availableParticipants.map(renderParticipant)}
+                  </TabsContent>
 
-                    <TabsContent value="busy">
-                      {busyParticipants.map(renderParticipant)}
-                    </TabsContent>
+                  <TabsContent value="busy">
+                    {busyParticipants.map(renderParticipant)}
+                  </TabsContent>
 
-                    <TabsContent value="all">
-                      {participants.map(renderParticipant)}
-                    </TabsContent>
+                  <TabsContent value="all">
+                    {participants.map(renderParticipant)}
+                  </TabsContent>
 
-                  </Tabs>
-                </CardContent>
+                </Tabs>
               </CardContent>
             </Card>
           </aside>
