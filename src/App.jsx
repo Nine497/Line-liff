@@ -78,6 +78,7 @@ function App() {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
   const isDark = theme === "dark";
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = showCreateForm ? "hidden" : "";
@@ -338,6 +339,8 @@ function App() {
 
       if (!file) return;
 
+      setIsUploading(true);
+
       const formData = new FormData();
 
       const userId =
@@ -376,6 +379,8 @@ function App() {
     } catch (error) {
       console.error(error);
     } finally {
+      setIsUploading(false);
+
       e.target.value = "";
     }
   };
@@ -509,8 +514,13 @@ function App() {
                   <Button
                     asChild
                     variant="outline"
+                    disabled={isUploading}
                   >
-                    <span>Import Excel</span>
+                    <span>
+                      {isUploading
+                        ? "กำลัง Import..."
+                        : "Import Excel"}
+                    </span>
                   </Button>
                 </label>
 
@@ -676,195 +686,197 @@ function App() {
         </section>
       </div>
 
-      {showCreateForm && (
-        <Dialog open={showCreateForm} className="overflow-y-auto" onClick={() => setShowCreateForm(false)}>
-          <DialogContent className="w-full max-w-2xl" onClick={(event) => event.stopPropagation()}>
-            <Card className="overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between gap-4 border-b px-6 pt-6 pb-4">
-                <div className="flex flex-col">
-                  <CardTitle>เพิ่มงานใหม่</CardTitle>
-                  <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
-                </div>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  className="h-10 w-10 p-0"
-                  onClick={() => setShowCreateForm(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </CardHeader>
-
-              <CardContent className="grid gap-4 px-4 pb-4 pt-4">
-                {formSuccess && (
-                  <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                    ✓ {formSuccess}
+      {
+        showCreateForm && (
+          <Dialog open={showCreateForm} className="overflow-y-auto" onClick={() => setShowCreateForm(false)}>
+            <DialogContent className="w-full max-w-2xl" onClick={(event) => event.stopPropagation()}>
+              <Card className="overflow-hidden">
+                <CardHeader className="flex flex-row items-center justify-between gap-4 border-b px-6 pt-6 pb-4">
+                  <div className="flex flex-col">
+                    <CardTitle>เพิ่มงานใหม่</CardTitle>
+                    <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
                   </div>
-                )}
-                {formError && (
-                  <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-pre-line">
-                    ✕ {formError}
-                  </div>
-                )}
+                  <Button
+                    variant="ghost"
+                    type="button"
+                    className="h-10 w-10 p-0"
+                    onClick={() => setShowCreateForm(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </CardHeader>
 
-                <Form onSubmit={handleCreateTask}>
-                  <FormField>
-                    <FormLabel htmlFor="title">ชื่องาน *</FormLabel>
-                    <Input
-                      id="title"
-                      type="text"
-                      className={formError.includes("ชื่องาน") ? "border-red-500" : ""}
-                      placeholder="เช่น ประชุมทีม"
-                      value={formData.title}
-                      onChange={(e) => {
-                        setFormData({ ...formData, title: e.target.value });
-                        setFormError("");
-                      }}
-                      disabled={isSubmitting}
-                      maxLength={100}
-                    />
-                    <FormDescription>{formData.title.length}/100 ตัวอักษร</FormDescription>
-                  </FormField>
+                <CardContent className="grid gap-4 px-4 pb-4 pt-4">
+                  {formSuccess && (
+                    <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                      ✓ {formSuccess}
+                    </div>
+                  )}
+                  {formError && (
+                    <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-pre-line">
+                      ✕ {formError}
+                    </div>
+                  )}
 
-                  <FormField>
-                    <FormLabel htmlFor="start_time">เวลา *</FormLabel>
-                    <Input
-                      id="start_time"
-                      type="datetime-local"
-                      className={formError.includes("เวลา") ? "border-red-500" : ""}
-                      value={formData.start_time}
-                      onChange={(e) => {
-                        setFormData({ ...formData, start_time: e.target.value });
-                        setFormError("");
-                      }}
-                      disabled={isSubmitting}
-                    />
-                  </FormField>
+                  <Form onSubmit={handleCreateTask}>
+                    <FormField>
+                      <FormLabel htmlFor="title">ชื่องาน *</FormLabel>
+                      <Input
+                        id="title"
+                        type="text"
+                        className={formError.includes("ชื่องาน") ? "border-red-500" : ""}
+                        placeholder="เช่น ประชุมทีม"
+                        value={formData.title}
+                        onChange={(e) => {
+                          setFormData({ ...formData, title: e.target.value });
+                          setFormError("");
+                        }}
+                        disabled={isSubmitting}
+                        maxLength={100}
+                      />
+                      <FormDescription>{formData.title.length}/100 ตัวอักษร</FormDescription>
+                    </FormField>
 
-                  <FormField>
-                    <FormLabel htmlFor="location">สถานที่</FormLabel>
-                    <Input
-                      id="location"
-                      type="text"
-                      placeholder="เช่น ห้องประชุม A"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      disabled={isSubmitting}
-                      maxLength={100}
-                    />
-                  </FormField>
+                    <FormField>
+                      <FormLabel htmlFor="start_time">เวลา *</FormLabel>
+                      <Input
+                        id="start_time"
+                        type="datetime-local"
+                        className={formError.includes("เวลา") ? "border-red-500" : ""}
+                        value={formData.start_time}
+                        onChange={(e) => {
+                          setFormData({ ...formData, start_time: e.target.value });
+                          setFormError("");
+                        }}
+                        disabled={isSubmitting}
+                      />
+                    </FormField>
 
-                  <FormField>
-                    <FormLabel htmlFor="type">ประเภท</FormLabel>
-                    <Select
-                      id="type"
-                      value={taskTypes.length ? formData.type_id ?? "" : formData.type}
-                      onChange={(e) => {
-                        if (taskTypes.length) {
-                          const selected = taskTypes.find((item) => String(item.id) === e.target.value);
-                          setFormData({
-                            ...formData,
-                            type_id: selected?.id ?? null,
-                            type: selected?.name ?? formData.type,
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            type: e.target.value,
-                          });
-                        }
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      {taskTypes.length ? (
-                        taskTypes.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.name}
-                          </option>
-                        ))
-                      ) : (
-                        [
-                          "ประชุม",
-                          "เดโม",
-                          "สรุปงาน",
-                          "แชร์ทรัพยากร",
-                          "เช็คอิน",
-                        ].map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))
-                      )}
-                    </Select>
-                  </FormField>
+                    <FormField>
+                      <FormLabel htmlFor="location">สถานที่</FormLabel>
+                      <Input
+                        id="location"
+                        type="text"
+                        placeholder="เช่น ห้องประชุม A"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        disabled={isSubmitting}
+                        maxLength={100}
+                      />
+                    </FormField>
 
-                  <FormField>
-                    <FormLabel htmlFor="participants">กำหนดผู้เข้าร่วม</FormLabel>
-                    <ComboboxChips
-                      options={users.filter(Boolean).map((user) => ({
-                        value: user?.id,
-                        label: user?.display_name || user?.line_id || `User ${user?.id ?? "?"}`,
-                      }))}
-                      selectedValues={selectedParticipantIds}
-                      onValueChange={(values) => setSelectedParticipantIds(values)}
-                      placeholder={users.length ? "" : "กำลังโหลดผู้ใช้..."}
-                      disabled={isSubmitting}
-                    />
-                    <FormDescription>
-                      เลือกผู้ใช้เพื่อเข้าร่วมงานโดยพิมพ์เพื่อกรองและคลิกเลือก
-                    </FormDescription>
-                  </FormField>
+                    <FormField>
+                      <FormLabel htmlFor="type">ประเภท</FormLabel>
+                      <Select
+                        id="type"
+                        value={taskTypes.length ? formData.type_id ?? "" : formData.type}
+                        onChange={(e) => {
+                          if (taskTypes.length) {
+                            const selected = taskTypes.find((item) => String(item.id) === e.target.value);
+                            setFormData({
+                              ...formData,
+                              type_id: selected?.id ?? null,
+                              type: selected?.name ?? formData.type,
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              type: e.target.value,
+                            });
+                          }
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        {taskTypes.length ? (
+                          taskTypes.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.name}
+                            </option>
+                          ))
+                        ) : (
+                          [
+                            "ประชุม",
+                            "เดโม",
+                            "สรุปงาน",
+                            "แชร์ทรัพยากร",
+                            "เช็คอิน",
+                          ].map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))
+                        )}
+                      </Select>
+                    </FormField>
 
-                  <FormField>
-                    <FormLabel htmlFor="description">รายละเอียด</FormLabel>
-                    <Textarea
-                      id="description"
-                      placeholder="รายละเอียดเพิ่มเติม (ไม่จำเป็น)"
-                      rows={3}
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      disabled={isSubmitting}
-                      maxLength={500}
-                    />
-                    <FormDescription>{formData.description.length}/500 ตัวอักษร</FormDescription>
-                  </FormField>
+                    <FormField>
+                      <FormLabel htmlFor="participants">กำหนดผู้เข้าร่วม</FormLabel>
+                      <ComboboxChips
+                        options={users.filter(Boolean).map((user) => ({
+                          value: user?.id,
+                          label: user?.display_name || user?.line_id || `User ${user?.id ?? "?"}`,
+                        }))}
+                        selectedValues={selectedParticipantIds}
+                        onValueChange={(values) => setSelectedParticipantIds(values)}
+                        placeholder={users.length ? "" : "กำลังโหลดผู้ใช้..."}
+                        disabled={isSubmitting}
+                      />
+                      <FormDescription>
+                        เลือกผู้ใช้เพื่อเข้าร่วมงานโดยพิมพ์เพื่อกรองและคลิกเลือก
+                      </FormDescription>
+                    </FormField>
 
-                  <CardFooter className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
-                    <Button
-                      type="submit"
-                      className="w-full sm:w-auto"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <span className="flex items-center gap-2">
-                          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
-                          กำลังบันทึก...
-                        </span>
-                      ) : (
-                        "บันทึก"
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full sm:w-auto"
-                      onClick={() => {
-                        setShowCreateForm(false);
-                        setFormError("");
-                        setFormSuccess("");
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      ยกเลิก
-                    </Button>
-                  </CardFooter>
-                </Form>
-              </CardContent>
-            </Card>
-          </DialogContent>
-        </Dialog>
-      )}
-    </main>
+                    <FormField>
+                      <FormLabel htmlFor="description">รายละเอียด</FormLabel>
+                      <Textarea
+                        id="description"
+                        placeholder="รายละเอียดเพิ่มเติม (ไม่จำเป็น)"
+                        rows={3}
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        disabled={isSubmitting}
+                        maxLength={500}
+                      />
+                      <FormDescription>{formData.description.length}/500 ตัวอักษร</FormDescription>
+                    </FormField>
+
+                    <CardFooter className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+                      <Button
+                        type="submit"
+                        className="w-full sm:w-auto"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <span className="flex items-center gap-2">
+                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
+                            กำลังบันทึก...
+                          </span>
+                        ) : (
+                          "บันทึก"
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                        onClick={() => {
+                          setShowCreateForm(false);
+                          setFormError("");
+                          setFormSuccess("");
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        ยกเลิก
+                      </Button>
+                    </CardFooter>
+                  </Form>
+                </CardContent>
+              </Card>
+            </DialogContent>
+          </Dialog>
+        )
+      }
+    </main >
   );
 }
 
