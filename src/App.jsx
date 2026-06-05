@@ -846,7 +846,7 @@ function App() {
                         options={participants
                           .filter(Boolean)
                           .map((participant) => ({
-                            value: participant?.name,
+                            value: participant?.id,
                             label:
                               participant?.name ||
                               `Participant ${participant?.id ?? "?"}`,
