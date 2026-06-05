@@ -238,7 +238,7 @@ function App() {
           await response.json();
 
         setParticipants(
-          result.data || []
+          result || []
         );
         console.log(result);
       } catch (error) {
