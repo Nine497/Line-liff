@@ -109,123 +109,59 @@ function App() {
   }, [selectedKey]);
 
   useEffect(() => {
-
     const initApp = async () => {
-
       setIsInitializing(true);
 
       try {
-
         const liff = await initLiff();
 
         if (!liff) {
-
-          setIsInitializing(false);
-
           return;
         }
 
-        const profile =
-          await liff.getProfile();
+        const idToken = liff.getIDToken();
 
-        if (!profile?.userId) {
-
+        if (!idToken) {
           throw new Error(
-            "LIFF profile missing userId"
+            "Missing LIFF ID Token (openid scope missing)"
           );
         }
 
-        const userObj = {
-          user_id:
-            profile.userId,
+        const response = await fetch(`${apiUrl}/users`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id_token: idToken,
+          }),
+        });
 
-          display_name:
-            profile.displayName,
+        const result = await response.json();
 
-          picture_url:
-            profile.pictureUrl ?? null,
-        };
+        console.log("Backend result:", result);
 
-        let nextUser = userObj;
-
-        try {
-
-          const response =
-            await fetch(
-              `${apiUrl}/users`,
-              {
-                method: "POST",
-
-                headers: {
-                  "Content-Type":
-                    "application/json",
-                },
-
-                body: JSON.stringify(
-                  userObj
-                ),
-              }
-            );
-
-          const result =
-            await response
-              .json()
-              .catch(() => ({}));
-
-          console.log(
-            "User upsert result:",
-            result
-          );
-
-          if (!response.ok) {
-
-            throw new Error(
-              result.error?.message ||
-              result.error ||
-              response.statusText
-            );
-          }
-
-          if (result.user) {
-            nextUser = result.user;
-          }
-
-        } catch (err) {
-
-          console.error(
-            "Failed to upsert user to backend",
-            err
+        if (!response.ok) {
+          throw new Error(
+            result.error || "Failed to sync user"
           );
         }
 
-        setCurrentUser(nextUser);
-
-        console.log(
-          "Current user:",
-          nextUser
-        );
+        setCurrentUser(result.user);
 
         await Promise.all([
           fetchTaskEvents(),
           fetchTaskTypes(),
           fetchUsers(),
         ]);
-
       } catch (error) {
-
-        console.error(
-          "LIFF init failed",
-          error
-        );
-
+        console.error("LIFF init failed:", error);
       } finally {
-
         setIsInitializing(false);
       }
     };
 
     initApp();
-
   }, []);
 
   useEffect(() => {
