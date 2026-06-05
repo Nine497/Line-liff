@@ -25,7 +25,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "./components/ui/tabs";
+} from "@/components/ui/tabs";
 import { cn } from "./lib/utils";
 
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];

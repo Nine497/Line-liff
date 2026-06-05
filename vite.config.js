@@ -1,24 +1,28 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { fileURLToPath, URL } from 'node:url'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { fileURLToPath } from "node:url";
+import path from "path";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
 
   resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-
-      // moment fix (ถ้าจำเป็นจริง)
-      moment: fileURLToPath(
-        new URL("./node_modules/moment/moment.js", import.meta.url)
-      ),
-    },
+    alias: [
+      {
+        find: /^moment$/,
+        replacement: fileURLToPath(
+          new URL("./node_modules/moment/moment.js", import.meta.url)
+        ),
+      },
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, "./src"),
+      },
+    ],
   },
 
   optimizeDeps: {
     include: ["calendarjs", "moment"],
   },
-})
+});
