@@ -70,6 +70,7 @@ function App() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [participants, setParticipants] = useState([]);
+  const [abortController, setAbortController] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     location: "",
@@ -377,45 +378,33 @@ function App() {
   }
 
   const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
     try {
-      const file = e.target.files[0];
-
-      if (!file) return;
-
-      setIsUploading(true);
-
       const formData = new FormData();
 
-      const userId =
-        currentUser?.id ??
-        currentUser?.user_id;
+      const userId = currentUser?.id ?? currentUser?.user_id;
 
       if (userId) {
-        formData.append(
-          "user_id",
-          userId
-        );
+        formData.append("user_id", userId);
       }
 
       formData.append("file", file);
 
-      const response = await fetch(
-        `${apiUrl}/tasks/import`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${apiUrl}/tasks/import`, {
+        method: "POST",
+        body: formData,
+      });
 
-      const result =
-        await response.json();
+      const result = await response.json();
 
       console.log(result);
 
       if (!response.ok) {
-        throw new Error(
-          result.error || "Import failed"
-        );
+        throw new Error(result.error || "Import failed");
       }
 
       await fetchTaskEvents();
@@ -423,7 +412,6 @@ function App() {
       console.error(error);
     } finally {
       setIsUploading(false);
-
       e.target.value = "";
     }
   };
@@ -491,8 +479,8 @@ function App() {
 
         <span
           className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
-              ? "bg-red-100 text-red-700"
-              : "bg-green-100 text-green-700"
+            ? "bg-red-100 text-red-700"
+            : "bg-green-100 text-green-700"
             }`}
         >
           {isBusy ? "ไม่ว่าง" : "ว่าง"}
@@ -782,6 +770,15 @@ function App() {
             </div>
           </div>
         </footer>
+        {isUploading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="w-[380px]">
+              <SpinnerEmpty
+                title="กำลัง Import Excel"
+                description="ระบบกำลังนำเข้าข้อมูล กรุณารอและห้ามปิดหน้าจอ" />
+            </div>
+          </div>
+        )}
       </div>
 
       {
