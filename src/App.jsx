@@ -507,7 +507,7 @@ function App() {
           </Card>
 
           <div className="grid grid-cols-1 gap-3">
-            <div className="flex flex-wrap gap-2">
+            {/* <div className="flex flex-wrap gap-2">
               <Button
                 size="sm"
                 variant={showMine ? "outline" : "secondary"}
@@ -522,7 +522,7 @@ function App() {
               >
                 งานของฉัน
               </Button>
-            </div>
+            </div> */}
           </div>
         </header>
 
@@ -588,7 +588,7 @@ function App() {
 
             <CardContent className="flex flex-col gap-5 p-4 pt-4 sm:p-5">
               <Tabs>
-                <TabsList className="w-fit">
+                {/* <TabsList className="w-fit">
                   {tabLabels.map(([item, label]) => (
                     <TabsTrigger
                       active={view === item}
@@ -598,7 +598,7 @@ function App() {
                       {label}
                     </TabsTrigger>
                   ))}
-                </TabsList>
+                </TabsList> */}
 
                 <TabsContent>
                   <div className="overflow-hidden rounded-lg border">
@@ -655,25 +655,6 @@ function App() {
                   <CardDescription>วันที่เลือก</CardDescription>
                   <CardTitle>{selectedDate}</CardTitle>
                 </div>
-
-                {/* <div className="grid grid-cols-2 gap-3">
-                  {[
-                    ["งานที่แสดง", filteredEvents.length],
-                    ["ผู้เข้าร่วม", totalParticipants],
-                  ].map(([label, value]) => (
-                    <div
-                      key={label}
-                      className="rounded-lg bg-muted p-4 text-center"
-                    >
-                      <div className="text-xs font-medium text-muted-foreground">
-                        {label}
-                      </div>
-                      <div className="mt-2 text-2xl font-semibold">
-                        {value}
-                      </div>
-                    </div>
-                  ))}
-                </div> */}
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 {availableParticipants.length ? (
