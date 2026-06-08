@@ -517,17 +517,29 @@ function App() {
       {
         key: "events",
         label: "Event",
-        children: selectedEvents.map(renderEvent),
+        children: (
+          <div className="space-y-3">
+            {selectedEvents.map(renderEvent)}
+          </div>
+        ),
       },
       {
         key: "available",
         label: "ว่าง",
-        children: availableParticipants.map(renderParticipant),
+        children: (
+          <div className="space-y-3">
+            {availableParticipants.map(renderParticipant)}
+          </div>
+        ),
       },
       {
         key: "busy",
         label: "ไม่ว่าง",
-        children: busyParticipants.map(renderParticipant),
+        children: (
+          <div className="space-y-3">
+            {busyParticipants.map(renderParticipant)}
+          </div>
+        ),
       },
     ],
     [availableParticipants, busyParticipants, selectedEvents]
