@@ -480,7 +480,7 @@ function App() {
   };
 
   return (
-    <main className={cn("relative min-h-svh bg-background text-foreground", isDark && "dark")}>
+    <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
       {isInitializing ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/75 backdrop-blur-md">
           <div className="flex min-w-[320px] flex-col items-center gap-4 rounded-3xl border border-border bg-card/95 p-6 text-center shadow-2xl">
@@ -511,8 +511,10 @@ function App() {
           </div>
         </div>
       ) : null}
-      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between gap-3">
+
+      {/* ส่วนโครงสร้างหลักกึ่งกลาง */}
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
+        <nav className="flex items-center justify-between gap-3 pb-4">
           <a className="flex items-center gap-3 font-semibold" href="#calendarjs">
             <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm">
               {currentUser.picture_url ? (
@@ -546,8 +548,9 @@ function App() {
             </Button>
           </div>
         </nav>
-        <main className="flex flex-1 flex-col gap-5">
 
+        {/* เปลี่ยนจาก <main> เป็น <div> เพื่อไม่ให้ Tag ซ้ำซ้อน และใช้ flex-1 เพื่อดัน Footer */}
+        <div className="flex flex-1 flex-col gap-5">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
             <Card className="overflow-hidden">
               <CardHeader className="flex flex-col gap-4 border-b bg-card sm:flex-row sm:items-center sm:justify-between">
@@ -609,7 +612,6 @@ function App() {
               </CardHeader>
 
               <CardContent className="flex flex-col gap-5 p-4 pt-4 sm:p-5">
-
                 <div className="overflow-hidden rounded-lg border">
                   <div className="grid grid-cols-7 bg-muted text-center text-xs font-medium text-muted-foreground">
                     {weekdays.map((weekday) => (
@@ -655,7 +657,7 @@ function App() {
               </CardContent>
             </Card>
 
-            <aside className="grid gap-5 max-h-[300px] xl:content-start">
+            <aside className="grid gap-5 xl:content-start">
               <Card>
                 <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -691,7 +693,6 @@ function App() {
 
                     <TabsContent value="busy">
                       <div className="max-h-[500px] overflow-y-auto pr-2">
-
                         <div className="flex flex-col gap-3">
                           {busyParticipants.length > 0 ? (
                             busyParticipants.map(renderParticipant)
@@ -703,7 +704,6 @@ function App() {
                         </div>
                       </div>
                     </TabsContent>
-
 
                     <TabsContent value="all">
                       <div className="max-h-[500px] overflow-y-auto pr-2">
@@ -718,37 +718,37 @@ function App() {
                         </div>
                       </div>
                     </TabsContent>
-
                   </Tabs>
                 </CardContent>
               </Card>
             </aside>
           </section>
-        </main >
-        <footer className="border-t bg-background">
-          <div className="mx-auto flex flex-col items-center justify-center gap-2 px-2 pt-2 text-center text-sm text-muted-foreground">
-            <p className="font-medium text-foreground">
-              LINE LIFF Scheduler © {new Date().getFullYear()}
-            </p>
-            <div className="flex items-center gap-2">
-              <span>
-                Powered by React •
-                Supabase
-              </span>
-            </div>
-          </div>
-        </footer>
-        {isUploading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
-            <div className="w-[380px]">
-              <SpinnerEmpty
-                title="กำลัง Import Excel"
-                description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
-              />
-            </div>
-          </div>
-        )}
+        </div>
       </div>
+
+      {/* ย้าย Footer ออกมาด้านนอกสุด และเพิ่ม padding เพื่อความสวยงาม */}
+      <footer className="w-full border-t bg-background py-4 mt-auto">
+        <div className="mx-auto flex flex-col items-center justify-center gap-1 text-center text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">
+            LINE LIFF Scheduler © {new Date().getFullYear()}
+          </p>
+          <div className="flex items-center gap-2">
+            <span>Powered by React • Supabase</span>
+          </div>
+        </div>
+      </footer>
+
+      {/* ส่วนของ Dialog ต่างๆ (คงเดิม) */}
+      {isUploading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
+          <div className="w-[380px]">
+            <SpinnerEmpty
+              title="กำลัง Import Excel"
+              description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
+            />
+          </div>
+        </div>
+      )}
 
       {
         showCreateForm && (
