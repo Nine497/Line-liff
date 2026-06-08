@@ -84,7 +84,7 @@ function App() {
   }); const [formSuccess, setFormSuccess] = useState("");
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
-  const [activeTab, setActiveTab] = useState("busy");
+  const [activeTab, setActiveTab] = useState("events");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -443,7 +443,7 @@ function App() {
         key={event.id}
         className="flex flex-col gap-1 rounded-lg border bg-background p-4"
       >
-        <p className="font-medium">{event.title}</p>
+        <p className="text-base font-semibold">{event.title}</p>
 
         <div className="text-sm text-muted-foreground">
           <p>ผู้เข้าร่วม</p>
@@ -474,12 +474,12 @@ function App() {
         className="flex items-center justify-between rounded-lg border bg-background p-4"
       >
         <div className="flex flex-col pr-2">
-          <p className="font-medium">{participant.name}</p>
+          <p className="text-base font-semibold">{participant.name}</p>
 
           <div className="text-sm text-muted-foreground">
             {isBusy ? (
               <div className="space-y-1">
-                <ul className="ml-4 list-disc">
+                <ul className="ml-4 list-none">
                   {events.map((e) => (
                     <li key={e.id}>
                       {e.title}
@@ -508,6 +508,11 @@ function App() {
   const tabItems = useMemo(
     () => [
       {
+        key: "events",
+        label: "Event",
+        children: selectedEvents.map(renderEvent),
+      },
+      {
         key: "available",
         label: "ว่าง",
         children: availableParticipants.map(renderParticipant),
@@ -516,11 +521,6 @@ function App() {
         key: "busy",
         label: "ไม่ว่าง",
         children: busyParticipants.map(renderParticipant),
-      },
-      {
-        key: "events",
-        label: "Event",
-        children: selectedEvents.map(renderEvent),
       },
     ],
     [availableParticipants, busyParticipants, selectedEvents]
