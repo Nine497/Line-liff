@@ -390,6 +390,9 @@ function App() {
     return Object.keys(errors).length === 0;
   };
 
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
   // =========================
   // available / busy
   // =========================
@@ -629,7 +632,7 @@ function App() {
                     <CardDescription>ปฏิทิน</CardDescription>
 
                     <CardTitle>
-                      {monthNames[month.month - 1]} {month.year}
+                      {monthNames[month.month - 1]} {month.year + 543}
                     </CardTitle>
                   </div>
                 </div>
@@ -692,13 +695,14 @@ function App() {
                       const isCurrentMonth = day.month === month.month;
                       const isSelected = key === selectedKey;
                       const hasEvents = Boolean(events[key]);
-
+                      const isToday = key === todayKey;
                       return (
                         <button
                           className={cn(
                             "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
                             !isCurrentMonth && "bg-muted/40 text-muted-foreground",
                             isSelected && "bg-accent",
+                            isToday && "ring-2 ring-primary/60"
                           )}
                           key={key}
                           onClick={() => setSelectedKey(key)}
