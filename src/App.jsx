@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/tabs";
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
+import { BarLoader } from "react-spinners";
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 const monthNames = [
   "มกราคม",
@@ -497,8 +498,8 @@ function App() {
               )}
             </div>
             <div>
-              <p className="text-lg font-semibold">กำลังโหลดข้อมูลผู้ใช้และงาน</p>
-              <p className="mt-2 text-sm text-muted-foreground">โปรดรอสักครู่ กำลังเรียกข้อมูลจาก LIFF และฐานข้อมูล</p>
+              <BarLoader size={20} />
+              <p className="text-lg font-semibold">กำลังเรียกข้อมูลผู้ใช้จาก LINE LIFF และฐานข้อมูล</p>
             </div>
           </div>
         </div>
