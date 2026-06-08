@@ -511,8 +511,8 @@ function App() {
           </div>
         </div>
       ) : null}
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-4 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between gap-3">
+<div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center justify-between gap-3">
           <a className="flex items-center gap-3 font-semibold" href="#calendarjs">
             <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm">
               {currentUser.picture_url ? (
@@ -546,44 +546,7 @@ function App() {
             </Button>
           </div>
         </nav>
-
-        {/* <header className="grid gap-4 lg:grid-cols-[1fr_360px]">
-          <Card className="border-none bg-card/70 shadow-none">
-            <CardHeader className="gap-3">
-              <Badge className="w-fit" variant="secondary">
-                LIFF scheduler SaaS
-              </Badge>
-              <div className="flex flex-col gap-2">
-                <CardTitle className="text-3xl leading-tight sm:text-4xl">
-                  จัดการตารางนัดหมายงาน ศร.ชล.
-                </CardTitle>
-                <CardDescription className="max-w-2xl text-base leading-7">
-                  ระบบปฏิทินสำหรับเพิ่มและติดตามงาน ของ ศร.ชล.
-                  ใช้งานได้ทั้งบน LIFF และ Desktop
-                </CardDescription>
-              </div>
-            </CardHeader>
-          </Card>
-
-          <div className="grid grid-cols-1 gap-3">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                variant={showMine ? "outline" : "secondary"}
-                onClick={() => setShowMine(false)}
-              >
-                งานทั้งหมด
-              </Button>
-              <Button
-                size="sm"
-                variant={showMine ? "secondary" : "outline"}
-                onClick={() => setShowMine(true)}
-              >
-                งานของฉัน
-              </Button>
-            </div>
-          </div>
-        </header> */}
+        <main className="flex flex-1 flex-col gap-5">
 
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
           <Card className="overflow-hidden">
@@ -761,6 +724,7 @@ function App() {
             </Card>
           </aside>
         </section>
+        <main/>
         <footer className="border-t bg-background">
           <div className="mx-auto flex flex-col items-center justify-center gap-2 px-2 pt-2 text-center text-sm text-muted-foreground">
             <p className="font-medium text-foreground">
