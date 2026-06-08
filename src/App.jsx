@@ -44,6 +44,8 @@ const monthNames = [
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 
+const today = new Date();
+const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
 // const tabLabels = [
 //   ["calendar", "ปฏิทิน"],
@@ -569,7 +571,7 @@ function App() {
               />
 
               <p className="text-lg font-semibold">
-                กำลังเรียกข้อมูลจาก LINE LIFF และฐานข้อมูล
+                กำลังเรียกข้อมูลผู้ใช้จาก LINE LIFF และฐานข้อมูล
               </p>
             </div>
           </div>
@@ -690,13 +692,13 @@ function App() {
                       const isCurrentMonth = day.month === month.month;
                       const isSelected = key === selectedKey;
                       const hasEvents = Boolean(events[key]);
+
                       return (
                         <button
                           className={cn(
                             "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
                             !isCurrentMonth && "bg-muted/40 text-muted-foreground",
                             isSelected && "bg-accent",
-                            isToday && !isSelected && "bg-primary/10 text-primary"
                           )}
                           key={key}
                           onClick={() => setSelectedKey(key)}
