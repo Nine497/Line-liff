@@ -457,7 +457,7 @@ function App() {
         key={participant.id}
         className="flex items-center justify-between rounded-lg border bg-background p-4"
       >
-        <div className="flex pr-3">
+        <div className="flex flex-col pr-3">
           <p className="font-medium">{participant.name}</p>
 
           <p className="text-sm text-muted-foreground">
