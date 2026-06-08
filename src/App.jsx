@@ -414,17 +414,6 @@ function App() {
   // =========================
   // available / busy
   // =========================
-
-  const availableParticipants =
-    participants.filter(
-      (p) => !busyMap.has(p.id)
-    );
-
-  const busyParticipants =
-    participants.filter(
-      (p) => busyMap.has(p.id)
-    );
-
   const eventMap = new Map();
 
   selectedEvents.forEach((event) => {
