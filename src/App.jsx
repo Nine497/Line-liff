@@ -103,9 +103,6 @@ function App() {
     return `${Number(day)} ${monthNames[Number(month) - 1]} ${Number(year) + 543}`;
   }, [selectedKey]);
 
-  const today = new Date();
-  const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-
   useEffect(() => {
     const initApp = async () => {
       try {
@@ -693,7 +690,6 @@ function App() {
                       const isCurrentMonth = day.month === month.month;
                       const isSelected = key === selectedKey;
                       const hasEvents = Boolean(events[key]);
-                      const isToday = key === todayKey;
                       return (
                         <button
                           className={cn(
