@@ -85,8 +85,6 @@ function App() {
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
   const [loading, setLoading] = useState(false);
-  const today = new Date();
-  const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
 
   useEffect(() => {
     document.body.style.overflow = showCreateForm ? "hidden" : "";
