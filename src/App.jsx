@@ -457,12 +457,12 @@ function App() {
         key={participant.id}
         className="flex items-center justify-between rounded-lg border bg-background p-4"
       >
-        <div className="flex flex-row pr-2">
+        <div className="flex flex-col pr-2">
           <p className="font-medium">{participant.name}</p>
 
           <p className="text-sm text-muted-foreground">
             {isBusy
-              ? `มีงาน: ${tasks.join(", ")}`
+              ? `มีงาน : ${tasks.join(", ")}`
               : "ไม่มีงานในวันนี้"}
           </p>
         </div>
