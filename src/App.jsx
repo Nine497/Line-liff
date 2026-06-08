@@ -101,8 +101,8 @@ function App() {
   }, [month]);
 
   const selectedDate = useMemo(() => {
-    const [, selectedMonth, selectedDay] = selectedKey.split("-");
-    return `${Number(selectedDay)} ${monthNames[Number(selectedMonth) - 1]}`;
+    const [year, month, day] = selectedKey.split("-");
+    return `${Number(day)} ${monthNames[Number(month) - 1]} ${Number(year) + 543}`;
   }, [selectedKey]);
 
   useEffect(() => {
