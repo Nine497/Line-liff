@@ -395,7 +395,7 @@ function App() {
 
   selectedEvents.forEach((event) => {
 
-    const title = event?.title;
+    const title = event.title;
 
     (event.task_participants ?? []).forEach(
       (tp) => {
@@ -418,6 +418,20 @@ function App() {
       }
     );
   });
+
+  // =========================
+  // available / busy
+  // =========================
+
+  const availableParticipants =
+    participants.filter(
+      (p) => !busyMap.has(p.id)
+    );
+
+  const busyParticipants =
+    participants.filter(
+      (p) => busyMap.has(p.id)
+    );
 
   const eventMap = new Map();
 
@@ -456,20 +470,6 @@ function App() {
       }
     );
   });
-
-  // =========================
-  // available / busy
-  // =========================
-
-  const availableParticipants =
-    participants.filter(
-      (p) => !busyMap.has(p.id)
-    );
-
-  const busyParticipants =
-    participants.filter(
-      (p) => busyMap.has(p.id)
-    );
 
   const renderParticipant = (participant) => {
     console.log("Rendering participant:", participant);
@@ -723,7 +723,7 @@ function App() {
                     <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="available">ว่าง</TabsTrigger>
                       <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
-                      <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
+                      <TabsTrigger value="all">อีเว้น</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="available">
@@ -755,46 +755,87 @@ function App() {
                     </TabsContent>
 
                     <TabsContent value="all">
-                      <div className="max-h-[500px] overflow-y-auto pr-2">
 
-                        <div className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-4">
 
-                          {Array.from(eventMap.values()).length > 0 ? (
+                        {selectedEvents.length > 0 ? (
 
-                            Array.from(eventMap.values()).map(
-                              (event) => (
+                          selectedEvents.map((event) => (
 
-                                <Card
-                                  key={event.id}
-                                  className="overflow-hidden"
-                                >
+                            <Card
+                              key={event.id}
+                              className="overflow-hidden"
+                            >
 
-                                  <CardHeader className="border-b py-3">
-                                    <CardTitle className="text-base">
-                                      {event.title}
-                                    </CardTitle>
-                                  </CardHeader>
+                              <CardHeader className="border-b py-3">
 
-                                  <CardContent className="flex flex-col gap-3 p-4">
+                                <CardTitle className="text-base">
+                                  {event.title}
+                                </CardTitle>
 
-                                    {event.participants.map(
-                                      renderParticipant
-                                    )}
+                                <CardDescription>
 
-                                  </CardContent>
-                                </Card>
-                              )
-                            )
+                                  {dayjs(event.start_time)
+                                    .format("HH:mm")}{" "}
+                                  -
+                                  {" "}
+                                  {dayjs(event.end_time)
+                                    .format("HH:mm")}
 
-                          ) : (
+                                </CardDescription>
 
-                            <div className="text-center text-muted-foreground p-4 border rounded-lg">
-                              ไม่มีข้อมูลงาน
-                            </div>
+                              </CardHeader>
 
-                          )}
+                              <CardContent className="flex flex-col gap-3 p-4">
 
-                        </div>
+                                {(event.task_participants ?? [])
+                                  .length > 0 ? (
+
+                                  event.task_participants.map(
+                                    (tp) => {
+
+                                      const participant =
+                                        tp.participant;
+
+                                      if (!participant)
+                                        return null;
+
+                                      return (
+                                        <div
+                                          key={participant.id}
+                                          className="rounded-lg border p-3"
+                                        >
+
+                                          <p className="font-medium">
+                                            {participant.name}
+                                          </p>
+
+                                        </div>
+                                      );
+                                    }
+                                  )
+
+                                ) : (
+
+                                  <div className="text-sm text-muted-foreground">
+                                    ไม่มีผู้เข้าร่วม
+                                  </div>
+
+                                )}
+
+                              </CardContent>
+
+                            </Card>
+                          ))
+
+                        ) : (
+
+                          <div className="rounded-lg border p-4 text-center text-muted-foreground">
+                            ไม่มีงานในวันนี้
+                          </div>
+
+                        )}
+
                       </div>
                     </TabsContent>
                   </Tabs>
