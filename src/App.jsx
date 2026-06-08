@@ -383,8 +383,6 @@ function App() {
     return events[selectedKey] || [];
   }, [events, selectedKey]);
 
-  const busyMap = new Map();
-
   selectedEvents.forEach((event) => {
 
     const title = event.title;
