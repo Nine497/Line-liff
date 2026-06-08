@@ -20,16 +20,10 @@ import { Select } from "./components/ui/select";
 import { Textarea } from "./components/ui/textarea";
 import { ComboboxChips } from "./components/ui/combobox";
 import { Form, FormDescription, FormField, FormLabel } from "./components/ui/form";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { BarLoader } from "react-spinners";
-import { DatePicker } from "antd";
+import { DatePicker, Tabs } from "antd";
 import dayjs from "dayjs";
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 const monthNames = [
@@ -475,6 +469,19 @@ function App() {
     return Object.keys(errors).length === 0;
   };
 
+  const tabItems = useMemo(() => [
+    {
+      key: "available",
+      label: "ว่าง",
+      children: availableParticipants.map(renderParticipant),
+    },
+    {
+      key: "busy",
+      label: "ไม่ว่าง",
+      children: busyParticipants.map(renderParticipant),
+    },
+  ], [availableParticipants, busyParticipants]);
+
   return (
     <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
       {isInitializing ? (
@@ -661,108 +668,24 @@ function App() {
                     <CardTitle>{selectedDate}</CardTitle>
                   </div>
                 </CardHeader>
+
                 <CardContent className="flex flex-col gap-3">
-                  <Tabs
-                    value={activeTab}
-                    onValueChange={setActiveTab}
-                  >
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="available">
-                        ว่าง
-                      </TabsTrigger>
-
-                      <TabsTrigger value="busy">
-                        ไม่ว่าง
-                      </TabsTrigger>
-
-                      <TabsTrigger value="all">
-                        อีเว้น
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <div className="mt-4 max-h-[500px] overflow-y-auto pr-2">
-                      {activeTab === "available" && (
-                        <div className="flex flex-col gap-3">
-                          {availableParticipants.length > 0 ? (
-                            availableParticipants.map(renderParticipant)
-                          ) : (
-                            <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                              ไม่มีคนว่าง
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {activeTab === "busy" && (
-                        <div className="flex flex-col gap-3">
-                          {busyParticipants.length > 0 ? (
-                            busyParticipants.map(renderParticipant)
-                          ) : (
-                            <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                              ทุกคนว่าง
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {activeTab === "all" && (
-                        <div className="flex flex-col gap-4">
-                          {selectedEvents.length > 0 ? (
-                            selectedEvents.map((event) => (
-                              <Card
-                                key={event.id}
-                                className="overflow-hidden"
-                              >
-                                <CardHeader className="border-b py-3">
-                                  <CardTitle className="text-base">
-                                    {event.title}
-                                  </CardTitle>
-                                </CardHeader>
-
-                                <CardContent className="flex flex-col gap-3 p-4">
-                                  {(event.task_participants ?? []).length > 0 ? (
-                                    event.task_participants.map((tp) => {
-                                      const participant = tp.participant;
-
-                                      if (!participant) return null;
-
-                                      return (
-                                        <div
-                                          key={participant.id}
-                                          className="rounded-lg border p-3"
-                                        >
-                                          <p className="font-medium">
-                                            {participant.name}
-                                          </p>
-                                        </div>
-                                      );
-                                    })
-                                  ) : (
-                                    <div className="text-sm text-muted-foreground">
-                                      ไม่มีผู้เข้าร่วม
-                                    </div>
-                                  )}
-                                </CardContent>
-                              </Card>
-                            ))
-                          ) : (
-                            <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                              ไม่มีงานในวันนี้
-                            </div>
-                          )}
-                        </div>
-                      )}
+                  {selectedEvents.length > 0 ? (
+                    <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+                  ) : (
+                    <div className="rounded-lg border p-4 text-center text-muted-foreground">
+                      ไม่มีงานในวันนี้
                     </div>
-                  </Tabs>
+                  )}
                 </CardContent>
               </Card>
             </aside>
-          </section>
-        </div>
-      </div>
+          </section >
+        </div >
+      </div >
 
       {/* ย้าย Footer ออกมาด้านนอกสุด และเพิ่ม padding เพื่อความสวยงาม */}
-      <footer className="w-full border-t bg-background py-4 mt-auto">
+      < footer className="w-full border-t bg-background py-4 mt-auto" >
         <div className="mx-auto flex flex-col items-center justify-center gap-1 text-center text-sm text-muted-foreground">
           <p className="font-medium text-foreground">
             LINE LIFF Scheduler © {new Date().getFullYear()}
@@ -771,19 +694,21 @@ function App() {
             <span>Powered by React • Supabase</span>
           </div>
         </div>
-      </footer>
+      </footer >
 
       {/* ส่วนของ Dialog ต่างๆ (คงเดิม) */}
-      {isUploading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
-          <div className="w-[380px]">
-            <SpinnerEmpty
-              title="กำลัง Import Excel"
-              description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
-            />
+      {
+        isUploading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
+            <div className="w-[380px]">
+              <SpinnerEmpty
+                title="กำลัง Import Excel"
+                description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {
         showCreateForm && (
