@@ -390,7 +390,7 @@ function App() {
 
   const busyMap = new Map();
 
-  filteredEvents.forEach((events) => {
+  task.forEach((events) => {
 
     const title = events?.title;
 
@@ -415,7 +415,7 @@ function App() {
 
   const eventMap = new Map();
 
-  filteredEvents.forEach((event) => {
+  task.forEach((event) => {
 
     if (!eventMap.has(event.id)) {
 
