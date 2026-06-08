@@ -288,19 +288,6 @@ function App() {
     });
   }
 
-  function validateForm() {
-    const errors = [];
-    if (!formData.title.trim()) errors.push("ชื่องานห้ามว่าง");
-    if (formData.title.trim().length < 3) errors.push("ชื่องานต้องมีอย่างน้อย 3 ตัวอักษร");
-    if (!formData.start_time) errors.push("เวลาห้ามว่าง");
-
-    const selectedTime = new Date(formData.start_time);
-    const now = new Date();
-    if (selectedTime < now) errors.push("ไม่สามารถสร้างงานในอดีตได้");
-
-    return errors;
-  }
-
   async function handleCreateTask(e) {
     e.preventDefault();
     if (!validateForm()) {
