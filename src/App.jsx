@@ -30,6 +30,7 @@ import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { BarLoader } from "react-spinners";
 import { DatePicker } from "antd";
+import dayjs from "dayjs";
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 const monthNames = [
   "มกราคม",
@@ -61,18 +62,14 @@ function dayKey(day) {
 }
 
 function App() {
-  const [view, setView] = useState("calendar");
   const [theme, setTheme] = useState("light");
-  const [viewMode, setViewMode] = useState("busy");
   const [month, setMonth] = useState({ year: 2026, month: 6 });
   const [selectedKey, setSelectedKey] = useState(todayKey);
-  const [showMine, setShowMine] = useState(false);
   const [events, setEvents] = useState({});
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [participants, setParticipants] = useState([]);
-  const [abortController, setAbortController] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
     location: "",
@@ -93,7 +90,6 @@ function App() {
   }); const [formSuccess, setFormSuccess] = useState("");
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
-  const [loadingTab, setLoadingTab] = useState("available");
   const [activeTab, setActiveTab] = useState("busy");
   const [loading, setLoading] = useState(false);
 
@@ -143,7 +139,6 @@ function App() {
 
         const result = await response.json();
 
-        console.log("Backend result:", result);
         if (response.status === 401) {
           liff.logout();
           liff.login();
@@ -166,7 +161,6 @@ function App() {
       } catch (error) {
         console.error("LIFF init failed:", error);
       } finally {
-        console.log("LIFF initialization completed", participants);
         setIsInitializing(false);
       }
     };
@@ -214,7 +208,6 @@ function App() {
         }, {});
 
       setEvents(grouped);
-      console.log("Events grouped by date:", grouped);
     } catch (error) {
       console.error(error);
     }
@@ -235,7 +228,6 @@ function App() {
         setParticipants(
           result || []
         );
-        console.log(result);
       } catch (error) {
         console.error(error);
       } finally {
@@ -373,7 +365,6 @@ function App() {
 
       const result = await response.json();
 
-      console.log(result);
 
       if (!response.ok) {
         throw new Error(result.error || "Import failed");
@@ -388,8 +379,9 @@ function App() {
     }
   };
 
-  const selectedEvents =
-    events[selectedDate] || [];
+  const selectedEvents = useMemo(() => {
+    return events[selectedKey] || [];
+  }, [events, selectedKey]);
 
   const busyMap = new Map();
 
@@ -472,8 +464,6 @@ function App() {
   });
 
   const renderParticipant = (participant) => {
-    console.log("Rendering participant:", participant);
-
     if (!participant) {
       return (
         <div className="flex items-center justify-between rounded-lg border bg-background p-4">
@@ -527,6 +517,40 @@ function App() {
 
     return Object.keys(errors).length === 0;
   };
+
+  const busyMap = useMemo(() => {
+    const map = new Map();
+
+    selectedEvents.forEach((event) => {
+      const title = event.title;
+
+      (event.task_participants ?? []).forEach((tp) => {
+        const participant = tp.participant;
+
+        if (!participant?.id) return;
+
+        if (!map.has(participant.id)) {
+          map.set(participant.id, []);
+        }
+
+        map.get(participant.id).push(title);
+      });
+    });
+
+    return map;
+  }, [selectedEvents]);
+
+  const availableParticipants = useMemo(() => {
+    return participants.filter(
+      (p) => !busyMap.has(p.id)
+    );
+  }, [participants, busyMap]);
+
+  const busyParticipants = useMemo(() => {
+    return participants.filter(
+      (p) => busyMap.has(p.id)
+    );
+  }, [participants, busyMap]);
 
   return (
     <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
@@ -716,128 +740,96 @@ function App() {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">
                   <Tabs
-                    defaultValue="available"
                     value={activeTab}
                     onValueChange={setActiveTab}
                   >
                     <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="available">ว่าง</TabsTrigger>
-                      <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
-                      <TabsTrigger value="all">อีเว้น</TabsTrigger>
+                      <TabsTrigger value="available">
+                        ว่าง
+                      </TabsTrigger>
+
+                      <TabsTrigger value="busy">
+                        ไม่ว่าง
+                      </TabsTrigger>
+
+                      <TabsTrigger value="all">
+                        อีเว้น
+                      </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="available">
-                      <div className="max-h-[500px] overflow-y-auto pr-2">
+                    <div className="mt-4 max-h-[500px] overflow-y-auto pr-2">
+                      {activeTab === "available" && (
                         <div className="flex flex-col gap-3">
                           {availableParticipants.length > 0 ? (
                             availableParticipants.map(renderParticipant)
                           ) : (
-                            <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                            <div className="rounded-lg border p-4 text-center text-muted-foreground">
                               ไม่มีคนว่าง
                             </div>
                           )}
                         </div>
-                      </div>
-                    </TabsContent>
+                      )}
 
-                    <TabsContent value="busy">
-                      <div className="max-h-[500px] overflow-y-auto pr-2">
+                      {activeTab === "busy" && (
                         <div className="flex flex-col gap-3">
                           {busyParticipants.length > 0 ? (
                             busyParticipants.map(renderParticipant)
                           ) : (
-                            <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                            <div className="rounded-lg border p-4 text-center text-muted-foreground">
                               ทุกคนว่าง
                             </div>
                           )}
                         </div>
-                      </div>
-                    </TabsContent>
+                      )}
 
-                    <TabsContent value="all">
+                      {activeTab === "all" && (
+                        <div className="flex flex-col gap-4">
+                          {selectedEvents.length > 0 ? (
+                            selectedEvents.map((event) => (
+                              <Card
+                                key={event.id}
+                                className="overflow-hidden"
+                              >
+                                <CardHeader className="border-b py-3">
+                                  <CardTitle className="text-base">
+                                    {event.title}
+                                  </CardTitle>
+                                </CardHeader>
 
-                      <div className="flex flex-col gap-4">
+                                <CardContent className="flex flex-col gap-3 p-4">
+                                  {(event.task_participants ?? []).length > 0 ? (
+                                    event.task_participants.map((tp) => {
+                                      const participant = tp.participant;
 
-                        {selectedEvents.length > 0 ? (
-
-                          selectedEvents.map((event) => (
-
-                            <Card
-                              key={event.id}
-                              className="overflow-hidden"
-                            >
-
-                              <CardHeader className="border-b py-3">
-
-                                <CardTitle className="text-base">
-                                  {event.title}
-                                </CardTitle>
-
-                                <CardDescription>
-
-                                  {dayjs(event.start_time)
-                                    .format("HH:mm")}{" "}
-                                  -
-                                  {" "}
-                                  {dayjs(event.end_time)
-                                    .format("HH:mm")}
-
-                                </CardDescription>
-
-                              </CardHeader>
-
-                              <CardContent className="flex flex-col gap-3 p-4">
-
-                                {(event.task_participants ?? [])
-                                  .length > 0 ? (
-
-                                  event.task_participants.map(
-                                    (tp) => {
-
-                                      const participant =
-                                        tp.participant;
-
-                                      if (!participant)
-                                        return null;
+                                      if (!participant) return null;
 
                                       return (
                                         <div
                                           key={participant.id}
                                           className="rounded-lg border p-3"
                                         >
-
                                           <p className="font-medium">
                                             {participant.name}
                                           </p>
-
                                         </div>
                                       );
-                                    }
-                                  )
-
-                                ) : (
-
-                                  <div className="text-sm text-muted-foreground">
-                                    ไม่มีผู้เข้าร่วม
-                                  </div>
-
-                                )}
-
-                              </CardContent>
-
-                            </Card>
-                          ))
-
-                        ) : (
-
-                          <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                            ไม่มีงานในวันนี้
-                          </div>
-
-                        )}
-
-                      </div>
-                    </TabsContent>
+                                    })
+                                  ) : (
+                                    <div className="text-sm text-muted-foreground">
+                                      ไม่มีผู้เข้าร่วม
+                                    </div>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            ))
+                          ) : (
+                            <div className="rounded-lg border p-4 text-center text-muted-foreground">
+                              ไม่มีงานในวันนี้
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </Tabs>
                 </CardContent>
               </Card>
