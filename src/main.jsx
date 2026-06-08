@@ -1,10 +1,20 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { ConfigProvider } from "antd";
 
-createRoot(document.getElementById('root')).render(
+import "./index.css";
+import App from "./App.jsx";
+
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
-)
+    <ConfigProvider
+      theme={{
+        token: {
+          fontFamily: '"LINE Seed Sans TH", sans-serif',
+        },
+      }}
+    >
+      <App />
+    </ConfigProvider>
+  </StrictMode>
+);
