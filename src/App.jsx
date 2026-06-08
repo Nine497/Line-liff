@@ -103,6 +103,9 @@ function App() {
     return `${Number(day)} ${monthNames[Number(month) - 1]} ${Number(year) + 543}`;
   }, [selectedKey]);
 
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
   useEffect(() => {
     const initApp = async () => {
       try {
@@ -388,9 +391,6 @@ function App() {
     return Object.keys(errors).length === 0;
   };
 
-  const today = new Date();
-  const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-
   // =========================
   // available / busy
   // =========================
@@ -572,7 +572,7 @@ function App() {
               />
 
               <p className="text-lg font-semibold">
-                กำลังเรียกข้อมูลผู้ใช้จาก LINE LIFF และฐานข้อมูล
+                กำลังเรียกข้อมูลจาก LINE LIFF และฐานข้อมูล
               </p>
             </div>
           </div>
@@ -700,6 +700,7 @@ function App() {
                             "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
                             !isCurrentMonth && "bg-muted/40 text-muted-foreground",
                             isSelected && "bg-accent",
+                            isToday && !isSelected && "bg-primary/10 text-primary"
                           )}
                           key={key}
                           onClick={() => setSelectedKey(key)}
@@ -709,7 +710,6 @@ function App() {
                             className={cn(
                               "grid size-7 place-items-center rounded-md text-sm font-medium",
                               isSelected && "bg-primary text-primary-foreground",
-                              isToday && !isSelected && "bg-primary/10 text-primary"
                             )}
                           >
                             {day.date}
