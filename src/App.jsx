@@ -83,7 +83,7 @@ function App() {
   const [users, setUsers] = useState([]);
   const [selectedParticipantIds, setSelectedParticipantIds] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formErrors, setFormErrors] = useState({
+  const [formError, setFormError] = useState({
     title: "",
     start_time: "",
     end_time: "",
@@ -386,32 +386,6 @@ function App() {
     return events[selectedKey] || [];
   }, [events, selectedKey]);
 
-  selectedEvents.forEach((event) => {
-
-    const title = event.title;
-
-    (event.task_participants ?? []).forEach(
-      (tp) => {
-
-        const participant =
-          tp.participant;
-
-        if (!participant?.id) return;
-
-        if (!busyMap.has(participant.id)) {
-          busyMap.set(participant.id, []);
-        }
-
-        const tasks =
-          busyMap.get(participant.id);
-
-        if (!tasks.includes(title)) {
-          tasks.push(title);
-        }
-      }
-    );
-  });
-
   const busyMap = useMemo(() => {
     const map = new Map();
 
@@ -496,7 +470,7 @@ function App() {
       errors.dateRange = "กรุณาเลือกช่วงเวลา";
     }
 
-    setFormErrors(errors);
+    setFormError(errors);
 
     return Object.keys(errors).length === 0;
   };
@@ -870,7 +844,7 @@ function App() {
                           format: "HH:mm",
                         }}
                         format="DD/MM/YYYY HH:mm"
-                        className={`w-full ${formErrors.dateRange
+                        className={`w-full ${formError.dateRange
                           ? "!border-red-500"
                           : ""
                           }`}
@@ -910,7 +884,7 @@ function App() {
                               values[1].toISOString(),
                           });
 
-                          setFormErrors((prev) => ({
+                          setFormError((prev) => ({
                             ...prev,
                             dateRange: "",
                           }));
@@ -922,9 +896,9 @@ function App() {
                         }
                       />
 
-                      {formErrors.dateRange && (
+                      {formError.dateRange && (
                         <p className="mt-1 text-sm text-red-500">
-                          {formErrors.dateRange}
+                          {formError.dateRange}
                         </p>
                       )}
                     </FormField>
