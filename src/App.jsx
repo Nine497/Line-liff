@@ -62,7 +62,7 @@ function dayKey(day) {
 function App() {
   const [view, setView] = useState("calendar");
   const [theme, setTheme] = useState("light");
-  const [viewMode, setViewMode] = useState("available");
+  const [viewMode, setViewMode] = useState("busy");
   const [month, setMonth] = useState({ year: 2026, month: 6 });
   const [selectedKey, setSelectedKey] = useState(todayKey);
   const [showMine, setShowMine] = useState(false);
@@ -499,8 +499,8 @@ function App() {
             </div>
             <div className="flex w-full flex-col items-center gap-3">
               <BarLoader
-                width={220}
-                height={6}
+                width={150}
+                height={3}
                 color="#22c55e"
               />
 
