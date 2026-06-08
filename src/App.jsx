@@ -412,39 +412,73 @@ function App() {
       }
     };
 
+    const busyMap = new Map();
+
+    filteredEvents.forEach((event) => {
+
+      const title = event?.title;
+
+      (event.task_participants ?? []).forEach(
+        (tp) => {
+
+          const participant =
+            tp.participant;
+
+          if (!participant?.id) return;
+
+          if (!busyMap.has(participant.id)) {
+            busyMap.set(participant.id, []);
+          }
+
+          busyMap
+            .get(participant.id)
+            .push(title);
+        }
+      );
+    });
+
     const eventMap = new Map();
 
     filteredEvents.forEach((event) => {
 
-      const eventId = event.id;
+      if (!eventMap.has(event.id)) {
 
-      if (!eventMap.has(eventId)) {
-        eventMap.set(eventId, {
+        eventMap.set(event.id, {
           id: event.id,
           title: event.title,
           participants: [],
         });
       }
 
-      (event.task_participants ?? []).forEach((tp) => {
+      (event.task_participants ?? []).forEach(
+        (tp) => {
 
-        const participant = tp.participant;
+          const participant =
+            tp.participant;
 
-        if (!participant) return;
+          if (!participant) return;
 
-        eventMap
-          .get(eventId)
-          .participants
-          .push(participant);
-      });
+          eventMap
+            .get(event.id)
+            .participants
+            .push(participant);
+        }
+      );
     });
-    const availableParticipants = participants.filter(
-      (p) => !eventMap.has(p.id)
-    );
 
-    const busyParticipants = participants.filter(
-      (p) => eventMap.has(p.id)
-    );
+    // =========================
+    // available / busy
+    // =========================
+
+    const availableParticipants =
+      participants.filter(
+        (p) => !busyMap.has(p.id)
+      );
+
+    const busyParticipants =
+      participants.filter(
+        (p) => busyMap.has(p.id)
+      );
 
     const filteredParticipants =
       viewMode === "available"
@@ -738,14 +772,44 @@ function App() {
 
                       <TabsContent value="all">
                         <div className="max-h-[500px] overflow-y-auto pr-2">
-                          <div className="flex flex-col gap-3">
-                            {participants.length > 0 ? (
-                              participants.map(renderParticipant)
+
+                          <div className="flex flex-col gap-4">
+
+                            {Array.from(eventMap.values()).length > 0 ? (
+
+                              Array.from(eventMap.values()).map(
+                                (event) => (
+
+                                  <Card
+                                    key={event.id}
+                                    className="overflow-hidden"
+                                  >
+
+                                    <CardHeader className="border-b py-3">
+                                      <CardTitle className="text-base">
+                                        {event.title}
+                                      </CardTitle>
+                                    </CardHeader>
+
+                                    <CardContent className="flex flex-col gap-3 p-4">
+
+                                      {event.participants.map(
+                                        renderParticipant
+                                      )}
+
+                                    </CardContent>
+                                  </Card>
+                                )
+                              )
+
                             ) : (
+
                               <div className="text-center text-muted-foreground p-4 border rounded-lg">
-                                ไม่มีข้อมูลผู้ใช้งาน
+                                ไม่มีข้อมูลงาน
                               </div>
+
                             )}
+
                           </div>
                         </div>
                       </TabsContent>
