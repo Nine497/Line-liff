@@ -436,8 +436,7 @@ function App() {
   }, [participants, busyMap]);
 
   const renderEvent = (event) => {
-    const participantsCount =
-      event?.task_participants?.length ?? 0;
+    const participants = event?.task_participants ?? [];
 
     return (
       <div
@@ -447,12 +446,24 @@ function App() {
         <p className="font-medium">{event.title}</p>
 
         <p className="text-sm text-muted-foreground">
-          เวลา: {new Date(event.start_time).toLocaleString()}
+          เวลา: {dayjs(event.start_time).format("DD/MM/YYYY, HH:mm")}
         </p>
 
-        <p className="text-sm text-muted-foreground">
-          คนในงาน: {participantsCount} คน
-        </p>
+        <div className="text-sm text-muted-foreground">
+          <p>ผู้เข้าร่วม:</p>
+
+          {participants.length > 0 ? (
+            <ul className="ml-4 list-disc">
+              {participants.map((tp) => (
+                <li key={tp.id ?? tp.participant?.id}>
+                  {tp.participant?.name ?? "ไม่ทราบชื่อ"}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="ml-4">ไม่มีผู้เข้าร่วม</p>
+          )}
+        </div>
       </div>
     );
   };
@@ -472,16 +483,17 @@ function App() {
           <div className="text-sm text-muted-foreground">
             {isBusy ? (
               <div className="space-y-1">
-                <p>มีงาน:</p>
-
                 <ul className="ml-4 list-disc">
                   {events.map((e) => (
                     <li key={e.id}>
                       {e.title}
+
                       {e.start_time && (
                         <span className="text-xs text-gray-500">
                           {" "}
-                          ({new Date(e.start_time).toLocaleString()})
+                          (
+                          {dayjs(e.start_time).format("DD/MM/YYYY, HH:mm")}
+                          )
                         </span>
                       )}
                     </li>
