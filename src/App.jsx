@@ -441,23 +441,29 @@ function App() {
     return (
       <div
         key={event.id}
-        className="flex flex-col gap-1 rounded-lg border bg-background p-4"
+        className="flex flex-col gap-2 rounded-xl border border-border/40 bg-background p-4 transition-colors hover:border-border/70"
       >
-        <p className="text-base font-semibold">{event.title}</p>
+        <p className="text-sm font-semibold text-foreground">{event.title}</p>
 
-        <div className="text-sm text-muted-foreground">
-          <p>ผู้เข้าร่วม</p>
+        <div className="space-y-2">
+          <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+            <Users className="h-3 w-3" />
+            ผู้เข้าร่วม
+          </p>
 
           {participants.length > 0 ? (
-            <ul className="ml-4 list-disc">
+            <div className="flex flex-wrap gap-1.5">
               {participants.map((tp) => (
-                <li key={tp.id ?? tp.participant?.id}>
+                <span
+                  key={tp.id ?? tp.participant?.id}
+                  className="rounded-full border border-border/40 bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+                >
                   {tp.participant?.name ?? "ไม่ทราบชื่อ"}
-                </li>
+                </span>
               ))}
-            </ul>
+            </div>
           ) : (
-            <p className="ml-4">ไม่มีผู้เข้าร่วม</p>
+            <p className="text-xs italic text-muted-foreground/60">ไม่มีผู้เข้าร่วม</p>
           )}
         </div>
       </div>
@@ -471,32 +477,32 @@ function App() {
     return (
       <div
         key={participant.id}
-        className="flex items-center justify-between rounded-lg border bg-background p-4"
+        className={`flex items-start justify-between gap-3 rounded-xl border-y border-r bg-background p-4 transition-colors hover:border-border/70
+        ${isBusy
+            ? "border-l-[3px] border-l-red-500 border-border/40"
+            : "border-l-[3px] border-l-emerald-500 border-border/40"
+          }`}
       >
-        <div className="flex flex-col pr-2">
-          <p className="text-base font-semibold">{participant.name}</p>
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <p className="text-sm font-semibold text-foreground">{participant.name}</p>
 
-          <div className="text-sm text-muted-foreground">
-            {isBusy ? (
-              <div className="space-y-1">
-                <ul className="ml-4 list-none">
-                  {events.map((e) => (
-                    <li key={e.id}>
-                      {e.title}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              ""
-            )}
-          </div>
+          {isBusy && (
+            <ul className="space-y-1">
+              {events.map((e) => (
+                <li key={e.id} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="h-1 w-1 shrink-0 rounded-full bg-red-400" />
+                  {e.title}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <span
-          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${isBusy
-            ? "bg-red-100 text-red-700"
-            : "bg-green-100 text-green-700"
+          className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold tracking-wide
+          ${isBusy
+              ? "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
+              : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
             }`}
         >
           {isBusy ? "ไม่ว่าง" : "ว่าง"}
