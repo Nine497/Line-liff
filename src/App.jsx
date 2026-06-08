@@ -445,12 +445,8 @@ function App() {
       >
         <p className="font-medium">{event.title}</p>
 
-        <p className="text-sm text-muted-foreground">
-          เวลา: {dayjs(event.start_time).format("DD/MM/YYYY, HH:mm")}
-        </p>
-
         <div className="text-sm text-muted-foreground">
-          <p>ผู้เข้าร่วม:</p>
+          <p>ผู้เข้าร่วม</p>
 
           {participants.length > 0 ? (
             <ul className="ml-4 list-disc">
@@ -487,21 +483,12 @@ function App() {
                   {events.map((e) => (
                     <li key={e.id}>
                       {e.title}
-
-                      {e.start_time && (
-                        <span className="text-xs text-gray-500">
-                          {" "}
-                          (
-                          {dayjs(e.start_time).format("DD/MM/YYYY, HH:mm")}
-                          )
-                        </span>
-                      )}
                     </li>
                   ))}
                 </ul>
               </div>
             ) : (
-              "ไม่มีงานในวันนี้"
+              ""
             )}
           </div>
         </div>
