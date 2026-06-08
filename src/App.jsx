@@ -373,86 +373,6 @@ function App() {
     }
   };
 
-  // =========================
-  // available / busy
-  // =========================
-  const selectedEvents = useMemo(() => {
-    return events[selectedKey] || [];
-  }, [events, selectedKey]);
-
-  const busyMap = useMemo(() => {
-    const map = new Map();
-
-    selectedEvents.forEach((event) => {
-      const title = event.title;
-
-      (event.task_participants ?? []).forEach((tp) => {
-        const participant = tp.participant;
-
-        if (!participant?.id) return;
-
-        if (!map.has(participant.id)) {
-          map.set(participant.id, []);
-        }
-
-        map.get(participant.id).push(title);
-      });
-    });
-
-    return map;
-  }, [selectedEvents]);
-
-  const availableParticipants = useMemo(() => {
-    return participants.filter(
-      (p) => !busyMap.has(p.id)
-    );
-  }, [participants, busyMap]);
-
-  const busyParticipants = useMemo(() => {
-    return participants.filter(
-      (p) => busyMap.has(p.id)
-    );
-  }, [participants, busyMap]);
-
-  const renderParticipant = (participant) => {
-    if (!participant) {
-      return (
-        <div className="flex items-center justify-between rounded-lg border bg-background p-4">
-          ไม่มีข้อมูล
-        </div>
-      );
-    }
-
-    const tasks = busyMap.get(participant.id) || [];
-    const isBusy = tasks.length > 0;
-
-    return (
-      <div
-        key={participant.id}
-        className="flex items-center justify-between rounded-lg border bg-background p-4"
-      >
-        <div className="flex flex-col pr-2">
-          <p className="font-medium">{participant.name}</p>
-
-          <p className="text-sm text-muted-foreground">
-            {isBusy
-              ? `มีงาน : ${tasks.join(", ")}`
-              : "ไม่มีงานในวันนี้"}
-          </p>
-        </div>
-
-        <span
-          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${isBusy
-            ? "bg-red-100 text-red-700"
-            : "bg-green-100 text-green-700"
-            }`}
-        >
-          {isBusy ? "ไม่ว่าง" : "ว่าง"}
-        </span>
-      </div>
-    );
-  };
-
   const validateForm = () => {
     const errors = {};
 
@@ -469,18 +389,143 @@ function App() {
     return Object.keys(errors).length === 0;
   };
 
-  const tabItems = useMemo(() => [
-    {
-      key: "available",
-      label: "ว่าง",
-      children: availableParticipants.map(renderParticipant),
-    },
-    {
-      key: "busy",
-      label: "ไม่ว่าง",
-      children: busyParticipants.map(renderParticipant),
-    },
-  ], [availableParticipants, busyParticipants]);
+  // =========================
+  // available / busy
+  // =========================
+
+  const selectedEvents = useMemo(() => {
+    return Array.isArray(events?.[selectedKey])
+      ? events[selectedKey]
+      : [];
+  }, [events, selectedKey]);
+
+  const busyMap = useMemo(() => {
+    const map = new Map();
+
+    for (const event of selectedEvents) {
+      const participants = Array.isArray(event?.task_participants)
+        ? event.task_participants
+        : [];
+
+      for (const tp of participants) {
+        const participant = tp?.participant;
+        if (!participant?.id) continue;
+
+        if (!map.has(participant.id)) {
+          map.set(participant.id, []);
+        }
+
+        map.get(participant.id).push({
+          id: event.id,
+          title: event.title,
+          start_time: event.start_time,
+          location: event.location,
+        });
+      }
+    }
+
+    return map;
+  }, [selectedEvents]);
+
+  const availableParticipants = useMemo(() => {
+    return participants.filter((p) => !busyMap.has(p.id));
+  }, [participants, busyMap]);
+
+  const busyParticipants = useMemo(() => {
+    return participants.filter((p) => busyMap.has(p.id));
+  }, [participants, busyMap]);
+
+  const renderEvent = (event) => {
+    const participantsCount =
+      event?.task_participants?.length ?? 0;
+
+    return (
+      <div
+        key={event.id}
+        className="flex flex-col gap-1 rounded-lg border bg-background p-4"
+      >
+        <p className="font-medium">{event.title}</p>
+
+        <p className="text-sm text-muted-foreground">
+          เวลา: {new Date(event.start_time).toLocaleString()}
+        </p>
+
+        <p className="text-sm text-muted-foreground">
+          คนในงาน: {participantsCount} คน
+        </p>
+      </div>
+    );
+  };
+
+  const renderParticipant = (participant) => {
+    const events = busyMap.get(participant.id) || [];
+    const isBusy = events.length > 0;
+
+    return (
+      <div
+        key={participant.id}
+        className="flex items-center justify-between rounded-lg border bg-background p-4"
+      >
+        <div className="flex flex-col pr-2">
+          <p className="font-medium">{participant.name}</p>
+
+          <div className="text-sm text-muted-foreground">
+            {isBusy ? (
+              <div className="space-y-1">
+                <p>มีงาน:</p>
+
+                <ul className="ml-4 list-disc">
+                  {events.map((e) => (
+                    <li key={e.id}>
+                      {e.title}
+                      {e.start_time && (
+                        <span className="text-xs text-gray-500">
+                          {" "}
+                          ({new Date(e.start_time).toLocaleString()})
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              "ไม่มีงานในวันนี้"
+            )}
+          </div>
+        </div>
+
+        <span
+          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${isBusy
+            ? "bg-red-100 text-red-700"
+            : "bg-green-100 text-green-700"
+            }`}
+        >
+          {isBusy ? "ไม่ว่าง" : "ว่าง"}
+        </span>
+      </div>
+    );
+  };
+
+  const tabItems = useMemo(
+    () => [
+      {
+        key: "available",
+        label: "ว่าง",
+        children: availableParticipants.map(renderParticipant),
+      },
+      {
+        key: "busy",
+        label: "ไม่ว่าง",
+        children: busyParticipants.map(renderParticipant),
+      },
+      {
+        key: "events",
+        label: "Event",
+        children: selectedEvents.map(renderEvent),
+      },
+    ],
+    [availableParticipants, busyParticipants, selectedEvents]
+  );
 
   return (
     <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
