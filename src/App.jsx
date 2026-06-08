@@ -702,7 +702,6 @@ function App() {
                             "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
                             !isCurrentMonth && "bg-muted/40 text-muted-foreground",
                             isSelected && "bg-accent",
-                            isToday && "ring-2 ring-primary/60"
                           )}
                           key={key}
                           onClick={() => setSelectedKey(key)}
@@ -712,6 +711,7 @@ function App() {
                             className={cn(
                               "grid size-7 place-items-center rounded-md text-sm font-medium",
                               isSelected && "bg-primary text-primary-foreground",
+                              isToday && !isSelected && "bg-primary/10 text-primary"
                             )}
                           >
                             {day.date}
