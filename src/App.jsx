@@ -29,6 +29,7 @@ import {
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { BarLoader } from "react-spinners";
+import { DatePicker } from "antd";
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 const monthNames = [
   "มกราคม",
@@ -85,8 +86,11 @@ function App() {
   const [users, setUsers] = useState([]);
   const [selectedParticipantIds, setSelectedParticipantIds] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [formSuccess, setFormSuccess] = useState("");
+  const [formErrors, setFormErrors] = useState({
+    title: "",
+    start_time: "",
+    end_time: "",
+  }); const [formSuccess, setFormSuccess] = useState("");
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
   const [loadingTab, setLoadingTab] = useState("available");
@@ -310,660 +314,683 @@ function App() {
 
   async function handleCreateTask(e) {
     e.preventDefault();
-    setFormError("");
-    setFormSuccess("");
-
-    const errors = validateForm();
-    if (errors.length > 0) {
-      setFormError(errors.join("\n"));
+    if (!validateForm()) {
       return;
-    }
+      setFormError("");
+      setFormSuccess("");
 
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        title: formData.title.trim(),
-        description: formData.description.trim() || null,
-        start_time: new Date(formData.start_time).toISOString(),
-        creator_id: currentUser.id ?? currentUser.user_id ?? null,
-        location: formData.location.trim() || null,
-        type_id: formData.type_id,
-        participant_ids: selectedParticipantIds,
-      };
-
-      const response = await fetch(`${apiUrl}/tasks`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "ไม่สามารถเพิ่มงานได้");
+      const errors = validateForm();
+      if (errors.length > 0) {
+        setFormError(errors.join("\n"));
+        return;
       }
 
-      setFormSuccess("เพิ่มงานสำเร็จ!");
-      setTimeout(() => {
-        setFormData({
-          title: "",
-          location: "",
-          start_time: "",
-          type_id: taskTypes.length ? taskTypes[0].id : null,
-          type: taskTypes.length ? taskTypes[0].name : "ประชุม",
-          description: "",
+      setIsSubmitting(true);
+      try {
+        const payload = {
+          title: formData.title.trim(),
+          description: formData.description.trim() || null,
+          start_time: new Date(formData.start_time).toISOString(),
+          creator_id: currentUser.id ?? currentUser.user_id ?? null,
+          location: formData.location.trim() || null,
+          type_id: formData.type_id,
+          participant_ids: selectedParticipantIds,
+        };
+
+        const response = await fetch(`${apiUrl}/tasks`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
-        setSelectedParticipantIds([]);
-        setFormError("");
-        setFormSuccess("");
-        setShowCreateForm(false);
-      }, 500);
 
-      await fetchTaskEvents();
-    } catch (error) {
-      console.error("Error creating task:", error);
-      setFormError(error.message || "เกิดข้อผิดพลาดในการเพิ่มงาน");
-    } finally {
-      setIsSubmitting(false);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "ไม่สามารถเพิ่มงานได้");
+        }
+
+        setFormSuccess("เพิ่มงานสำเร็จ!");
+        setTimeout(() => {
+          setFormData({
+            title: "",
+            location: "",
+            start_time: "",
+            type_id: taskTypes.length ? taskTypes[0].id : null,
+            type: taskTypes.length ? taskTypes[0].name : "ประชุม",
+            description: "",
+          });
+          setSelectedParticipantIds([]);
+          setFormError("");
+          setFormSuccess("");
+          setShowCreateForm(false);
+        }, 500);
+
+        await fetchTaskEvents();
+      } catch (error) {
+        console.error("Error creating task:", error);
+        setFormError(error.message || "เกิดข้อผิดพลาดในการเพิ่มงาน");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
-  }
 
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const handleUpload = async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    setIsUploading(true);
+      setIsUploading(true);
 
-    try {
-      const formData = new FormData();
+      try {
+        const formData = new FormData();
 
-      const userId = currentUser?.id ?? currentUser?.user_id;
+        const userId = currentUser?.id ?? currentUser?.user_id;
 
-      if (userId) {
-        formData.append("user_id", userId);
+        if (userId) {
+          formData.append("user_id", userId);
+        }
+
+        formData.append("file", file);
+
+        const response = await fetch(`${apiUrl}/tasks/import`, {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        console.log(result);
+
+        if (!response.ok) {
+          throw new Error(result.error || "Import failed");
+        }
+
+        await fetchTaskEvents();
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsUploading(false);
+        e.target.value = "";
+      }
+    };
+
+    const eventMap = new Map();
+
+    filteredEvents.forEach((event) => {
+
+      const eventId = event.id;
+
+      if (!eventMap.has(eventId)) {
+        eventMap.set(eventId, {
+          id: event.id,
+          title: event.title,
+          participants: [],
+        });
       }
 
-      formData.append("file", file);
+      (event.task_participants ?? []).forEach((tp) => {
 
-      const response = await fetch(`${apiUrl}/tasks/import`, {
-        method: "POST",
-        body: formData,
+        const participant = tp.participant;
+
+        if (!participant) return;
+
+        eventMap
+          .get(eventId)
+          .participants
+          .push(participant);
       });
-
-      const result = await response.json();
-
-      console.log(result);
-
-      if (!response.ok) {
-        throw new Error(result.error || "Import failed");
-      }
-
-      await fetchTaskEvents();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsUploading(false);
-      e.target.value = "";
-    }
-  };
-
-  const busyMap = new Map();
-
-  filteredEvents.forEach((event) => {
-    const title = event?.title;
-
-    (event.task_participants ?? []).forEach((tp) => {
-      const id = tp.participant?.id;
-      if (!id) return;
-
-      if (!busyMap.has(id)) {
-        busyMap.set(id, []);
-      }
-
-      busyMap.get(id).push(title);
     });
-  });
+    const availableParticipants = participants.filter(
+      (p) => !eventMap.has(p.id)
+    );
 
-  const availableParticipants = participants.filter(
-    (p) => !busyMap.has(p.id)
-  );
+    const busyParticipants = participants.filter(
+      (p) => eventMap.has(p.id)
+    );
 
-  const busyParticipants = participants.filter(
-    (p) => busyMap.has(p.id)
-  );
+    const filteredParticipants =
+      viewMode === "available"
+        ? availableParticipants
+        : viewMode === "busy"
+          ? busyParticipants
+          : participants;
 
-  const filteredParticipants =
-    viewMode === "available"
-      ? availableParticipants
-      : viewMode === "busy"
-        ? busyParticipants
-        : participants;
+    const renderParticipant = (participant) => {
+      console.log("Rendering participant:", participant);
 
-  const renderParticipant = (participant) => {
-    console.log("Rendering participant:", participant);
+      if (!participant) {
+        return (
+          <div className="flex items-center justify-between rounded-lg border bg-background p-4">
+            ไม่มีข้อมูล
+          </div>
+        );
+      }
 
-    if (!participant) {
+      const tasks = busyMap.get(participant.id) || [];
+      const isBusy = tasks.length > 0;
+
       return (
-        <div className="flex items-center justify-between rounded-lg border bg-background p-4">
-          ไม่มีข้อมูล
+        <div
+          key={participant.id}
+          className="flex items-center justify-between rounded-lg border bg-background p-4"
+        >
+          <div className="flex flex-col pr-2">
+            <p className="font-medium">{participant.name}</p>
+
+            <p className="text-sm text-muted-foreground">
+              {isBusy
+                ? `มีงาน : ${tasks.join(", ")}`
+                : "ไม่มีงานในวันนี้"}
+            </p>
+          </div>
+
+          <span
+            className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${isBusy
+              ? "bg-red-100 text-red-700"
+              : "bg-green-100 text-green-700"
+              }`}
+          >
+            {isBusy ? "ไม่ว่าง" : "ว่าง"}
+          </span>
         </div>
       );
-    }
+    };
 
-    const tasks = busyMap.get(participant.id) || [];
-    const isBusy = tasks.length > 0;
+    const validateForm = () => {
+      const errors = {};
+
+      if (!formData.title.trim()) {
+        errors.title = "กรุณากรอกชื่องาน";
+      }
+
+      if (!formData.start_time || !formData.end_time) {
+        errors.dateRange = "กรุณาเลือกช่วงเวลา";
+      }
+
+      setFormErrors(errors);
+
+      return Object.keys(errors).length === 0;
+    };
 
     return (
-      <div
-        key={participant.id}
-        className="flex items-center justify-between rounded-lg border bg-background p-4"
-      >
-        <div className="flex flex-col pr-2">
-          <p className="font-medium">{participant.name}</p>
-
-          <p className="text-sm text-muted-foreground">
-            {isBusy
-              ? `มีงาน : ${tasks.join(", ")}`
-              : "ไม่มีงานในวันนี้"}
-          </p>
-        </div>
-
-        <span
-          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${isBusy
-            ? "bg-red-100 text-red-700"
-            : "bg-green-100 text-green-700"
-            }`}
-        >
-          {isBusy ? "ไม่ว่าง" : "ว่าง"}
-        </span>
-      </div>
-    );
-  };
-
-  return (
-    <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
-      {isInitializing ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/75 backdrop-blur-md">
-          <div className="flex min-w-[320px] flex-col items-center gap-4 rounded-3xl border border-border bg-card/95 p-6 text-center shadow-2xl">
-            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted">
-              {currentUser.picture_url ? (
-                <img
-                  src={currentUser.picture_url}
-                  alt={currentUser.display_name ?? "Current user"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-3xl font-semibold text-primary">
-                  {currentUser.display_name?.[0] ?? "U"}
-                </span>
-              )}
-            </div>
-            <div className="flex w-full flex-col items-center gap-5">
-              <BarLoader
-                width={150}
-                height={3}
-                color="#22c55e"
-              />
-
-              <p className="text-lg font-semibold">
-                กำลังเรียกข้อมูลผู้ใช้จาก LINE LIFF และฐานข้อมูล
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : null}
-
-      {/* ส่วนโครงสร้างหลักกึ่งกลาง */}
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between gap-3 pb-4">
-          <a className="flex items-center gap-3 font-semibold" href="#calendarjs">
-            <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm">
-              {currentUser.picture_url ? (
-                <img
-                  src={currentUser.picture_url}
-                  alt={currentUser.display_name ?? "Current user"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-lg font-semibold">
-                  {currentUser.display_name?.[0] ?? "L"}
-                </span>
-              )}
-            </span>
-            <span>{currentUser.display_name ? currentUser.display_name : "ศรชล. Scheduler"}</span>
-          </a>
-
-          <div className="flex items-center gap-2">
-            <Button
-              aria-label={isDark ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด"}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              size="icon"
-              type="button"
-              variant="outline"
-            >
-              {isDark ? <Sun /> : <Moon />}
-            </Button>
-            <Button size="sm" onClick={() => setShowCreateForm(true)}>
-              <Plus data-icon="inline-start" />
-              เพิ่มงาน
-            </Button>
-          </div>
-        </nav>
-
-        {/* เปลี่ยนจาก <main> เป็น <div> เพื่อไม่ให้ Tag ซ้ำซ้อน และใช้ flex-1 เพื่อดัน Footer */}
-        <div className="flex flex-1 flex-col gap-5">
-          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
-            <Card className="overflow-hidden">
-              <CardHeader className="flex flex-col gap-4 border-b bg-card sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-10 place-items-center rounded-lg bg-secondary text-secondary-foreground">
-                    <CalendarDays />
-                  </span>
-
-                  <div className="flex flex-col gap-1">
-                    <CardDescription>ปฏิทิน</CardDescription>
-
-                    <CardTitle>
-                      {monthNames[month.month - 1]} {month.year}
-                    </CardTitle>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    id="excel-upload"
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleUpload}
-                    className="hidden"
+      <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
+        {isInitializing ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/75 backdrop-blur-md">
+            <div className="flex min-w-[320px] flex-col items-center gap-4 rounded-3xl border border-border bg-card/95 p-6 text-center shadow-2xl">
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted">
+                {currentUser.picture_url ? (
+                  <img
+                    src={currentUser.picture_url}
+                    alt={currentUser.display_name ?? "Current user"}
+                    className="h-full w-full object-cover"
                   />
+                ) : (
+                  <span className="text-3xl font-semibold text-primary">
+                    {currentUser.display_name?.[0] ?? "U"}
+                  </span>
+                )}
+              </div>
+              <div className="flex w-full flex-col items-center gap-5">
+                <BarLoader
+                  width={150}
+                  height={3}
+                  color="#22c55e"
+                />
 
-                  <label htmlFor="excel-upload">
-                    <Button
-                      asChild
-                      variant="outline"
-                      disabled={isUploading}
-                    >
-                      <span>
-                        {isUploading
-                          ? "กำลัง Import..."
-                          : "Import Excel"}
-                      </span>
-                    </Button>
-                  </label>
-
-                  <Button
-                    aria-label="เดือนก่อนหน้า"
-                    onClick={() => moveMonth(-1)}
-                    size="icon"
-                    variant="outline"
-                  >
-                    <ChevronLeft />
-                  </Button>
-
-                  <Button
-                    aria-label="เดือนถัดไป"
-                    onClick={() => moveMonth(1)}
-                    size="icon"
-                    variant="outline"
-                  >
-                    <ChevronRight />
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent className="flex flex-col gap-5 p-4 pt-4 sm:p-5">
-                <div className="overflow-hidden rounded-lg border">
-                  <div className="grid grid-cols-7 bg-muted text-center text-xs font-medium text-muted-foreground">
-                    {weekdays.map((weekday) => (
-                      <div className="px-2 py-3" key={weekday}>
-                        {weekday}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-7">
-                    {weeks.flat().map((day) => {
-                      const key = dayKey(day);
-                      const isCurrentMonth = day.month === month.month;
-                      const isSelected = key === selectedKey;
-                      const hasEvents = Boolean(events[key]);
-
-                      return (
-                        <button
-                          className={cn(
-                            "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
-                            !isCurrentMonth && "bg-muted/40 text-muted-foreground",
-                            isSelected && "bg-accent",
-                          )}
-                          key={key}
-                          onClick={() => setSelectedKey(key)}
-                          type="button"
-                        >
-                          <span
-                            className={cn(
-                              "grid size-7 place-items-center rounded-md text-sm font-medium",
-                              isSelected && "bg-primary text-primary-foreground",
-                            )}
-                          >
-                            {day.date}
-                          </span>
-                          {hasEvents ? (
-                            <span className="h-1.5 w-10 rounded-full bg-primary" />
-                          ) : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <aside className="grid gap-5 xl:content-start">
-              <Card>
-                <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <CardDescription>วันที่เลือก</CardDescription>
-                    <CardTitle>{selectedDate}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  <Tabs
-                    defaultValue="available"
-                    value={activeTab}
-                    onValueChange={setActiveTab}
-                  >
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="available">ว่าง</TabsTrigger>
-                      <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
-                      <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="available">
-                      <div className="max-h-[500px] overflow-y-auto pr-2">
-                        <div className="flex flex-col gap-3">
-                          {availableParticipants.length > 0 ? (
-                            availableParticipants.map(renderParticipant)
-                          ) : (
-                            <div className="text-center text-muted-foreground p-4 border rounded-lg">
-                              ไม่มีคนว่าง
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="busy">
-                      <div className="max-h-[500px] overflow-y-auto pr-2">
-                        <div className="flex flex-col gap-3">
-                          {busyParticipants.length > 0 ? (
-                            busyParticipants.map(renderParticipant)
-                          ) : (
-                            <div className="text-center text-muted-foreground p-4 border rounded-lg">
-                              ทุกคนว่าง
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="all">
-                      <div className="max-h-[500px] overflow-y-auto pr-2">
-                        <div className="flex flex-col gap-3">
-                          {participants.length > 0 ? (
-                            participants.map(renderParticipant)
-                          ) : (
-                            <div className="text-center text-muted-foreground p-4 border rounded-lg">
-                              ไม่มีข้อมูลผู้ใช้งาน
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            </aside>
-          </section>
-        </div>
-      </div>
-
-      {/* ย้าย Footer ออกมาด้านนอกสุด และเพิ่ม padding เพื่อความสวยงาม */}
-      <footer className="w-full border-t bg-background py-4 mt-auto">
-        <div className="mx-auto flex flex-col items-center justify-center gap-1 text-center text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">
-            LINE LIFF Scheduler © {new Date().getFullYear()}
-          </p>
-          <div className="flex items-center gap-2">
-            <span>Powered by React • Supabase</span>
+                <p className="text-lg font-semibold">
+                  กำลังเรียกข้อมูลผู้ใช้จาก LINE LIFF และฐานข้อมูล
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </footer>
+        ) : null}
 
-      {/* ส่วนของ Dialog ต่างๆ (คงเดิม) */}
-      {isUploading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
-          <div className="w-[380px]">
-            <SpinnerEmpty
-              title="กำลัง Import Excel"
-              description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
-            />
-          </div>
-        </div>
-      )}
+        {/* ส่วนโครงสร้างหลักกึ่งกลาง */}
+        <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center justify-between gap-3 pb-4">
+            <a className="flex items-center gap-3 font-semibold" href="#calendarjs">
+              <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm">
+                {currentUser.picture_url ? (
+                  <img
+                    src={currentUser.picture_url}
+                    alt={currentUser.display_name ?? "Current user"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-lg font-semibold">
+                    {currentUser.display_name?.[0] ?? "L"}
+                  </span>
+                )}
+              </span>
+              <span>{currentUser.display_name ? currentUser.display_name : "ศรชล. Scheduler"}</span>
+            </a>
 
-      {
-        showCreateForm && (
-          <Dialog open={showCreateForm} className="overflow-y-auto" onClick={() => setShowCreateForm(false)}>
-            <DialogContent className="w-full max-w-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center gap-2">
+              <Button
+                aria-label={isDark ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด"}
+                onClick={() => setTheme(isDark ? "light" : "dark")}
+                size="icon"
+                type="button"
+                variant="outline"
+              >
+                {isDark ? <Sun /> : <Moon />}
+              </Button>
+              <Button size="sm" onClick={() => setShowCreateForm(true)}>
+                <Plus data-icon="inline-start" />
+                เพิ่มงาน
+              </Button>
+            </div>
+          </nav>
+
+          {/* เปลี่ยนจาก <main> เป็น <div> เพื่อไม่ให้ Tag ซ้ำซ้อน และใช้ flex-1 เพื่อดัน Footer */}
+          <div className="flex flex-1 flex-col gap-5">
+            <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
               <Card className="overflow-hidden">
-                <CardHeader className="flex flex-row items-center justify-between gap-4 border-b px-6 pt-6 pb-4">
-                  <div className="flex flex-col">
-                    <CardTitle>เพิ่มงานใหม่</CardTitle>
-                    <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
+                <CardHeader className="flex flex-col gap-4 border-b bg-card sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-10 place-items-center rounded-lg bg-secondary text-secondary-foreground">
+                      <CalendarDays />
+                    </span>
+
+                    <div className="flex flex-col gap-1">
+                      <CardDescription>ปฏิทิน</CardDescription>
+
+                      <CardTitle>
+                        {monthNames[month.month - 1]} {month.year}
+                      </CardTitle>
+                    </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    type="button"
-                    className="h-10 w-10 p-0"
-                    onClick={() => setShowCreateForm(false)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="excel-upload"
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleUpload}
+                      className="hidden"
+                    />
+
+                    <label htmlFor="excel-upload">
+                      <Button
+                        asChild
+                        variant="outline"
+                        disabled={isUploading}
+                      >
+                        <span>
+                          {isUploading
+                            ? "กำลัง Import..."
+                            : "Import Excel"}
+                        </span>
+                      </Button>
+                    </label>
+
+                    <Button
+                      aria-label="เดือนก่อนหน้า"
+                      onClick={() => moveMonth(-1)}
+                      size="icon"
+                      variant="outline"
+                    >
+                      <ChevronLeft />
+                    </Button>
+
+                    <Button
+                      aria-label="เดือนถัดไป"
+                      onClick={() => moveMonth(1)}
+                      size="icon"
+                      variant="outline"
+                    >
+                      <ChevronRight />
+                    </Button>
+                  </div>
                 </CardHeader>
 
-                <CardContent className="grid gap-4 px-4 pb-4 pt-4">
-                  {formSuccess && (
-                    <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                      ✓ {formSuccess}
+                <CardContent className="flex flex-col gap-5 p-4 pt-4 sm:p-5">
+                  <div className="overflow-hidden rounded-lg border">
+                    <div className="grid grid-cols-7 bg-muted text-center text-xs font-medium text-muted-foreground">
+                      {weekdays.map((weekday) => (
+                        <div className="px-2 py-3" key={weekday}>
+                          {weekday}
+                        </div>
+                      ))}
                     </div>
-                  )}
-                  {formError && (
-                    <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-pre-line">
-                      ✕ {formError}
+                    <div className="grid grid-cols-7">
+                      {weeks.flat().map((day) => {
+                        const key = dayKey(day);
+                        const isCurrentMonth = day.month === month.month;
+                        const isSelected = key === selectedKey;
+                        const hasEvents = Boolean(events[key]);
+
+                        return (
+                          <button
+                            className={cn(
+                              "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
+                              !isCurrentMonth && "bg-muted/40 text-muted-foreground",
+                              isSelected && "bg-accent",
+                            )}
+                            key={key}
+                            onClick={() => setSelectedKey(key)}
+                            type="button"
+                          >
+                            <span
+                              className={cn(
+                                "grid size-7 place-items-center rounded-md text-sm font-medium",
+                                isSelected && "bg-primary text-primary-foreground",
+                              )}
+                            >
+                              {day.date}
+                            </span>
+                            {hasEvents ? (
+                              <span className="h-1.5 w-10 rounded-full bg-primary" />
+                            ) : null}
+                          </button>
+                        );
+                      })}
                     </div>
-                  )}
-
-                  <Form onSubmit={handleCreateTask}>
-                    <FormField>
-                      <FormLabel htmlFor="title">ชื่องาน *</FormLabel>
-                      <Input
-                        id="title"
-                        type="text"
-                        className={formError.includes("ชื่องาน") ? "border-red-500" : ""}
-                        placeholder="เช่น ประชุมทีม"
-                        value={formData.title}
-                        onChange={(e) => {
-                          setFormData({ ...formData, title: e.target.value });
-                          setFormError("");
-                        }}
-                        disabled={isSubmitting}
-                        maxLength={100}
-                      />
-                      <FormDescription>{formData.title.length}/100 ตัวอักษร</FormDescription>
-                    </FormField>
-
-                    <FormField>
-                      <FormLabel htmlFor="start_time">เวลา *</FormLabel>
-                      <Input
-                        id="start_time"
-                        type="datetime-local"
-                        className={formError.includes("เวลา") ? "border-red-500" : ""}
-                        value={formData.start_time}
-                        onChange={(e) => {
-                          setFormData({ ...formData, start_time: e.target.value });
-                          setFormError("");
-                        }}
-                        disabled={isSubmitting}
-                      />
-                    </FormField>
-
-                    <FormField>
-                      <FormLabel htmlFor="location">สถานที่</FormLabel>
-                      <Input
-                        id="location"
-                        type="text"
-                        placeholder="เช่น ห้องประชุม A"
-                        value={formData.location}
-                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                        disabled={isSubmitting}
-                        maxLength={100}
-                      />
-                    </FormField>
-
-                    <FormField>
-                      <FormLabel htmlFor="type">ประเภท</FormLabel>
-                      <Select
-                        id="type"
-                        value={taskTypes.length ? formData.type_id ?? "" : formData.type}
-                        onChange={(e) => {
-                          if (taskTypes.length) {
-                            const selected = taskTypes.find((item) => String(item.id) === e.target.value);
-                            setFormData({
-                              ...formData,
-                              type_id: selected?.id ?? null,
-                              type: selected?.name ?? formData.type,
-                            });
-                          } else {
-                            setFormData({
-                              ...formData,
-                              type: e.target.value,
-                            });
-                          }
-                        }}
-                        disabled={isSubmitting}
-                      >
-                        {taskTypes.length ? (
-                          taskTypes.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.name}
-                            </option>
-                          ))
-                        ) : (
-                          [
-                            "ประชุม",
-                            "เดโม",
-                            "สรุปงาน",
-                            "แชร์ทรัพยากร",
-                            "เช็คอิน",
-                          ].map((option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))
-                        )}
-                      </Select>
-                    </FormField>
-
-                    <FormField>
-                      <FormLabel htmlFor="participants">
-                        กำหนดผู้เข้าร่วม
-                      </FormLabel>
-
-                      <ComboboxChips
-                        options={participants
-                          .filter(Boolean)
-                          .map((participant) => ({
-                            value: participant?.id,
-                            label:
-                              participant?.name ||
-                              `Participant ${participant?.id ?? "?"}`,
-                          }))}
-
-                        selectedValues={
-                          selectedParticipantIds
-                        }
-
-                        onValueChange={(values) =>
-                          setSelectedParticipantIds(
-                            values
-                          )
-                        }
-
-                        placeholder={
-                          participants.length
-                            ? "เลือกผู้เข้าร่วม"
-                            : "กำลังโหลดผู้เข้าร่วม..."
-                        }
-
-                        disabled={isSubmitting}
-                      />
-
-                      <FormDescription>
-                        เลือกผู้เข้าร่วมโดยพิมพ์เพื่อค้นหา
-                      </FormDescription>
-                    </FormField>
-
-                    <FormField>
-                      <FormLabel htmlFor="description">รายละเอียด</FormLabel>
-                      <Textarea
-                        id="description"
-                        placeholder="รายละเอียดเพิ่มเติม (ไม่จำเป็น)"
-                        rows={3}
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        disabled={isSubmitting}
-                        maxLength={500}
-                      />
-                      <FormDescription>{formData.description.length}/500 ตัวอักษร</FormDescription>
-                    </FormField>
-
-                    <CardFooter className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
-                      <Button
-                        type="submit"
-                        className="w-full sm:w-auto"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          <span className="flex items-center gap-2">
-                            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
-                            กำลังบันทึก...
-                          </span>
-                        ) : (
-                          "บันทึก"
-                        )}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                        onClick={() => {
-                          setShowCreateForm(false);
-                          setFormError("");
-                          setFormSuccess("");
-                        }}
-                        disabled={isSubmitting}
-                      >
-                        ยกเลิก
-                      </Button>
-                    </CardFooter>
-                  </Form>
+                  </div>
                 </CardContent>
               </Card>
-            </DialogContent>
-          </Dialog>
-        )
-      }
-    </main >
-  );
+
+              <aside className="grid gap-5 xl:content-start">
+                <Card>
+                  <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <CardDescription>วันที่เลือก</CardDescription>
+                      <CardTitle>{selectedDate}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-3">
+                    <Tabs
+                      defaultValue="available"
+                      value={activeTab}
+                      onValueChange={setActiveTab}
+                    >
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="available">ว่าง</TabsTrigger>
+                        <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
+                        <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="available">
+                        <div className="max-h-[500px] overflow-y-auto pr-2">
+                          <div className="flex flex-col gap-3">
+                            {availableParticipants.length > 0 ? (
+                              availableParticipants.map(renderParticipant)
+                            ) : (
+                              <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                                ไม่มีคนว่าง
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="busy">
+                        <div className="max-h-[500px] overflow-y-auto pr-2">
+                          <div className="flex flex-col gap-3">
+                            {busyParticipants.length > 0 ? (
+                              busyParticipants.map(renderParticipant)
+                            ) : (
+                              <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                                ทุกคนว่าง
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="all">
+                        <div className="max-h-[500px] overflow-y-auto pr-2">
+                          <div className="flex flex-col gap-3">
+                            {participants.length > 0 ? (
+                              participants.map(renderParticipant)
+                            ) : (
+                              <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                                ไม่มีข้อมูลผู้ใช้งาน
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              </aside>
+            </section>
+          </div>
+        </div>
+
+        {/* ย้าย Footer ออกมาด้านนอกสุด และเพิ่ม padding เพื่อความสวยงาม */}
+        <footer className="w-full border-t bg-background py-4 mt-auto">
+          <div className="mx-auto flex flex-col items-center justify-center gap-1 text-center text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">
+              LINE LIFF Scheduler © {new Date().getFullYear()}
+            </p>
+            <div className="flex items-center gap-2">
+              <span>Powered by React • Supabase</span>
+            </div>
+          </div>
+        </footer>
+
+        {/* ส่วนของ Dialog ต่างๆ (คงเดิม) */}
+        {isUploading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
+            <div className="w-[380px]">
+              <SpinnerEmpty
+                title="กำลัง Import Excel"
+                description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
+              />
+            </div>
+          </div>
+        )}
+
+        {
+          showCreateForm && (
+            <Dialog open={showCreateForm} className="overflow-y-auto" onClick={() => setShowCreateForm(false)}>
+              <DialogContent className="w-full max-w-2xl" onClick={(event) => event.stopPropagation()}>
+                <Card className="overflow-hidden">
+                  <CardHeader className="flex flex-row items-center justify-between gap-4 border-b px-6 pt-6 pb-4">
+                    <div className="flex flex-col">
+                      <CardTitle>เพิ่มงานใหม่</CardTitle>
+                      <CardDescription>กรอกข้อมูลงานใหม่ของคุณ</CardDescription>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      type="button"
+                      className="h-10 w-10 p-0"
+                      onClick={() => setShowCreateForm(false)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </CardHeader>
+
+                  <CardContent className="grid gap-4 px-4 pb-4 pt-4">
+                    {formSuccess && (
+                      <div className="rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-900/20 dark:text-green-400">
+                        ✓ {formSuccess}
+                      </div>
+                    )}
+                    {formError && (
+                      <div className="rounded-lg bg-red-50 p-3 text-sm text-red-800 dark:bg-red-900/20 dark:text-red-400 whitespace-pre-line">
+                        ✕ {formError}
+                      </div>
+                    )}
+
+                    <Form onSubmit={handleCreateTask}>
+                      <FormField>
+                        <FormLabel htmlFor="title">ชื่องาน *</FormLabel>
+                        <Input
+                          id="title"
+                          type="text"
+                          className={formError.includes("ชื่องาน") ? "border-red-500" : ""}
+                          placeholder="เช่น ประชุมทีม"
+                          value={formData.title}
+                          onChange={(e) => {
+                            setFormData({ ...formData, title: e.target.value });
+                            setFormError("");
+                          }}
+                          disabled={isSubmitting}
+                          maxLength={100}
+                        />
+                        <FormDescription>{formData.title.length}/100 ตัวอักษร</FormDescription>
+                      </FormField>
+
+                      <FormField>
+                        <FormLabel>ช่วงเวลา *</FormLabel>
+
+                        <RangePicker
+                          showTime={{
+                            format: "HH:mm",
+                          }}
+                          format="DD/MM/YYYY HH:mm"
+                          className={`w-full ${formErrors.dateRange
+                            ? "!border-red-500"
+                            : ""
+                            }`}
+                          placeholder={[
+                            "เวลาเริ่ม",
+                            "เวลาสิ้นสุด",
+                          ]}
+                          value={
+                            formData.start_time &&
+                              formData.end_time
+                              ? [
+                                dayjs(formData.start_time),
+                                dayjs(formData.end_time),
+                              ]
+                              : null
+                          }
+                          onChange={(values) => {
+
+                            if (!values) {
+
+                              setFormData({
+                                ...formData,
+                                start_time: "",
+                                end_time: "",
+                              });
+
+                              return;
+                            }
+
+                            setFormData({
+                              ...formData,
+
+                              start_time:
+                                values[0].toISOString(),
+
+                              end_time:
+                                values[1].toISOString(),
+                            });
+
+                            setFormErrors((prev) => ({
+                              ...prev,
+                              dateRange: "",
+                            }));
+                          }}
+                          disabled={isSubmitting}
+                          disabledDate={(current) =>
+                            current &&
+                            current < dayjs().startOf("day")
+                          }
+                        />
+
+                        {formErrors.dateRange && (
+                          <p className="mt-1 text-sm text-red-500">
+                            {formErrors.dateRange}
+                          </p>
+                        )}
+                      </FormField>
+
+                      <FormField>
+                        <FormLabel htmlFor="participants">
+                          กำหนดผู้เข้าร่วม
+                        </FormLabel>
+
+                        <ComboboxChips
+                          options={participants
+                            .filter(Boolean)
+                            .map((participant) => ({
+                              value: participant?.id,
+                              label:
+                                participant?.name ||
+                                `Participant ${participant?.id ?? "?"}`,
+                            }))}
+
+                          selectedValues={
+                            selectedParticipantIds
+                          }
+
+                          onValueChange={(values) =>
+                            setSelectedParticipantIds(
+                              values
+                            )
+                          }
+
+                          placeholder={
+                            participants.length
+                              ? "เลือกผู้เข้าร่วม"
+                              : "กำลังโหลดผู้เข้าร่วม..."
+                          }
+
+                          disabled={isSubmitting}
+                        />
+
+                        <FormDescription>
+                          เลือกผู้เข้าร่วมโดยพิมพ์เพื่อค้นหา
+                        </FormDescription>
+                      </FormField>
+
+                      <FormField>
+                        <FormLabel htmlFor="description">รายละเอียด</FormLabel>
+                        <Textarea
+                          id="description"
+                          placeholder="รายละเอียดเพิ่มเติม (ไม่จำเป็น)"
+                          rows={3}
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          disabled={isSubmitting}
+                          maxLength={500}
+                        />
+                        <FormDescription>{formData.description.length}/500 ตัวอักษร</FormDescription>
+                      </FormField>
+
+                      <CardFooter className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+                        <Button
+                          type="submit"
+                          className="w-full sm:w-auto"
+                          disabled={isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            <span className="flex items-center gap-2">
+                              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent" />
+                              กำลังบันทึก...
+                            </span>
+                          ) : (
+                            "บันทึก"
+                          )}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full sm:w-auto"
+                          onClick={() => {
+                            setShowCreateForm(false);
+                            setFormError("");
+                            setFormSuccess("");
+                          }}
+                          disabled={isSubmitting}
+                        >
+                          ยกเลิก
+                        </Button>
+                      </CardFooter>
+                    </Form>
+                  </CardContent>
+                </Card>
+              </DialogContent>
+            </Dialog>
+          )
+        }
+      </main >
+    );
+  }
 }
 
 export default App;
