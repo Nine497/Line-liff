@@ -468,9 +468,9 @@ function App() {
         </div>
 
         <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
-            ? "bg-red-100 text-red-700"
-            : "bg-green-100 text-green-700"
+          className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${isBusy
+              ? "bg-red-100 text-red-700"
+              : "bg-green-100 text-green-700"
             }`}
         >
           {isBusy ? "ไม่ว่าง" : "ว่าง"}
