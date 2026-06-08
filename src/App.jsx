@@ -90,7 +90,7 @@ function App() {
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
   const [loadingTab, setLoadingTab] = useState("available");
-  const [activeTab, setActiveTab] = useState("available");
+  const [activeTab, setActiveTab] = useState("busy");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -457,7 +457,7 @@ function App() {
         key={participant.id}
         className="flex items-center justify-between rounded-lg border bg-background p-4"
       >
-        <div className="flex flex-row pr-3">
+        <div className="flex flex-row pr-2">
           <p className="font-medium">{participant.name}</p>
 
           <p className="text-sm text-muted-foreground">
@@ -497,7 +497,7 @@ function App() {
                 </span>
               )}
             </div>
-            <div className="flex w-full flex-col items-center gap-3">
+            <div className="flex w-full flex-col items-center gap-5">
               <BarLoader
                 width={150}
                 height={3}
