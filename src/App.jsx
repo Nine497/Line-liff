@@ -388,13 +388,16 @@ function App() {
     }
   };
 
+  const selectedEvents =
+    events[selectedDate] || [];
+
   const busyMap = new Map();
 
-  task.forEach((events) => {
+  selectedEvents.forEach((event) => {
 
-    const title = events?.title;
+    const title = event?.title;
 
-    (events.task_participants ?? []).forEach(
+    (event.task_participants ?? []).forEach(
       (tp) => {
 
         const participant =
@@ -406,16 +409,19 @@ function App() {
           busyMap.set(participant.id, []);
         }
 
-        busyMap
-          .get(participant.id)
-          .push(title);
+        const tasks =
+          busyMap.get(participant.id);
+
+        if (!tasks.includes(title)) {
+          tasks.push(title);
+        }
       }
     );
   });
 
   const eventMap = new Map();
 
-  task.forEach((event) => {
+  selectedEvents.forEach((event) => {
 
     if (!eventMap.has(event.id)) {
 
@@ -432,12 +438,21 @@ function App() {
         const participant =
           tp.participant;
 
-        if (!participant) return;
+        if (!participant?.id) return;
 
-        eventMap
-          .get(event.id)
-          .participants
-          .push(participant);
+        const eventData =
+          eventMap.get(event.id);
+
+        const alreadyExists =
+          eventData.participants.some(
+            (p) => p.id === participant.id
+          );
+
+        if (!alreadyExists) {
+          eventData.participants.push(
+            participant
+          );
+        }
       }
     );
   });
