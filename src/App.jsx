@@ -692,66 +692,74 @@ function App() {
             </CardContent>
           </Card>
 
-<aside className="grid gap-5 xl:content-start">
-  <Card className="max-h-[300px] overflow-hidden">
-    <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <CardDescription>วันที่เลือก</CardDescription>
-        <CardTitle>{selectedDate}</CardTitle>
-      </div>
-    </CardHeader>
+          <aside className="grid gap-5 max-h-[300px] xl:content-start">
+            <Card>
+              <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardDescription>วันที่เลือก</CardDescription>
+                  <CardTitle>{selectedDate}</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <Tabs
+                  defaultValue="available"
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                >
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="available">ว่าง</TabsTrigger>
+                    <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
+                    <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
+                  </TabsList>
 
-    <CardContent className="overflow-y-auto">
-      <Tabs
-        defaultValue="available"
-        value={activeTab}
-        onValueChange={setActiveTab}
-      >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="available">ว่าง</TabsTrigger>
-          <TabsTrigger value="busy">ไม่ว่าง</TabsTrigger>
-          <TabsTrigger value="all">ทั้งหมด</TabsTrigger>
-        </TabsList>
+                  <TabsContent value="available">
+                      <div className="max-h-[500px] overflow-y-auto pr-2">
+                    <div className="flex flex-col gap-3">
+                      {availableParticipants.length > 0 ? (
+                        availableParticipants.map(renderParticipant)
+                      ) : (
+                        <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                          ไม่มีคนว่าง
+                        </div>
+                      )}
+                    </div>
+                     </div>
+                  </TabsContent>
 
-        <TabsContent value="available">
-          <div className="flex flex-col gap-3">
-            {availableParticipants.length > 0 ? (
-              availableParticipants.map(renderParticipant)
-            ) : (
-              <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                ไม่มีคนว่าง
-              </div>
-            )}
-          </div>
-        </TabsContent>
+                  <TabsContent value="busy">
+                                          <div className="max-h-[500px] overflow-y-auto pr-2">
 
-        <TabsContent value="busy">
-          <div className="flex flex-col gap-3">
-            {busyParticipants.length > 0 ? (
-              busyParticipants.map(renderParticipant)
-            ) : (
-              <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                ทุกคนว่าง
-              </div>
-            )}
-          </div>
-        </TabsContent>
+                    <div className="flex flex-col gap-3">
+                      {busyParticipants.length > 0 ? (
+                        busyParticipants.map(renderParticipant)
+                      ) : (
+                        <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                          ทุกคนว่าง
+                        </div>
+                      )}
+                    </div>
+                     </div>
+                  </TabsContent>
 
-        <TabsContent value="all">
-          <div className="flex flex-col gap-3">
-            {participants.length > 0 ? (
-              participants.map(renderParticipant)
-            ) : (
-              <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                ไม่มีข้อมูลผู้ใช้งาน
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-    </CardContent>
-  </Card>
-</aside>
+
+                  <TabsContent value="all">
+                    <div className="max-h-[500px] overflow-y-auto pr-2">
+                    <div className="flex flex-col gap-3">
+                      {participants.length > 0 ? (
+                        participants.map(renderParticipant)
+                      ) : (
+                        <div className="text-center text-muted-foreground p-4 border rounded-lg">
+                          ไม่มีข้อมูลผู้ใช้งาน
+                        </div>
+                      )}
+                    </div>
+                    </div>
+                  </TabsContent>
+
+                </Tabs>
+              </CardContent>
+            </Card>
+          </aside>
         </section>
         <footer className="border-t bg-background">
           <div className="mx-auto flex flex-col items-center justify-center gap-2 px-2 pt-2 text-center text-sm text-muted-foreground">
