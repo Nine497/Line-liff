@@ -379,6 +379,9 @@ function App() {
     }
   };
 
+  // =========================
+  // available / busy
+  // =========================
   const selectedEvents = useMemo(() => {
     return events[selectedKey] || [];
   }, [events, selectedKey]);
@@ -409,46 +412,39 @@ function App() {
     );
   });
 
-  // =========================
-  // available / busy
-  // =========================
-  const eventMap = new Map();
+  const busyMap = useMemo(() => {
+    const map = new Map();
 
-  selectedEvents.forEach((event) => {
+    selectedEvents.forEach((event) => {
+      const title = event.title;
 
-    if (!eventMap.has(event.id)) {
-
-      eventMap.set(event.id, {
-        id: event.id,
-        title: event.title,
-        participants: [],
-      });
-    }
-
-    (event.task_participants ?? []).forEach(
-      (tp) => {
-
-        const participant =
-          tp.participant;
+      (event.task_participants ?? []).forEach((tp) => {
+        const participant = tp.participant;
 
         if (!participant?.id) return;
 
-        const eventData =
-          eventMap.get(event.id);
-
-        const alreadyExists =
-          eventData.participants.some(
-            (p) => p.id === participant.id
-          );
-
-        if (!alreadyExists) {
-          eventData.participants.push(
-            participant
-          );
+        if (!map.has(participant.id)) {
+          map.set(participant.id, []);
         }
-      }
+
+        map.get(participant.id).push(title);
+      });
+    });
+
+    return map;
+  }, [selectedEvents]);
+
+  const availableParticipants = useMemo(() => {
+    return participants.filter(
+      (p) => !busyMap.has(p.id)
     );
-  });
+  }, [participants, busyMap]);
+
+  const busyParticipants = useMemo(() => {
+    return participants.filter(
+      (p) => busyMap.has(p.id)
+    );
+  }, [participants, busyMap]);
 
   const renderParticipant = (participant) => {
     if (!participant) {
@@ -504,40 +500,6 @@ function App() {
 
     return Object.keys(errors).length === 0;
   };
-
-  const busyMap = useMemo(() => {
-    const map = new Map();
-
-    selectedEvents.forEach((event) => {
-      const title = event.title;
-
-      (event.task_participants ?? []).forEach((tp) => {
-        const participant = tp.participant;
-
-        if (!participant?.id) return;
-
-        if (!map.has(participant.id)) {
-          map.set(participant.id, []);
-        }
-
-        map.get(participant.id).push(title);
-      });
-    });
-
-    return map;
-  }, [selectedEvents]);
-
-  const availableParticipants = useMemo(() => {
-    return participants.filter(
-      (p) => !busyMap.has(p.id)
-    );
-  }, [participants, busyMap]);
-
-  const busyParticipants = useMemo(() => {
-    return participants.filter(
-      (p) => busyMap.has(p.id)
-    );
-  }, [participants, busyMap]);
 
   return (
     <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
