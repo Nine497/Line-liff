@@ -497,10 +497,17 @@ function App() {
                 </span>
               )}
             </div>
-            <div>
-              <BarLoader size={20} />
-              <p className="text-lg font-semibold">กำลังเรียกข้อมูลผู้ใช้จาก LINE LIFF และฐานข้อมูล</p>
-            </div>
+ <div className="flex w-full flex-col items-center gap-3">
+      <BarLoader
+        width={220}
+        height={6}
+        color="#22c55e"
+      />
+
+      <p className="text-lg font-semibold">
+        กำลังเรียกข้อมูลผู้ใช้จาก LINE LIFF และฐานข้อมูล
+      </p>
+    </div>
           </div>
         </div>
       ) : null}
