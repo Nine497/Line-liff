@@ -123,8 +123,6 @@ function App() {
 
   useEffect(() => {
     const initApp = async () => {
-      setIsInitializing(true);
-
       try {
         const liff = await initLiff();
 
@@ -182,15 +180,6 @@ function App() {
 
     initApp();
   }, []);
-
-  useEffect(() => {
-
-    console.log(
-      "currentUser updated:",
-      currentUser
-    );
-
-  }, [currentUser]);
 
   async function fetchTaskEvents() {
     try {
@@ -695,7 +684,7 @@ function App() {
             </CardContent>
           </Card>
 
-          <aside className="grid gap-5 xl:content-start">
+          <aside className="grid gap-5 max-h-[300px] xl:content-start">
             <Card>
               <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -771,11 +760,12 @@ function App() {
           </div>
         </footer>
         {isUploading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
             <div className="w-[380px]">
               <SpinnerEmpty
                 title="กำลัง Import Excel"
-                description="ระบบกำลังนำเข้าข้อมูล กรุณารอและห้ามปิดหน้าจอ" />
+                description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
+              />
             </div>
           </div>
         )}

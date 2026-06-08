@@ -14,7 +14,7 @@ export function SpinnerEmpty({ title, description }) {
         <Empty className="w-full">
             <EmptyHeader>
                 <EmptyMedia variant="icon">
-                    <PulseLoader size={28} />
+                    <PulseLoader size={20} />
                 </EmptyMedia>
 
                 <EmptyTitle>

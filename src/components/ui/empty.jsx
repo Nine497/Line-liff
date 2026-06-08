@@ -15,11 +15,11 @@ export function EmptyMedia({ children }) {
 }
 
 export function EmptyTitle({ children }) {
-    return <h3 className="text-lg font-semibold">{children}</h3>;
+    return <h3 className="text-xl font-semibold">{children}</h3>;
 }
 
 export function EmptyDescription({ children }) {
-    return <p className="text-sm text-muted-foreground">{children}</p>;
+    return <p className="text-lg text-muted-foreground">{children}</p>;
 }
 
 export function EmptyContent({ children }) {
