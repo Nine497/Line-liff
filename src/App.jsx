@@ -740,7 +740,7 @@ function App() {
                   />
 
                   <Button
-                    type="Outline"
+                    variant="outline"
                     icon={<DownloadOutlined />}
                     onClick={() =>
                       document
