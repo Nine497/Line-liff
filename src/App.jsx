@@ -30,7 +30,7 @@ import {
   Button,
   Alert,
   Tabs,
-  notification
+  message
 } from "antd";
 import dayjs from "dayjs";
 import FullCalendar from "@fullcalendar/react";
@@ -344,7 +344,7 @@ function App() {
 
       // ❌ ต้องเช็คก่อน ไม่งั้น throw แล้ว code ด้านล่างไม่ทำงาน
       if (!response.ok) {
-        notification.error({
+        message.error({
           message: "เกิดข้อผิดพลาด",
           description: result?.error || "ไม่สามารถนำเข้าข้อมูลได้",
           placement: "topRight",
@@ -357,7 +357,7 @@ function App() {
       await fetchTaskEvents();
 
       // ✅ success notification
-      notification.success({
+      message.success({
         message: "นำเข้าข้อมูลสำเร็จ",
         description: `นำเข้าสำเร็จ ${result?.count ?? 0} รายการ`,
         placement: "topRight",
@@ -367,7 +367,7 @@ function App() {
     } catch (error) {
       console.error(error);
 
-      notification.error({
+      message.error({
         message: "เกิดข้อผิดพลาด",
         description: error.message || "ไม่สามารถนำเข้าข้อมูลได้",
         placement: "topRight",
