@@ -391,7 +391,7 @@ function App() {
       errors.dateRange = "กรุณาเลือกช่วงเวลา";
     }
 
-    setFormError(errors);
+    setFormError(error?.message || "เกิดข้อผิดพลาด");
 
     return Object.keys(errors).length === 0;
   };
@@ -753,7 +753,7 @@ function App() {
                   />
 
                   <Button
-                    type="default"
+                    type="primary"
                     icon={<DownloadOutlined />}
                     onClick={() =>
                       document
