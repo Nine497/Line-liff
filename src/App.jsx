@@ -319,6 +319,8 @@ function App() {
     if (!file) return;
 
     setIsUploading(true);
+    setFormError("");
+    setFormSuccess("");
 
     try {
       const formData = new FormData();
@@ -331,21 +333,37 @@ function App() {
 
       formData.append("file", file);
 
-      const response = await fetch(`${apiUrl}/tasks/import`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${apiUrl}/tasks/import`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const result = await response.json();
 
-
       if (!response.ok) {
-        throw new Error(result.error || "Import failed");
+        throw new Error(
+          result.error || "Import failed"
+        );
       }
 
+      // ✅ refresh only data (ไม่ reload page)
       await fetchTaskEvents();
+
+      // optional UX feedback
+      setFormSuccess(
+        `Import สำเร็จ (${result?.count ?? 0} รายการ)`
+      );
+
     } catch (error) {
       console.error(error);
+
+      setFormError(
+        error.message ||
+        "เกิดข้อผิดพลาดในการ Import"
+      );
     } finally {
       setIsUploading(false);
       e.target.value = "";
@@ -686,7 +704,7 @@ function App() {
               size="icon"
               type="button"
               variant="outline"
-              disable={true}
+              disabled
             >
               {isDark ? <Sun /> : <Moon />}
             </Button>
@@ -724,20 +742,18 @@ function App() {
                     className="hidden"
                   />
 
-                  <label htmlFor="excel-upload">
-                    <Button
-                      asChild
-                      variant="outline"
-                      icon={<DownloadOutlined />}
-                      disabled={isUploading}
-                    >
-                      <span>
-                        {isUploading
-                          ? "กำลัง Import..."
-                          : "Import Excel"}
-                      </span>
-                    </Button>
-                  </label>
+                  <Button
+                    type="default"
+                    icon={<DownloadOutlined />}
+                    onClick={() =>
+                      document
+                        .getElementById("excel-upload")
+                        .click()
+                    }
+                    loading={isUploading}
+                  >
+                    {isUploading ? "กำลัง Import..." : "Import Excel"}
+                  </Button>
 
                   <Button
                     aria-label="เดือนก่อนหน้า"
@@ -845,9 +861,11 @@ function App() {
       </footer >
 
       {/* ส่วนของ Dialog ต่างๆ (คงเดิม) */}
-      {
-        isUploading && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-auto">
+      {isUploading && (
+        <>
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="w-[380px]">
               <SpinnerEmpty
                 title="กำลัง Import Excel"
@@ -855,8 +873,8 @@ function App() {
               />
             </div>
           </div>
-        )
-      }
+        </>
+      )}
 
       <Modal
         open={showCreateForm}
