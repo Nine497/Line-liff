@@ -884,32 +884,14 @@ function App() {
         width={800}
         destroyOnHidden
       >
-        {formSuccess && (
-          <Alert
-            type="success"
-            message={formSuccess}
-            showIcon
-            className="mb-4"
-          />
-        )}
-
-        {formError && (
-          <Alert
-            type="error"
-            message={formError}
-            showIcon
-            className="mb-4"
-          />
-        )}
-
         <Form
           form={form}
           layout="vertical"
           onFinish={async (values) => {
             const payload = {
               title: values.title.trim(),
-              description:
-                values.description?.trim() || "",
+              type_id: values.type_id,
+              description: values.description?.trim() || "",
               start_time:
                 values.dateRange[0].toISOString(),
               end_time:
@@ -961,6 +943,27 @@ function App() {
               placeholder="เช่น ประชุมทีม"
               maxLength={100}
               showCount
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="ประเภทงาน"
+            name="type_id"
+            rules={[
+              {
+                required: true,
+                message: "กรุณาเลือกประเภทงาน",
+              },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder="เลือกประเภทงาน"
+              optionFilterProp="label"
+              options={taskTypes.map((type) => ({
+                value: type.id,
+                label: type.name,
+              }))}
             />
           </Form.Item>
 
