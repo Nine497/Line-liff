@@ -617,22 +617,26 @@ function App() {
       // มีคนติดงาน
       // =========================
       if (response.status === 409) {
-        const text =
-          result?.conflicts
-            ?.map((c) => {
-              const taskTitle =
-                c.task_title?.length > 20
-                  ? `${c.task_title.slice(0, 20)}...`
-                  : c.task_title;
+        notification.warning({
+          message: "ไม่สามารถสร้างงานได้",
+          placement: "topRight",
+          duration: 6,
+          description: (
+            <div className="space-y-1">
+              {result?.conflicts?.map((c, index) => {
+                const taskTitle =
+                  c.task_title?.length > 20
+                    ? `${c.task_title.slice(0, 20)}...`
+                    : c.task_title;
 
-              return `${c.participant_name} ติดงาน "${taskTitle}"`;
-            })
-            .join("\n") ||
-          "มีผู้เข้าร่วมติดงานอยู่แล้ว";
-
-        message.warning({
-          content: text,
-          duration: 5,
+                return (
+                  <div key={index}>
+                    • {c.participant_name} ติดงาน "{taskTitle}"
+                  </div>
+                );
+              })}
+            </div>
+          ),
         });
 
         return;
