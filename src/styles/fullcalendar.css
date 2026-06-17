@@ -5,10 +5,6 @@
   overflow: hidden;
 }
 
-.fc .selected-day {
-  background: rgba(101, 191, 142, 0.12) !important;
-}
-
 /* ── Toolbar ── */
 .fc .fc-toolbar { gap: 8px; flex-wrap: wrap; }
 .fc .fc-toolbar-title {
@@ -69,7 +65,11 @@
   color: #fff;
   font-weight: 500;
 }
-.fc .fc-daygrid-day:hover { background: rgba(128,128,128,.05); }
+.fc .fc-daygrid-day:hover { background: rgba(58, 58, 58, 0.05); }
+
+.fc .fc-daygrid-day.selected-day {
+  background: rgba(58, 58, 58, 0.05) !important;
+}
 
 /* ── Events ── */
 .fc .fc-event {
@@ -82,13 +82,6 @@
 }
 .fc .fc-event:hover { opacity: .82; }
 .fc .fc-daygrid-event { min-height: 20px; }
-
-/* ── Event colors ── */
-.fc .fc-event.cat-purple { background: rgba(108,92,231,.15); color: #5a4db5; }
-.fc .fc-event.cat-teal   { background: rgba(29,158,117,.13);  color: #0f6e56; }
-.fc .fc-event.cat-coral  { background: rgba(216,90,48,.12);   color: #993c1d; }
-.fc .fc-event.cat-blue   { background: rgba(55,138,221,.13);  color: #185fa5; }
-.fc .fc-event.cat-amber  { background: rgba(186,117,23,.13);  color: #854f0b; }
 
 /* ── More link ── */
 .fc .fc-daygrid-more-link {
