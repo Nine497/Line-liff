@@ -28,7 +28,9 @@ import {
   DatePicker,
   Select,
   Button,
-  Alert, Tabs
+  Alert,
+  Tabs,
+  notification
 } from "antd";
 import dayjs from "dayjs";
 import FullCalendar from "@fullcalendar/react";
@@ -322,9 +324,9 @@ function App() {
     setFormError("");
     setFormSuccess("");
 
-    try {
-      const formData = new FormData();
+    const formData = new FormData();
 
+    try {
       const userId = currentUser?.id ?? currentUser?.user_id;
 
       if (userId) {
@@ -333,37 +335,45 @@ function App() {
 
       formData.append("file", file);
 
-      const response = await fetch(
-        `${apiUrl}/tasks/import`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`${apiUrl}/tasks/import`, {
+        method: "POST",
+        body: formData,
+      });
 
       const result = await response.json();
 
+      // ❌ ต้องเช็คก่อน ไม่งั้น throw แล้ว code ด้านล่างไม่ทำงาน
       if (!response.ok) {
-        throw new Error(
-          result.error || "Import failed"
-        );
+        notification.error({
+          message: "เกิดข้อผิดพลาด",
+          description: result?.error || "ไม่สามารถนำเข้าข้อมูลได้",
+          placement: "topRight",
+        });
+
+        throw new Error(result?.error || "Import failed");
       }
 
-      // ✅ refresh only data (ไม่ reload page)
+      // ✅ refresh data only
       await fetchTaskEvents();
 
-      // optional UX feedback
-      setFormSuccess(
-        `Import สำเร็จ (${result?.count ?? 0} รายการ)`
-      );
+      // ✅ success notification
+      notification.success({
+        message: "นำเข้าข้อมูลสำเร็จ",
+        description: `นำเข้าสำเร็จ ${result?.count ?? 0} รายการ`,
+        placement: "topRight",
+      });
 
+      setFormSuccess(`นำเข้าสำเร็จ ${result?.count ?? 0} รายการ`);
     } catch (error) {
       console.error(error);
 
-      setFormError(
-        error.message ||
-        "เกิดข้อผิดพลาดในการ Import"
-      );
+      notification.error({
+        message: "เกิดข้อผิดพลาด",
+        description: error.message || "ไม่สามารถนำเข้าข้อมูลได้",
+        placement: "topRight",
+      });
+
+      setFormError(error.message);
     } finally {
       setIsUploading(false);
       e.target.value = "";
