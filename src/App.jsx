@@ -294,6 +294,21 @@ function App() {
     });
   };
 
+  const goToday = () => {
+    const calendarApi =
+      calendarRef.current?.getApi();
+
+    if (!calendarApi) return;
+
+    calendarApi.today();
+
+    const today = new Date();
+
+    setSelectedKey(
+      today.toISOString().split("T")[0]
+    );
+  };
+
   async function handleCreateTask(e) {
     e.preventDefault();
     if (!validateForm()) {
@@ -740,6 +755,13 @@ function App() {
                     variant="outline"
                   >
                     <ChevronLeft />
+                  </Button>
+
+                  <Button
+                    onClick={goToday}
+                    variant="outline"
+                  >
+                    วันนี้
                   </Button>
 
                   <Button
