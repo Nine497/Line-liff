@@ -1,65 +1,149 @@
-.fc {
-  font-family: inherit;
-}
-
-/* เส้นตาราง */
-.fc-theme-standard td,
-.fc-theme-standard th {
-  border-color: hsl(var(--border));
-}
-
-/* วันปัจจุบัน */
-.fc .fc-day-today {
-  background: hsl(var(--accent) / 0.2) !important;
-}
-
-/* วันที่ถูกเลือก */
-.fc .selected-day {
-  background: hsl(var(--primary) / 0.12) !important;
-}
-
-/* Event */
-.fc .fc-event {
-  border: none !important;
-  border-radius: 8px;
-  padding: 2px 6px;
-  cursor: pointer;
-}
-
-/* Hover Event */
-.fc .fc-event:hover {
-  opacity: 0.9;
-}
-
-/* Header */
+/* ── Toolbar ── */
+.fc .fc-toolbar { gap: 8px; flex-wrap: wrap; }
 .fc .fc-toolbar-title {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--color-text-primary, #1a1a1a);
 }
-
-/* ปุ่ม */
 .fc .fc-button {
   border-radius: 8px !important;
+  border: 0.5px solid var(--color-border-secondary) !important;
+  background: var(--color-background-primary) !important;
+  color: var(--color-text-secondary) !important;
+  box-shadow: none !important;
+  font-size: 13px;
+  transition: background .15s;
+}
+.fc .fc-button:hover {
+  background: var(--color-background-secondary) !important;
+  color: var(--color-text-primary) !important;
+}
+.fc .fc-button-active,
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  background: var(--color-background-secondary) !important;
+  color: var(--color-text-primary) !important;
+  font-weight: 500;
 }
 
-/* ซ่อน border หนา ๆ */
-.fc .fc-scrollgrid {
-  border-radius: 12px;
-  overflow: hidden;
-}
-/* Event */
-.fc .fc-daygrid-event {
-  font-size: 12px;
-  min-height: 22px;
-}
-
-/* Hover วัน */
-.fc .fc-daygrid-day:hover {
-  background: hsl(var(--accent) / 0.08);
+/* ── Grid ── */
+.fc-theme-standard td,
+.fc-theme-standard th { border-color: var(--color-border-tertiary); }
+.fc .fc-scrollgrid { border-radius: 12px; overflow: hidden; }
+.fc .fc-col-header-cell-cushion {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  padding: 10px 4px;
 }
 
-/* เลขวัน */
+/* ── Day numbers ── */
 .fc .fc-daygrid-day-number {
-  font-size: 0.875rem;
-  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 0;
+  margin: 4px;
+}
+.fc .fc-day-today { background: transparent !important; }
+.fc .fc-day-today .fc-daygrid-day-number {
+  background: #6c5ce7;
+  color: #fff;
+  font-weight: 500;
+}
+.fc .fc-daygrid-day:hover { background: rgba(128,128,128,.05); }
+
+/* ── Events ── */
+.fc .fc-event {
+  border: none !important;
+  border-radius: 6px;
+  font-size: 11.5px;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: opacity .12s;
+}
+.fc .fc-event:hover { opacity: .82; }
+.fc .fc-daygrid-event { min-height: 20px; }
+
+/* ── Event colors ── */
+.fc .fc-event.cat-purple { background: rgba(108,92,231,.15); color: #5a4db5; }
+.fc .fc-event.cat-teal   { background: rgba(29,158,117,.13);  color: #0f6e56; }
+.fc .fc-event.cat-coral  { background: rgba(216,90,48,.12);   color: #993c1d; }
+.fc .fc-event.cat-blue   { background: rgba(55,138,221,.13);  color: #185fa5; }
+.fc .fc-event.cat-amber  { background: rgba(186,117,23,.13);  color: #854f0b; }
+
+/* ── More link ── */
+.fc .fc-daygrid-more-link {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  padding: 1px 7px;
+}
+/* ── Mobile-first overrides ── */
+@media (max-width: 600px) {
+
+  /* Grid cell เล็กลง */
+  .fc .fc-daygrid-day {
+    min-height: 56px !important;
+  }
+
+  /* ซ่อน event label ใน grid — ใช้ dot แทน */
+  .fc .fc-daygrid-event-harness {
+    display: none;
+  }
+
+  /* Dot indicators */
+  .fc .fc-daygrid-day-bottom {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+    padding-bottom: 4px;
+  }
+
+  /* วันที่ให้ลงกลาง */
+  .fc .fc-daygrid-day-top {
+    justify-content: center;
+  }
+
+  .fc .fc-daygrid-day-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 13px;
+    padding: 0;
+  }
+
+  /* Toolbar compact */
+  .fc .fc-toolbar {
+    flex-direction: row;
+    gap: 6px;
+    padding: 12px 16px 8px;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1rem;
+  }
+
+  .fc .fc-button {
+    padding: 8px 10px !important;
+    font-size: 13px;
+  }
+
+  /* ซ่อน view switcher บนมือถือ */
+  .fc .fc-button-group {
+    display: none;
+  }
+
+  /* Header วัน */
+  .fc .fc-col-header-cell-cushion {
+    font-size: 10px;
+    padding: 8px 2px;
+  }
 }
