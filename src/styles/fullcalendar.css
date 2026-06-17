@@ -1,3 +1,9 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh; /* dvh = รองรับ browser bar มือถือ */
+  overflow: hidden;
+}
 /* ── Toolbar ── */
 .fc .fc-toolbar { gap: 8px; flex-wrap: wrap; }
 .fc .fc-toolbar-title {
@@ -83,6 +89,29 @@
   color: var(--color-text-tertiary);
   padding: 1px 7px;
 }
+
+/* Grid วันที่ — ยืดเต็มพื้นที่ที่เหลือ */
+.fc-daygrid-body,
+.fc .fc-scroller {
+  flex: 1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* ปิด scroll ภายใน */
+.fc .fc-scroller-harness {
+  height: 100% !important;
+}
+
+/* ทำให้แต่ละแถวกระจายเท่ากัน */
+.fc .fc-daygrid-body table {
+  height: 100%;
+}
+.fc .fc-daygrid-row {
+  height: calc(100% / 6); /* หาร 6 แถว */
+}
+
 /* ── Mobile-first overrides ── */
 @media (max-width: 600px) {
 

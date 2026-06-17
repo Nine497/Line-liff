@@ -719,6 +719,9 @@ function App() {
                     events={events}
                     displayEventTime={false}
                     moreLinkClick="popover"
+                    expandRows={true}
+                    height="auto"
+                    headerToolbar={false}
                     dateClick={(info) => {
                       setSelectedKey(info.dateStr);
                     }}
