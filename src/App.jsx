@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import Calendar from "calendarjs";
 import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun, X } from "lucide-react";
 import { Badge } from "./components/ui/badge";
-import { Button } from "./components/ui/button";
 import { initLiff } from "./liff";
 import {
   Card,
@@ -16,11 +15,8 @@ import {
 import { Users } from "lucide-react"
 import { Dialog, DialogContent } from "./components/ui/dialog";
 import { Label } from "./components/ui/label";
-import { Input } from "./components/ui/input";
-import { Select } from "./components/ui/select";
 import { Textarea } from "./components/ui/textarea";
 import { ComboboxChips } from "./components/ui/combobox";
-import { Form, FormDescription, FormField, FormLabel } from "./components/ui/form";
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { BarLoader } from "react-spinners";
@@ -317,67 +313,6 @@ function App() {
     );
   };
 
-  async function handleCreateTask(e) {
-    e.preventDefault();
-    if (!validateForm()) {
-      return;
-      setFormError("");
-      setFormSuccess("");
-
-      const errors = validateForm();
-      if (errors.length > 0) {
-        setFormError(errors.join("\n"));
-        return;
-      }
-
-      setIsSubmitting(true);
-      try {
-        const payload = {
-          title: formData.title.trim(),
-          description: formData.description.trim() || null,
-          start_time: new Date(formData.start_time).toISOString(),
-          creator_id: currentUser.id ?? currentUser.user_id ?? null,
-          location: formData.location.trim() || null,
-          type_id: formData.type_id,
-          participant_ids: selectedParticipantIds,
-        };
-
-        const response = await fetch(`${apiUrl}/tasks`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "ไม่สามารถเพิ่มงานได้");
-        }
-
-        setFormSuccess("เพิ่มงานสำเร็จ!");
-        setTimeout(() => {
-          setFormData({
-            title: "",
-            location: "",
-            start_time: "",
-            type_id: taskTypes.length ? taskTypes[0].id : null,
-            type: taskTypes.length ? taskTypes[0].name : "ประชุม",
-            description: "",
-          });
-          setSelectedParticipantIds([]);
-          setFormError("");
-          setFormSuccess("");
-          setShowCreateForm(false);
-        }, 500);
-
-        await fetchTaskEvents();
-      } catch (error) {
-        console.error("Error creating task:", error);
-        setFormError(error.message || "เกิดข้อผิดพลาดในการเพิ่มงาน");
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-  }
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
