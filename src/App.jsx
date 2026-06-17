@@ -621,13 +621,13 @@ function App() {
           result?.conflicts
             ?.map((c) => {
               const taskTitle =
-                c.task_title?.length > 25
-                  ? `${c.task_title.slice(0, 25)}...`
+                c.task_title?.length > 20
+                  ? `${c.task_title.slice(0, 20)}...`
                   : c.task_title;
 
               return `${c.participant_name} ติดงาน "${taskTitle}"`;
             })
-            .join(", ") ||
+            .join("\n") ||
           "มีผู้เข้าร่วมติดงานอยู่แล้ว";
 
         message.warning({
