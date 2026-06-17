@@ -182,26 +182,27 @@ function App() {
 
       const tasks = await response.json();
 
-      const calendarEvents = tasks.map((task) => ({
-        id: task.id,
-        title: task.title,
+      const calendarEvents = tasks.map((task) => {
+        const color = task.type?.color ?? '#6c5ce7'
+        const r = parseInt(color.slice(1, 3), 16)
+        const g = parseInt(color.slice(3, 5), 16)
+        const b = parseInt(color.slice(5, 7), 16)
 
-        start: dayjs(task.start_time).format(
-          "YYYY-MM-DD"
-        ),
-
-        end: dayjs(task.end_time)
-          .add(1, "day")
-          .format("YYYY-MM-DD"),
-
-        allDay: true,
-
-        extendedProps: {
-          task,
-          participants:
-            task.task_participants,
-        },
-      }));
+        return {
+          id: task.id,
+          title: task.title,
+          start: dayjs(task.start_time).format("YYYY-MM-DD"),
+          end: dayjs(task.end_time).add(1, "day").format("YYYY-MM-DD"),
+          allDay: true,
+          backgroundColor: `rgba(${r},${g},${b},0.15)`,
+          borderColor: 'transparent',
+          textColor: color,
+          extendedProps: {
+            task,
+            participants: task.task_participants,
+          },
+        }
+      })
 
       setEvents(calendarEvents);
       console.log("Fetched tasks:", calendarEvents);
