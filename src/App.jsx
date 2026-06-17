@@ -472,7 +472,7 @@ function App() {
     const color = event?.extendedProps?.task?.type?.color;
     const typeName = event?.extendedProps?.task?.type?.name;
 
-    const hex = color ?? '#6c5ce7'
+    const hex = color ?? '#2563eb'
     const r = parseInt(hex.slice(1, 3), 16)
     const g = parseInt(hex.slice(3, 5), 16)
     const b = parseInt(hex.slice(5, 7), 16)
