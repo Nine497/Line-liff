@@ -33,7 +33,9 @@
 
 /* ── Grid ── */
 .fc-theme-standard td,
-.fc-theme-standard th { border-color: var(--color-border-tertiary); }
+.fc-theme-standard th {
+  border-color: #d1d5db; /* ลด opacity ลง */
+}
 .fc .fc-scrollgrid { border-radius: 12px; overflow: hidden; }
 .fc .fc-col-header-cell-cushion {
   font-size: 11px;
