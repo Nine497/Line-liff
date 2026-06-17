@@ -26,7 +26,7 @@ export function SpinnerEmpty({
                     {title}
                 </EmptyTitle>
 
-                <EmptyDescription className="text-white/80">
+                <EmptyDescription className="text-white">
                     {description}
                 </EmptyDescription>
             </EmptyHeader>
