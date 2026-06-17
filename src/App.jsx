@@ -163,8 +163,6 @@ function App() {
     initApp();
   }, []);
 
-  import dayjs from "dayjs";
-
   async function fetchTaskEvents() {
     try {
       const response = await fetch(
