@@ -26,6 +26,10 @@ import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { BarLoader } from "react-spinners";
 import { DatePicker, Tabs } from "antd";
 import dayjs from "dayjs";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import thLocale from "@fullcalendar/core/locales/th";
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 const monthNames = [
   "มกราคม",
@@ -60,7 +64,7 @@ function App() {
   const [theme, setTheme] = useState("light");
   const [month, setMonth] = useState({ year: 2026, month: 6 });
   const [selectedKey, setSelectedKey] = useState(todayKey);
-  const [events, setEvents] = useState({});
+  const [events, setEvents] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -175,49 +179,35 @@ function App() {
         );
       }
 
-      const tasks =
-        await response.json();
+      const tasks = await response.json();
 
-      const grouped = {};
+      const calendarEvents = tasks.map(
+        (task) => ({
+          id: task.id,
+          title: task.title,
+          start: task.start_time,
 
-      tasks.forEach((task) => {
-        let current = dayjs(
-          task.start_time
-        );
+          // FullCalendar ใช้ end แบบ exclusive
+          end: dayjs(task.end_time)
+            .add(1, "day")
+            .toISOString(),
 
-        const end = dayjs(
-          task.end_time
-        );
+          extendedProps: {
+            task,
+            participants:
+              task.task_participants,
+          },
+        })
+      );
 
-        while (
-          current.isBefore(end, "day") ||
-          current.isSame(end, "day")
-        ) {
-          const key =
-            current.format(
-              "YYYY-M-D"
-            );
-
-          grouped[key] ??= [];
-
-          grouped[key].push(task);
-
-          current =
-            current.add(1, "day");
-        }
-      });
-
-      setEvents(grouped);
+      setEvents(calendarEvents);
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Fetch tasks error:",
+        error
+      );
     }
   }
-
-  const getEventSpan = (event) =>
-    dayjs(event.end_time).diff(
-      dayjs(event.start_time),
-      "day"
-    ) + 1;
 
   const fetchParticipants =
     async () => {
@@ -286,6 +276,20 @@ function App() {
       ).values(),
     ];
   }, [events]);
+
+  const calendarEvents = useMemo(() => {
+    return tasks.map((task) => ({
+      id: task.id,
+      title: task.title,
+      start: task.start_time,
+      end: dayjs(task.end_time)
+        .add(1, "day")
+        .toISOString(),
+      extendedProps: {
+        task,
+      },
+    }));
+  }, [tasks]);
 
   function moveMonth(direction) {
     setMonth((current) => {
@@ -700,142 +704,16 @@ function App() {
 
               <CardContent className="flex flex-col gap-5 p-4 pt-4 sm:p-5">
                 <div className="overflow-hidden rounded-lg border">
-                  <div className="grid grid-cols-7 bg-muted text-center text-xs font-medium text-muted-foreground">
-                    {weekdays.map((weekday) => (
-                      <div className="px-2 py-3" key={weekday}>
-                        {weekday}
-                      </div>
-                    ))}
-                  </div>
-
-                  {weeks.map((week, weekIndex) => {
-                    const weekStart = dayjs(dayKey(week[0]));
-                    const weekEnd = dayjs(dayKey(week[6]));
-
-                    const weekEvents = uniqueEvents.filter((event) => {
-                      const start = dayjs(event.start_time);
-                      const end = dayjs(event.end_time);
-
-                      return !(
-                        end.isBefore(weekStart, "day") ||
-                        start.isAfter(weekEnd, "day")
-                      );
-                    });
-
-                    const eventRowsHeight =
-                      Math.max(weekEvents.length, 1) * 22;
-
-                    return (
-                      <div
-                        key={weekIndex}
-                        className="relative"
-                      >
-                        {/* Event Area */}
-                        <div
-                          className="relative border-t bg-background"
-                          style={{
-                            height: `${eventRowsHeight}px`,
-                          }}
-                        >
-                          {weekEvents.map(
-                            (event, rowIndex) => {
-                              const start = dayjs(
-                                event.start_time
-                              );
-                              const end = dayjs(
-                                event.end_time
-                              );
-
-                              const visibleStart =
-                                start.isBefore(
-                                  weekStart,
-                                  "day"
-                                )
-                                  ? weekStart
-                                  : start;
-
-                              const visibleEnd =
-                                end.isAfter(
-                                  weekEnd,
-                                  "day"
-                                )
-                                  ? weekEnd
-                                  : end;
-
-                              const startColumn =
-                                visibleStart.diff(
-                                  weekStart,
-                                  "day"
-                                );
-
-                              const span =
-                                visibleEnd.diff(
-                                  visibleStart,
-                                  "day"
-                                ) + 1;
-
-                              const cellWidth =
-                                100 / 7;
-
-                              return (
-                                <div
-                                  key={`${event.id}-${weekIndex}`}
-                                  className="absolute flex h-5 items-center overflow-hidden rounded bg-primary px-2 text-[10px] text-primary-foreground"
-                                  style={{
-                                    top: rowIndex * 22,
-                                    left: `${startColumn * cellWidth}%`,
-                                    width: `${span * cellWidth}%`,
-                                  }}
-                                >
-                                  <span className="truncate">
-                                    {event.title}
-                                  </span>
-                                </div>
-                              );
-                            }
-                          )}
-                        </div>
-
-                        {/* Day Cells */}
-                        <div className="grid grid-cols-7">
-                          {week.map((day) => {
-                            const key = dayKey(day);
-                            const isCurrentMonth =
-                              day.month === month.month;
-                            const isSelected =
-                              key === selectedKey;
-
-                            return (
-                              <button
-                                key={key}
-                                type="button"
-                                onClick={() =>
-                                  setSelectedKey(key)
-                                }
-                                className={cn(
-                                  "relative min-h-28 border-r border-t p-2 text-left last:border-r-0",
-                                  !isCurrentMonth &&
-                                  "bg-muted/40 text-muted-foreground",
-                                  isSelected &&
-                                  "bg-accent"
-                                )}
-                              >
-                                <span
-                                  className={cn(
-                                    "grid size-7 place-items-center rounded-md text-sm font-medium",
-                                    isSelected &&
-                                    "bg-primary text-primary-foreground"
-                                  )}
-                                >
-                                  {day.date}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <FullCalendar
+                    plugins={[
+                      dayGridPlugin,
+                      interactionPlugin,
+                    ]}
+                    initialView="dayGridMonth"
+                    locale="th"
+                    height="auto"
+                    events={calendarEvents}
+                  />
                 </div>
               </CardContent>
             </Card>
