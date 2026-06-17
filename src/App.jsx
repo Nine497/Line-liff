@@ -1054,7 +1054,7 @@ function App() {
           </Form.Item>
 
           <div className="flex justify-end gap-2">
-            <Button type="outline"
+            <Button variant="outline"
               onClick={() => {
                 setShowCreateForm(false);
                 form.resetFields();
