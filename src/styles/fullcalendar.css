@@ -1,0 +1,65 @@
+.fc {
+  font-family: inherit;
+}
+
+/* เส้นตาราง */
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: hsl(var(--border));
+}
+
+/* วันปัจจุบัน */
+.fc .fc-day-today {
+  background: hsl(var(--accent) / 0.2) !important;
+}
+
+/* วันที่ถูกเลือก */
+.fc .selected-day {
+  background: hsl(var(--primary) / 0.12) !important;
+}
+
+/* Event */
+.fc .fc-event {
+  border: none !important;
+  border-radius: 8px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+/* Hover Event */
+.fc .fc-event:hover {
+  opacity: 0.9;
+}
+
+/* Header */
+.fc .fc-toolbar-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+/* ปุ่ม */
+.fc .fc-button {
+  border-radius: 8px !important;
+}
+
+/* ซ่อน border หนา ๆ */
+.fc .fc-scrollgrid {
+  border-radius: 12px;
+  overflow: hidden;
+}
+/* Event */
+.fc .fc-daygrid-event {
+  font-size: 12px;
+  min-height: 22px;
+}
+
+/* Hover วัน */
+.fc .fc-daygrid-day:hover {
+  background: hsl(var(--accent) / 0.08);
+}
+
+/* เลขวัน */
+.fc .fc-daygrid-day-number {
+  font-size: 0.875rem;
+  padding: 6px;
+}

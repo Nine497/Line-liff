@@ -30,6 +30,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import thLocale from "@fullcalendar/core/locales/th";
+import "./styles/fullcalendar.css"
 const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
 const monthNames = [
   "มกราคม",
@@ -718,6 +719,14 @@ function App() {
                     events={events}
                     displayEventTime={false}
                     moreLinkClick="popover"
+                    dateClick={(info) => {
+                      setSelectedKey(info.dateStr);
+                    }}
+                    dayCellClassNames={(arg) =>
+                      arg.dateStr === selectedKey
+                        ? ["selected-day"]
+                        : []
+                    }
                   />
                 </div>
               </CardContent>
