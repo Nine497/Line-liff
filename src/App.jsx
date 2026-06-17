@@ -592,7 +592,7 @@ function App() {
     () => [
       {
         key: "events",
-        label: "Event",
+        label: "กำหนดการ",
         children: (
           <div className="space-y-3">
             {selectedEvents.map(renderEvent)}
@@ -601,7 +601,7 @@ function App() {
       },
       {
         key: "available",
-        label: "ว่าง",
+        label: "ไม่ติดภารกิจ",
         children: (
           <div className="space-y-3">
             {availableParticipants.map(renderParticipant)}
@@ -610,7 +610,7 @@ function App() {
       },
       {
         key: "busy",
-        label: "ไม่ว่าง",
+        label: "ติดภารกิจ",
         children: (
           <div className="space-y-3">
             {busyParticipants.map(renderParticipant)}
