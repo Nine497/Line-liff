@@ -6,30 +6,39 @@ import {
     EmptyMedia,
     EmptyTitle,
 } from "@/components/ui/empty";
-import { PulseLoader } from "react-spinners";
-import { Button } from "@/components/ui/button";
 
-export function SpinnerEmpty({ title, description }) {
+import { PulseLoader } from "react-spinners";
+import { Button } from "antd";
+
+export function SpinnerEmpty({
+    title = "กำลังดำเนินการ",
+    description = "กรุณารอสักครู่ อย่าปิดหน้าจอนี้",
+    onCancel,
+}) {
     return (
-        <Empty className="w-full">
-            <EmptyHeader>
+        <Empty className="w-full text-white">
+            <EmptyHeader className="text-white">
                 <EmptyMedia variant="icon">
-                    <PulseLoader size={20} />
+                    <PulseLoader size={20} color="#ffffff" />
                 </EmptyMedia>
 
-                <EmptyTitle>
-                    {title || "Processing your request"}
+                <EmptyTitle className="text-white">
+                    {title}
                 </EmptyTitle>
 
-                <EmptyDescription>
-                    {description ||
-                        "Please wait while we process your request. Do not refresh the page."}
+                <EmptyDescription className="text-white/80">
+                    {description}
                 </EmptyDescription>
             </EmptyHeader>
 
             <EmptyContent>
-                <Button variant="outline" size="sm">
-                    Cancel
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onCancel}
+                    className="text-white border-white/30 hover:bg-white/10"
+                >
+                    ยกเลิก
                 </Button>
             </EmptyContent>
         </Empty>

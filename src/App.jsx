@@ -863,10 +863,10 @@ function App() {
       {/* ส่วนของ Dialog ต่างๆ (คงเดิม) */}
       {isUploading && (
         <>
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
 
           <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="w-[380px]">
+            <div className="w-[380px] text-white">
               <SpinnerEmpty
                 title="กำลัง Import Excel"
                 description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
