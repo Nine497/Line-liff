@@ -619,24 +619,23 @@ function App() {
       if (response.status === 409) {
         const text =
           result?.conflicts
-            ?.map(
-              (c) =>
-                `• ${c.participant_name} ติดงาน "${c.task_title}"`
-            )
-            .join("\n") ||
+            ?.map((c) => {
+              const taskTitle =
+                c.task_title?.length > 25
+                  ? `${c.task_title.slice(0, 25)}...`
+                  : c.task_title;
+
+              return `${c.participant_name} ติดงาน "${taskTitle}"`;
+            })
+            .join(", ") ||
           "มีผู้เข้าร่วมติดงานอยู่แล้ว";
 
-        notification.warning({
-          message: "ไม่สามารถสร้างงานได้",
-          description: (
-            <div className="whitespace-pre-line">
-              {text}
-            </div>
-          ),
-          placement: "topRight",
+        message.warning({
+          content: text,
+          duration: 5,
         });
 
-        return; // ❌ ไม่ปิด Modal
+        return;
       }
 
       if (!response.ok) {
@@ -645,26 +644,18 @@ function App() {
         );
       }
 
-      notification.success({
-        message: "บันทึกสำเร็จ",
-        description: "เพิ่มงานเรียบร้อยแล้ว",
-        placement: "topRight",
-      });
+      message.success("เพิ่มงานสำเร็จ");
 
       form.resetFields();
-
       setShowCreateForm(false);
 
       await fetchTaskEvents();
     } catch (error) {
       console.error(error);
 
-      notification.error({
-        message: "เกิดข้อผิดพลาด",
-        description:
-          error.message || "ไม่สามารถบันทึกข้อมูลได้",
-        placement: "topRight",
-      });
+      message.error(
+        error.message || "ไม่สามารถบันทึกข้อมูลได้"
+      );
 
       setFormError(
         error.message || "เกิดข้อผิดพลาด"
@@ -673,7 +664,6 @@ function App() {
       setIsSubmitting(false);
     }
   };
-
   return (
     <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
       {isInitializing ? (
