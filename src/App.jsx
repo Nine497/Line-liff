@@ -49,9 +49,9 @@ const monthNames = [
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 
-const today = new Date();
-const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
-
+const todayKey = dayjs().format(
+  "YYYY-MM-DD"
+);
 // const tabLabels = [
 //   ["calendar", "ปฏิทิน"],
 //   ["agenda", "รายการ"],
@@ -802,17 +802,15 @@ function App() {
                     dateClick={(info) => {
                       setSelectedKey(info.dateStr);
                     }}
-                    dayCellDidMount={(arg) => {
+                    dayCellClassNames={(arg) => {
                       const key =
                         dayjs(arg.date).format(
                           "YYYY-MM-DD"
                         );
 
-                      if (key === selectedKey) {
-                        arg.el.classList.add(
-                          "selected-day"
-                        );
-                      }
+                      return key === selectedKey
+                        ? ["selected-day"]
+                        : [];
                     }}
                   />
                 </div>
