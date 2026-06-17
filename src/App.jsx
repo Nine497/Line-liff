@@ -752,7 +752,7 @@ function App() {
                     }
                     loading={isUploading}
                   >
-                    {isUploading ? "กำลัง Import..." : "Import Excel"}
+                    {isUploading ? "กำลังนำเข้าข้อมูล..." : "นำเข้า Excel"}
                   </Button>
 
                   <Button
@@ -868,7 +868,7 @@ function App() {
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="w-[380px] text-white">
               <SpinnerEmpty
-                title="กำลัง Import Excel"
+                title="กำลังนำเข้าข้อมูลจาก Excel"
                 description="ระบบกำลังนำเข้าข้อมูล กรุณารอสักครู่..."
               />
             </div>
