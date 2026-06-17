@@ -344,11 +344,7 @@ function App() {
 
       // ❌ ต้องเช็คก่อน ไม่งั้น throw แล้ว code ด้านล่างไม่ทำงาน
       if (!response.ok) {
-        message.error({
-          message: "เกิดข้อผิดพลาด",
-          description: result?.error || "ไม่สามารถนำเข้าข้อมูลได้",
-          placement: "topRight",
-        });
+        message.error(`เกิดข้อผิดพลาด ${result?.error || "ไม่สามารถนำเข้าข้อมูลได้"}`);
 
         throw new Error(result?.error || "Import failed");
       }
@@ -357,21 +353,12 @@ function App() {
       await fetchTaskEvents();
 
       // ✅ success notification
-      message.success({
-        message: "นำเข้าข้อมูลสำเร็จ",
-        description: `นำเข้าสำเร็จ ${result?.count ?? 0} รายการ`,
-        placement: "topRight",
-      });
+      message.success(`นำเข้าข้อมูลสำเร็จ ${result?.count ?? 0} รายการ`,);
 
       setFormSuccess(`นำเข้าสำเร็จ ${result?.count ?? 0} รายการ`);
     } catch (error) {
       console.error(error);
-
-      message.error({
-        message: "เกิดข้อผิดพลาด",
-        description: error.message || "ไม่สามารถนำเข้าข้อมูลได้",
-        placement: "topRight",
-      });
+      message.error(`เกิดข้อผิดพลาด ${error?.message || "ไม่สามารถนำเข้าข้อมูลได้"}`);
 
       setFormError(error.message);
     } finally {
