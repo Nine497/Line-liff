@@ -181,24 +181,26 @@ function App() {
 
       const tasks = await response.json();
 
-      const calendarEvents = tasks.map(
-        (task) => ({
-          id: task.id,
-          title: task.title,
-          start: task.start_time,
+      const calendarEvents = tasks.map((task) => ({
+        id: task.id,
+        title: task.title,
 
-          // FullCalendar ใช้ end แบบ exclusive
-          end: dayjs(task.end_time)
-            .add(1, "day")
-            .toISOString(),
+        start: dayjs(task.start_time).format(
+          "YYYY-MM-DD"
+        ),
 
-          extendedProps: {
-            task,
-            participants:
-              task.task_participants,
-          },
-        })
-      );
+        end: dayjs(task.end_time)
+          .add(1, "day")
+          .format("YYYY-MM-DD"),
+
+        allDay: true,
+
+        extendedProps: {
+          task,
+          participants:
+            task.task_participants,
+        },
+      }));
 
       setEvents(calendarEvents);
     } catch (error) {
@@ -696,9 +698,10 @@ function App() {
                       interactionPlugin,
                     ]}
                     initialView="dayGridMonth"
-                    locale="th"
-                    height="auto"
+                    locale={thLocale}
                     events={events}
+                    displayEventTime={false}
+                    moreLinkClick="popover"
                   />
                 </div>
               </CardContent>
