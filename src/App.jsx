@@ -408,21 +408,34 @@ function App() {
   // =========================
 
   const selectedEvents = useMemo(() => {
-    return Array.isArray(events?.[selectedKey])
-      ? events[selectedKey]
-      : [];
+    return events.filter((event) => {
+      const selected = dayjs(selectedKey);
+
+      const start = dayjs(event.start);
+      const end = event.end
+        ? dayjs(event.end).subtract(1, "day")
+        : start;
+
+      return (
+        (selected.isAfter(start, "day") ||
+          selected.isSame(start, "day")) &&
+        (selected.isBefore(end, "day") ||
+          selected.isSame(end, "day"))
+      );
+    });
   }, [events, selectedKey]);
 
   const busyMap = useMemo(() => {
     const map = new Map();
 
     for (const event of selectedEvents) {
-      const participants = Array.isArray(event?.task_participants)
-        ? event.task_participants
-        : [];
+      const participants =
+        event?.extendedProps?.task
+          ?.task_participants ?? [];
 
       for (const tp of participants) {
         const participant = tp?.participant;
+
         if (!participant?.id) continue;
 
         if (!map.has(participant.id)) {
@@ -432,8 +445,9 @@ function App() {
         map.get(participant.id).push({
           id: event.id,
           title: event.title,
-          start_time: event.start_time,
-          location: event.location,
+          start_time:
+            event.extendedProps.task
+              .start_time,
         });
       }
     }
@@ -450,7 +464,9 @@ function App() {
   }, [participants, busyMap]);
 
   const renderEvent = (event) => {
-    const participants = event?.task_participants ?? [];
+    const participants =
+      event?.extendedProps?.task
+        ?.task_participants ?? [];
 
     return (
       <div
