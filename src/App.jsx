@@ -277,20 +277,6 @@ function App() {
     ];
   }, [events]);
 
-  const calendarEvents = useMemo(() => {
-    return tasks.map((task) => ({
-      id: task.id,
-      title: task.title,
-      start: task.start_time,
-      end: dayjs(task.end_time)
-        .add(1, "day")
-        .toISOString(),
-      extendedProps: {
-        task,
-      },
-    }));
-  }, [tasks]);
-
   function moveMonth(direction) {
     setMonth((current) => {
       const nextMonth = current.month + direction;
@@ -712,7 +698,7 @@ function App() {
                     initialView="dayGridMonth"
                     locale="th"
                     height="auto"
-                    events={calendarEvents}
+                    events={events}
                   />
                 </div>
               </CardContent>
