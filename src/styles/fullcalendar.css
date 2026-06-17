@@ -60,7 +60,7 @@
 }
 .fc .fc-day-today { background: transparent !important; }
 .fc .fc-day-today .fc-daygrid-day-number {
-  background: #6c5ce7;
+  background: hsl(var(--primary) / 0.12) !important;
   color: #fff;
   font-weight: 500;
 }
