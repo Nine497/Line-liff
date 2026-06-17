@@ -163,6 +163,8 @@ function App() {
     initApp();
   }, []);
 
+  import dayjs from "dayjs";
+
   async function fetchTaskEvents() {
     try {
       const response = await fetch(
@@ -178,35 +180,46 @@ function App() {
       const tasks =
         await response.json();
 
-      if (tasks.length !== 0) {
-        console.log(
-          "Loaded tasks:",
-          tasks
+      const grouped = {};
+
+      tasks.forEach((task) => {
+        let current = dayjs(
+          task.start_time
         );
-      }
 
-      const grouped =
-        tasks.reduce((acc, task) => {
-          const date = new Date(
-            task.start_time
-          );
+        const end = dayjs(
+          task.end_time
+        );
 
-          const key = `${date.getFullYear()}-${date.getMonth() + 1
-            }-${date.getDate()}`;
+        while (
+          current.isBefore(end, "day") ||
+          current.isSame(end, "day")
+        ) {
+          const key =
+            current.format(
+              "YYYY-M-D"
+            );
 
-          acc[key] =
-            acc[key] ?? [];
+          grouped[key] ??= [];
 
-          acc[key].push(task);
+          grouped[key].push(task);
 
-          return acc;
-        }, {});
+          current =
+            current.add(1, "day");
+        }
+      });
 
       setEvents(grouped);
     } catch (error) {
       console.error(error);
     }
   }
+
+  const getEventSpan = (event) =>
+    dayjs(event.end_time).diff(
+      dayjs(event.start_time),
+      "day"
+    ) + 1;
 
   const fetchParticipants =
     async () => {
@@ -686,39 +699,146 @@ function App() {
                       </div>
                     ))}
                   </div>
-                  <div className="grid grid-cols-7">
-                    {weeks.flat().map((day) => {
-                      const key = dayKey(day);
-                      const isCurrentMonth = day.month === month.month;
-                      const isSelected = key === selectedKey;
-                      const hasEvents = Boolean(events[key]);
 
-                      return (
-                        <button
-                          className={cn(
-                            "flex min-h-20 flex-col items-start gap-2 border-r border-t p-2 text-left transition-colors last:border-r-0 sm:min-h-28 sm:p-3 lg:min-h-32",
-                            !isCurrentMonth && "bg-muted/40 text-muted-foreground",
-                            isSelected && "bg-accent",
-                          )}
-                          key={key}
-                          onClick={() => setSelectedKey(key)}
-                          type="button"
-                        >
-                          <span
-                            className={cn(
-                              "grid size-7 place-items-center rounded-md text-sm font-medium",
-                              isSelected && "bg-primary text-primary-foreground",
+                  {weeks.map((week, weekIndex) => {
+                    const weekStart = dayjs(dayKey(week[0]));
+                    const weekEnd = dayjs(dayKey(week[6]));
+
+                    const weekEvents = Object.values(events)
+                      .flat()
+                      .filter(
+                        (event, index, self) =>
+                          index ===
+                          self.findIndex((e) => e.id === event.id)
+                      )
+                      .filter((event) => {
+                        const start = dayjs(event.start_time);
+                        const end = dayjs(event.end_time);
+
+                        return (
+                          start.isSameOrBefore(weekEnd, "day") &&
+                          end.isSameOrAfter(weekStart, "day")
+                        );
+                      });
+
+                    return (
+                      <div
+                        key={weekIndex}
+                        className="relative"
+                      >
+                        {/* Day Cells */}
+                        <div className="grid grid-cols-7">
+                          {week.map((day) => {
+                            const key = dayKey(day);
+                            const isCurrentMonth =
+                              day.month === month.month;
+                            const isSelected =
+                              key === selectedKey;
+
+                            return (
+                              <button
+                                key={key}
+                                type="button"
+                                onClick={() =>
+                                  setSelectedKey(key)
+                                }
+                                className={cn(
+                                  "relative min-h-32 border-r border-t p-2 text-left last:border-r-0",
+                                  !isCurrentMonth &&
+                                  "bg-muted/40 text-muted-foreground",
+                                  isSelected && "bg-accent"
+                                )}
+                              >
+                                <span
+                                  className={cn(
+                                    "grid size-7 place-items-center rounded-md text-sm font-medium",
+                                    isSelected &&
+                                    "bg-primary text-primary-foreground"
+                                  )}
+                                >
+                                  {day.date}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Event Layer */}
+                        <div className="pointer-events-none absolute inset-0 top-9 px-1">
+                          <div className="grid grid-cols-7 gap-y-1">
+                            {weekEvents.map(
+                              (event, rowIndex) => {
+                                const start =
+                                  dayjs(
+                                    event.start_time
+                                  );
+                                const end = dayjs(
+                                  event.end_time
+                                );
+
+                                const visibleStart =
+                                  start.isBefore(
+                                    weekStart,
+                                    "day"
+                                  )
+                                    ? weekStart
+                                    : start;
+
+                                const visibleEnd =
+                                  end.isAfter(
+                                    weekEnd,
+                                    "day"
+                                  )
+                                    ? weekEnd
+                                    : end;
+
+                                const startColumn =
+                                  visibleStart.diff(
+                                    weekStart,
+                                    "day"
+                                  ) + 1;
+
+                                const span =
+                                  visibleEnd.diff(
+                                    visibleStart,
+                                    "day"
+                                  ) + 1;
+
+                                return (
+                                  <div
+                                    key={`${event.id}-${weekIndex}`}
+                                    className="absolute flex h-5 items-center overflow-hidden rounded bg-primary px-2 text-[10px] text-primary-foreground"
+                                    style={{
+                                      top:
+                                        rowIndex * 22,
+                                      left: `calc(${((startColumn - 1) / 7) * 100}% + 4px)`,
+                                      width: `calc(${(span / 7) * 100}% - 8px)`,
+                                    }}
+                                  >
+                                    <span className="truncate">
+                                      {event.title}
+                                    </span>
+                                  </div>
+                                );
+                              }
                             )}
-                          >
-                            {day.date}
-                          </span>
-                          {hasEvents ? (
-                            <span className="h-1.5 w-10 rounded-full bg-primary" />
-                          ) : null}
-                        </button>
-                      );
-                    })}
-                  </div>
+                          </div>
+                        </div>
+
+                        {/* เพิ่มความสูงให้ Event ไม่ทับ */}
+                        {weekEvents.length >
+                          0 && (
+                            <div
+                              style={{
+                                height:
+                                  weekEvents.length *
+                                  22,
+                              }}
+                            />
+                          )}
+                      </div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
