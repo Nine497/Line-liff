@@ -72,11 +72,6 @@
   box-shadow: inset 0 4px 0 #2e2e2e;
 }
 
-.fc .fc-daygrid-day.selected-day .fc-daygrid-day-number {
-  color: #ffffff;
-  font-weight: 600;
-}
-
 /* ── Events ── */
 .fc .fc-event {
   border: none !important;
