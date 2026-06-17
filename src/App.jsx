@@ -802,11 +802,23 @@ function App() {
                     dateClick={(info) => {
                       setSelectedKey(info.dateStr);
                     }}
-                    dayCellClassNames={(arg) =>
-                      arg.dateStr === selectedKey
+                    dayCellClassNames={(arg) => {
+                      const key =
+                        dayjs(arg.date).format(
+                          "YYYY-MM-DD"
+                        );
+
+                      console.log(
+                        "cell:",
+                        key,
+                        "selected:",
+                        selectedKey
+                      );
+
+                      return key === selectedKey
                         ? ["selected-day"]
-                        : []
-                    }
+                        : [];
+                    }}
                   />
                 </div>
               </CardContent>
