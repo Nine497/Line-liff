@@ -4,6 +4,11 @@
   height: 100dvh; /* dvh = รองรับ browser bar มือถือ */
   overflow: hidden;
 }
+
+.fc .selected-day {
+  background: rgba(101, 191, 142, 0.12) !important;
+}
+
 /* ── Toolbar ── */
 .fc .fc-toolbar { gap: 8px; flex-wrap: wrap; }
 .fc .fc-toolbar-title {
