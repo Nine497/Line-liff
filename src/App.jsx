@@ -4,6 +4,7 @@ import Calendar from "calendarjs";
 import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun, X } from "lucide-react";
 import { Badge } from "./components/ui/badge";
 import { initLiff } from "./liff";
+import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   Card,
   CardContent,
@@ -685,11 +686,11 @@ function App() {
               size="icon"
               type="button"
               variant="outline"
+              disable={true}
             >
               {isDark ? <Sun /> : <Moon />}
             </Button>
-            <Button size="sm" onClick={() => setShowCreateForm(true)}>
-              <Plus data-icon="inline-start" />
+            <Button color="green" variant="solid" size="sm" icon={<PlusOutlined />} onClick={() => setShowCreateForm(true)}>
               เพิ่มงาน
             </Button>
           </div>
@@ -727,6 +728,7 @@ function App() {
                     <Button
                       asChild
                       variant="outline"
+                      icon={<DownloadOutlined />}
                       disabled={isUploading}
                     >
                       <span>
