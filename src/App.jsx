@@ -802,22 +802,17 @@ function App() {
                     dateClick={(info) => {
                       setSelectedKey(info.dateStr);
                     }}
-                    dayCellClassNames={(arg) => {
+                    dayCellDidMount={(arg) => {
                       const key =
                         dayjs(arg.date).format(
                           "YYYY-MM-DD"
                         );
 
-                      console.log(
-                        "cell:",
-                        key,
-                        "selected:",
-                        selectedKey
-                      );
-
-                      return key === selectedKey
-                        ? ["selected-day"]
-                        : [];
+                      if (key === selectedKey) {
+                        arg.el.classList.add(
+                          "selected-day"
+                        );
+                      }
                     }}
                   />
                 </div>
