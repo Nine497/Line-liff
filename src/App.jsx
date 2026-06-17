@@ -277,6 +277,16 @@ function App() {
     }
   }
 
+  const uniqueEvents = useMemo(() => {
+    return [
+      ...new Map(
+        Object.values(events)
+          .flat()
+          .map((event) => [event.id, event])
+      ).values(),
+    ];
+  }, [events]);
+
   function moveMonth(direction) {
     setMonth((current) => {
       const nextMonth = current.month + direction;
@@ -702,28 +712,90 @@ function App() {
                     const weekStart = dayjs(dayKey(week[0]));
                     const weekEnd = dayjs(dayKey(week[6]));
 
-                    const weekEvents = Object.values(events)
-                      .flat()
-                      .filter(
-                        (event, index, self) =>
-                          index ===
-                          self.findIndex((e) => e.id === event.id)
-                      )
-                      .filter((event) => {
-                        const start = dayjs(event.start_time);
-                        const end = dayjs(event.end_time);
+                    const weekEvents = uniqueEvents.filter((event) => {
+                      const start = dayjs(event.start_time);
+                      const end = dayjs(event.end_time);
 
-                        return (
-                          start.isSameOrBefore(weekEnd, "day") &&
-                          end.isSameOrAfter(weekStart, "day")
-                        );
-                      });
+                      return !(
+                        end.isBefore(weekStart, "day") ||
+                        start.isAfter(weekEnd, "day")
+                      );
+                    });
+
+                    const eventRowsHeight =
+                      Math.max(weekEvents.length, 1) * 22;
 
                     return (
                       <div
                         key={weekIndex}
                         className="relative"
                       >
+                        {/* Event Area */}
+                        <div
+                          className="relative border-t bg-background"
+                          style={{
+                            height: `${eventRowsHeight}px`,
+                          }}
+                        >
+                          {weekEvents.map(
+                            (event, rowIndex) => {
+                              const start = dayjs(
+                                event.start_time
+                              );
+                              const end = dayjs(
+                                event.end_time
+                              );
+
+                              const visibleStart =
+                                start.isBefore(
+                                  weekStart,
+                                  "day"
+                                )
+                                  ? weekStart
+                                  : start;
+
+                              const visibleEnd =
+                                end.isAfter(
+                                  weekEnd,
+                                  "day"
+                                )
+                                  ? weekEnd
+                                  : end;
+
+                              const startColumn =
+                                visibleStart.diff(
+                                  weekStart,
+                                  "day"
+                                );
+
+                              const span =
+                                visibleEnd.diff(
+                                  visibleStart,
+                                  "day"
+                                ) + 1;
+
+                              const cellWidth =
+                                100 / 7;
+
+                              return (
+                                <div
+                                  key={`${event.id}-${weekIndex}`}
+                                  className="absolute flex h-5 items-center overflow-hidden rounded bg-primary px-2 text-[10px] text-primary-foreground"
+                                  style={{
+                                    top: rowIndex * 22,
+                                    left: `${startColumn * cellWidth}%`,
+                                    width: `${span * cellWidth}%`,
+                                  }}
+                                >
+                                  <span className="truncate">
+                                    {event.title}
+                                  </span>
+                                </div>
+                              );
+                            }
+                          )}
+                        </div>
+
                         {/* Day Cells */}
                         <div className="grid grid-cols-7">
                           {week.map((day) => {
@@ -741,10 +813,11 @@ function App() {
                                   setSelectedKey(key)
                                 }
                                 className={cn(
-                                  "relative min-h-32 border-r border-t p-2 text-left last:border-r-0",
+                                  "relative min-h-28 border-r border-t p-2 text-left last:border-r-0",
                                   !isCurrentMonth &&
                                   "bg-muted/40 text-muted-foreground",
-                                  isSelected && "bg-accent"
+                                  isSelected &&
+                                  "bg-accent"
                                 )}
                               >
                                 <span
@@ -760,80 +833,6 @@ function App() {
                             );
                           })}
                         </div>
-
-                        {/* Event Layer */}
-                        <div className="pointer-events-none absolute inset-0 top-9 px-1">
-                          <div className="grid grid-cols-7 gap-y-1">
-                            {weekEvents.map(
-                              (event, rowIndex) => {
-                                const start =
-                                  dayjs(
-                                    event.start_time
-                                  );
-                                const end = dayjs(
-                                  event.end_time
-                                );
-
-                                const visibleStart =
-                                  start.isBefore(
-                                    weekStart,
-                                    "day"
-                                  )
-                                    ? weekStart
-                                    : start;
-
-                                const visibleEnd =
-                                  end.isAfter(
-                                    weekEnd,
-                                    "day"
-                                  )
-                                    ? weekEnd
-                                    : end;
-
-                                const startColumn =
-                                  visibleStart.diff(
-                                    weekStart,
-                                    "day"
-                                  ) + 1;
-
-                                const span =
-                                  visibleEnd.diff(
-                                    visibleStart,
-                                    "day"
-                                  ) + 1;
-
-                                return (
-                                  <div
-                                    key={`${event.id}-${weekIndex}`}
-                                    className="absolute flex h-5 items-center overflow-hidden rounded bg-primary px-2 text-[10px] text-primary-foreground"
-                                    style={{
-                                      top:
-                                        rowIndex * 22,
-                                      left: `calc(${((startColumn - 1) / 7) * 100}% + 4px)`,
-                                      width: `calc(${(span / 7) * 100}% - 8px)`,
-                                    }}
-                                  >
-                                    <span className="truncate">
-                                      {event.title}
-                                    </span>
-                                  </div>
-                                );
-                              }
-                            )}
-                          </div>
-                        </div>
-
-                        {/* เพิ่มความสูงให้ Event ไม่ทับ */}
-                        {weekEvents.length >
-                          0 && (
-                            <div
-                              style={{
-                                height:
-                                  weekEvents.length *
-                                  22,
-                              }}
-                            />
-                          )}
                       </div>
                     );
                   })}
