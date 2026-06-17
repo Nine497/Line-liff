@@ -204,6 +204,7 @@ function App() {
       }));
 
       setEvents(calendarEvents);
+      console.log("Fetched tasks:", calendarEvents);
     } catch (error) {
       console.error(
         "Fetch tasks error:",
