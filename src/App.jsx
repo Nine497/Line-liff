@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Calendar from "calendarjs";
 import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun, X } from "lucide-react";
 import { Badge } from "./components/ui/badge";
@@ -70,6 +70,7 @@ function App() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [participants, setParticipants] = useState([]);
+  const calendarRef = useRef(null);
   const [formData, setFormData] = useState({
     title: "",
     location: "",
@@ -272,24 +273,26 @@ function App() {
     }
   }
 
-  const uniqueEvents = useMemo(() => {
-    return [
-      ...new Map(
-        Object.values(events)
-          .flat()
-          .map((event) => [event.id, event])
-      ).values(),
-    ];
-  }, [events]);
+  const moveMonth = (direction) => {
+    const calendarApi =
+      calendarRef.current?.getApi();
 
-  function moveMonth(direction) {
-    setMonth((current) => {
-      const nextMonth = current.month + direction;
-      if (nextMonth < 1) return { year: current.year - 1, month: 12 };
-      if (nextMonth > 12) return { year: current.year + 1, month: 1 };
-      return { ...current, month: nextMonth };
+    if (!calendarApi) return;
+
+    if (direction > 0) {
+      calendarApi.next();
+    } else {
+      calendarApi.prev();
+    }
+
+    const currentDate =
+      calendarApi.getDate();
+
+    setMonth({
+      year: currentDate.getFullYear(),
+      month: currentDate.getMonth() + 1,
     });
-  }
+  };
 
   async function handleCreateTask(e) {
     e.preventDefault();
@@ -753,6 +756,7 @@ function App() {
               <CardContent className="flex flex-col gap-5 p-4 pt-4 sm:p-5">
                 <div className="overflow-hidden rounded-lg border">
                   <FullCalendar
+                    ref={calendarRef}
                     plugins={[
                       dayGridPlugin,
                       interactionPlugin,
@@ -765,6 +769,14 @@ function App() {
                     expandRows={true}
                     height="auto"
                     headerToolbar={false}
+                    datesSet={(arg) => {
+                      const date = arg.view.currentStart;
+
+                      setMonth({
+                        year: date.getFullYear(),
+                        month: date.getMonth() + 1,
+                      });
+                    }}
                     dateClick={(info) => {
                       setSelectedKey(info.dateStr);
                     }}

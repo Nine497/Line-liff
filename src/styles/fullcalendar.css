@@ -65,10 +65,10 @@
   color: #fff;
   font-weight: 500;
 }
-.fc .fc-daygrid-day:hover { background: rgba(58, 58, 58, 0.05); }
+.fc .fc-daygrid-day:hover { background: rgba(43, 42, 42, 0.05); }
 
 .fc .fc-daygrid-day.selected-day {
-  background: rgba(58, 58, 58, 0.05) !important;
+  background: rgba(43, 42, 42, 0.05) !important;
 }
 
 /* ── Events ── */
@@ -79,6 +79,7 @@
   padding: 2px 7px;
   cursor: pointer;
   transition: opacity .12s;
+  gap: 3px;
 }
 .fc .fc-event:hover { opacity: .82; }
 .fc .fc-daygrid-event { min-height: 20px; }
