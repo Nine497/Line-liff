@@ -114,7 +114,7 @@
 
 @media (max-width: 600px) {
 
-  /* cell สูงขึ้นนิดเพื่อให้ chip พอดี */
+  /* cell */
   .fc .fc-daygrid-day {
     min-height: 52px !important;
   }
@@ -136,7 +136,7 @@
     padding: 0;
   }
 
-  /* Event chip — เล็ก กะทัดรัด */
+  /* Event chip */
   .fc .fc-daygrid-event {
     font-size: 9px !important;
     padding: 1px 4px !important;
@@ -148,20 +148,36 @@
     text-overflow: ellipsis;
   }
 
-  /* แสดง dot-style แทน title */
-  .fc .fc-daygrid-event::before {
-    content: '';
-    display: inline-block;
+  /* dot + title บรรทัดเดียวกัน */
+  .fc .fc-event-main {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    overflow: hidden;
+  }
+
+  .fc .fc-daygrid-event-dot {
     width: 5px;
     height: 5px;
     border-radius: 50%;
+    flex-shrink: 0;
+    border: none !important;
     background: currentColor;
-    margin-right: 3px;
-    vertical-align: middle;
-    opacity: .8;
   }
 
-  /* +N more link */
+  .fc .fc-event-title {
+    font-size: 9px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ซ่อน time */
+  .fc .fc-event-time {
+    display: none;
+  }
+
+  /* +N more */
   .fc .fc-daygrid-more-link {
     font-size: 9px;
     color: var(--color-text-tertiary);
