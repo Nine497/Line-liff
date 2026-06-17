@@ -705,7 +705,7 @@ function App() {
             >
               {isDark ? <Sun /> : <Moon />}
             </Button>
-            <Button color="green" variant="solid" size="sm" icon={<PlusOutlined />} onClick={() => setShowCreateForm(true)}>
+            <Button type="primary" size="sm" icon={<PlusOutlined />} onClick={() => setShowCreateForm(true)}>
               เพิ่มงาน
             </Button>
           </div>
@@ -740,7 +740,7 @@ function App() {
                   />
 
                   <Button
-                    type="primary"
+                    type="Outline"
                     icon={<DownloadOutlined />}
                     onClick={() =>
                       document
@@ -1054,7 +1054,7 @@ function App() {
           </Form.Item>
 
           <div className="flex justify-end gap-2">
-            <Button
+            <Button type="outline"
               onClick={() => {
                 setShowCreateForm(false);
                 form.resetFields();
