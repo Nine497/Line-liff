@@ -80,7 +80,7 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSuccess, setFormSuccess] = useState("");
   const [formError, setFormError] = useState("");
-  const [participants, setParticipants] = useState([]); const [participants, setParticipants] = useState([]);
+  const [participants, setParticipants] = useState([]);
   const calendarRef = useRef(null);
   const { TextArea } = Input;
   const { RangePicker } = DatePicker;
