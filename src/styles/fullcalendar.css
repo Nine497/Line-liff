@@ -113,6 +113,9 @@
 .fc .fc-daygrid-row {
   height: calc(100% / 6); /* หาร 6 แถว */
 }
+.fc .fc-daygrid-day:has(.fc-event:hover) {
+  background: transparent !important;
+}
 
 @media (max-width: 600px) {
 
