@@ -1,33 +1,17 @@
 "use client";
 import { useEffect, useMemo, useState, useRef } from "react";
-import Calendar from "calendarjs";
 import Header from "./components/layout/Header";
 import CalendarCard from "./components/calendar/CalendarCard";
 import CalendarsSidebar from "./components/calendar/CalendarSidebar";
 import CreateTaskModal from "./components/modal/CreateTaskModal";
-import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun, X } from "lucide-react";
 import { initLiff } from "./liff";
-import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "./components/ui/card";
 import { Users } from "lucide-react"
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { BarLoader } from "react-spinners";
 import {
-  Modal,
   Form,
   Input,
-  DatePicker,
-  Select,
-  Button,
-  Alert,
   Tabs,
   message, notification
 } from "antd";
@@ -57,18 +41,18 @@ function App() {
   const calendarRef = useRef(null);
   const { TextArea } = Input;
   const [form] = Form.useForm();
-  const [formData, setFormData] = useState({
-    title: "",
-    location: "",
-    start_time: "",
-    team: "",
-    type_id: null,
-    type: "ประชุม",
-    description: "",
-  });
+  // const [formData, setFormData] = useState({
+  //   title: "",
+  //   location: "",
+  //   start_time: "",
+  //   team: "",
+  //   type_id: null,
+  //   type: "ประชุม",
+  //   description: "",
+  // });
   const [taskTypes, setTaskTypes] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [selectedParticipantIds, setSelectedParticipantIds] = useState([]);
+  // const [users, setUsers] = useState([]);
+  // const [selectedParticipantIds, setSelectedParticipantIds] = useState([]);
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
@@ -234,19 +218,19 @@ function App() {
     }
   }
 
-  async function fetchUsers() {
-    try {
-      const response = await fetch(`${apiUrl}/users`);
-      if (!response.ok) throw new Error("Failed to load users");
+  // async function fetchUsers() {
+  //   try {
+  //     const response = await fetch(`${apiUrl}/users`);
+  //     if (!response.ok) throw new Error("Failed to load users");
 
-      const userList = await response.json();
-      if (Array.isArray(userList)) {
-        setUsers(userList);
-      }
-    } catch (error) {
-      console.error("Failed to load users from backend", error);
-    }
-  }
+  //     const userList = await response.json();
+  //     if (Array.isArray(userList)) {
+  //       setUsers(userList);
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to load users from backend", error);
+  //   }
+  // }
 
   const moveMonth = (direction) => {
     const calendarApi =
@@ -335,21 +319,21 @@ function App() {
     }
   };
 
-  const validateForm = () => {
-    const errors = {};
+  // const validateForm = () => {
+  //   const errors = {};
 
-    if (!formData.title.trim()) {
-      errors.title = "กรุณากรอกชื่องาน";
-    }
+  //   if (!formData.title.trim()) {
+  //     errors.title = "กรุณากรอกชื่องาน";
+  //   }
 
-    if (!formData.start_time || !formData.end_time) {
-      errors.dateRange = "กรุณาเลือกช่วงเวลา";
-    }
+  //   if (!formData.start_time || !formData.end_time) {
+  //     errors.dateRange = "กรุณาเลือกช่วงเวลา";
+  //   }
 
-    setFormError(error?.message || "เกิดข้อผิดพลาด");
+  //   setFormError(error?.message || "เกิดข้อผิดพลาด");
 
-    return Object.keys(errors).length === 0;
-  };
+  //   return Object.keys(errors).length === 0;
+  // };
 
   // =========================
   // available / busy
@@ -731,212 +715,6 @@ function App() {
           </div>
         </>
       )}
-
-      {/* <Modal
-        open={showCreateForm}
-        title="เพิ่มกำหนดการใหม่"
-        onCancel={() => {
-          setShowCreateForm(false);
-          form.resetFields();
-        }}
-        footer={null}
-        width={800}
-        destroyOnHidden
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={async (values) => {
-            const payload = {
-              title: values.title.trim(),
-              type_id: values.type_id,
-              description: values.description?.trim() || "",
-              start_time:
-                values.dateRange[0].toISOString(),
-              end_time:
-                values.dateRange[1].toISOString(),
-              participant_ids:
-                values.participants || [],
-            };
-
-            await handleCreateTask(payload);
-          }}
-          initialValues={{
-            title: "",
-            description: "",
-            participants: [],
-          }}
-        >
-          <Form.Item
-            label="ชื่องาน"
-            name="title"
-            rules={[
-              {
-                required: true,
-                message: "กรุณากรอกชื่องาน",
-              },
-              {
-                max: 100,
-                message:
-                  "ชื่องานต้องไม่เกิน 100 ตัวอักษร",
-              },
-              {
-                validator: (_, value) => {
-                  if (
-                    !value ||
-                    value.trim().length > 0
-                  ) {
-                    return Promise.resolve();
-                  }
-
-                  return Promise.reject(
-                    new Error(
-                      "ชื่องานต้องไม่เป็นค่าว่าง"
-                    )
-                  );
-                },
-              },
-            ]}
-          >
-            <Input
-              placeholder="เช่น ประชุมทีม"
-              maxLength={100}
-              showCount
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="ประเภทงาน"
-            name="type_id"
-            rules={[
-              {
-                required: true,
-                message: "กรุณาเลือกประเภทงาน",
-              },
-            ]}
-          >
-            <Select
-              showSearch
-              placeholder="เลือกประเภทงาน"
-              optionFilterProp="label"
-              options={taskTypes.map((type) => ({
-                value: type.id,
-                label: type.name,
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="ช่วงเวลา"
-            name="dateRange"
-            rules={[
-              {
-                required: true,
-                message:
-                  "กรุณาเลือกวันและเวลา",
-              },
-              {
-                validator: (_, value) => {
-                  if (!value) {
-                    return Promise.resolve();
-                  }
-
-                  const [start, end] =
-                    value;
-
-                  if (
-                    end.isAfter(start)
-                  ) {
-                    return Promise.resolve();
-                  }
-
-                  return Promise.reject(
-                    new Error(
-                      "วันสิ้นสุดต้องมากกว่าวันเริ่มต้น"
-                    )
-                  );
-                },
-              },
-            ]}
-          >
-            <RangePicker
-              className="w-full"
-              showTime={{
-                format: "HH:mm",
-              }}
-              format="DD/MM/YYYY HH:mm"
-              placeholder={[
-                "วันเริ่มต้น",
-                "วันสิ้นสุด",
-              ]}
-              disabledDate={(current) =>
-                current &&
-                current <
-                dayjs().startOf("day")
-              }
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="ผู้เข้าร่วม"
-            name="participants"
-          >
-            <Select
-              mode="multiple"
-              showSearch
-              allowClear
-              optionFilterProp="label"
-              placeholder="เลือกผู้เข้าร่วม"
-              options={participants.map(
-                (participant) => ({
-                  value: participant.id,
-                  label: participant.name,
-                })
-              )}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="รายละเอียด"
-            name="description"
-            rules={[
-              {
-                max: 500,
-                message:
-                  "รายละเอียดต้องไม่เกิน 500 ตัวอักษร",
-              },
-            ]}
-          >
-            <TextArea
-              rows={4}
-              maxLength={500}
-              showCount
-              placeholder="รายละเอียดเพิ่มเติม (ไม่บังคับ)"
-            />
-          </Form.Item>
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline"
-              onClick={() => {
-                setShowCreateForm(false);
-                form.resetFields();
-              }}
-              disabled={isSubmitting}
-            >
-              ยกเลิก
-            </Button>
-
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={isSubmitting}
-            >
-              บันทึก
-            </Button>
-          </div>
-        </Form>
-      </Modal> */}
-
       <CreateTaskModal
         open={showCreateForm}
         form={form}
