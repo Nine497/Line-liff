@@ -17,7 +17,6 @@ import {
   CardTitle,
 } from "./components/ui/card";
 import { Users } from "lucide-react"
-import { Textarea } from "./components/ui/textarea";
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { BarLoader } from "react-spinners";
@@ -38,31 +37,10 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import thLocale from "@fullcalendar/core/locales/th";
 import "./styles/fullcalendar.css"
-const weekdays = ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"];
-const monthNames = [
-  "มกราคม",
-  "กุมภาพันธ์",
-  "มีนาคม",
-  "เมษายน",
-  "พฤษภาคม",
-  "มิถุนายน",
-  "กรกฎาคม",
-  "สิงหาคม",
-  "กันยายน",
-  "ตุลาคม",
-  "พฤศจิกายน",
-  "ธันวาคม",
-];
-
-const apiUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
-
-const todayKey = dayjs().format(
-  "YYYY-MM-DD"
-);
-
-function dayKey(day) {
-  return `${day.year}-${day.month}-${day.date}`;
-}
+import { weekdays, monthNames } from "./constants/calendar";
+import { apiUrl } from "./lib/api";
+import { todayKey, dayKey } from "./utils/date";
+import { hexToRgba } from "./utils/color";
 
 function App() {
   const [theme, setTheme] = useState("light");
@@ -78,7 +56,6 @@ function App() {
   const [participants, setParticipants] = useState([]);
   const calendarRef = useRef(null);
   const { TextArea } = Input;
-  const { RangePicker } = DatePicker;
   const [form] = Form.useForm();
   const [formData, setFormData] = useState({
     title: "",
@@ -103,11 +80,6 @@ function App() {
       document.body.style.overflow = "";
     };
   }, [showCreateForm]);
-
-  const weeks = useMemo(() => {
-    const calendar = new Calendar(month.year, month.month);
-    return calendar.generate({ withStaticLength: true });
-  }, [month]);
 
   const selectedDate = useMemo(() => {
     const [year, month, day] = selectedKey.split("-");
@@ -198,7 +170,7 @@ function App() {
           start: dayjs(task.start_time).format("YYYY-MM-DD"),
           end: dayjs(task.end_time).add(1, "day").format("YYYY-MM-DD"),
           allDay: true,
-          backgroundColor: `rgba(${r},${g},${b},0.15)`,
+          backgroundColor: hexToRgba(color, 0.15),
           borderColor: 'transparent',
           textColor: color,
           extendedProps: {
