@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import Header from "./components/layout/Header";
 import CalendarCard from "./components/calendar/CalendarCard";
-import CalendarsSidebar from "./components/calendar/CalendarSidebar";
+import CalendarSidebar from "./components/calendar/CalendarSidebar";
 import CreateTaskModal from "./components/modal/CreateTaskModal";
 import { initLiff } from "./liff";
 import { Users } from "lucide-react"
@@ -25,6 +25,9 @@ import { weekdays, monthNames } from "./constants/calendar";
 import { apiUrl } from "./lib/api";
 import { todayKey, dayKey } from "./utils/date";
 import { hexToRgba } from "./utils/color";
+import { fetchTasks, fetchParticipants, fetchTaskTypes } from "./api/tasks";
+import { toCalendarEvent } from "./utils/taskMapper";
+import { useInitApp } from "./hooks/useInitApp";
 
 function App() {
   const [theme, setTheme] = useState("light");
@@ -41,18 +44,7 @@ function App() {
   const calendarRef = useRef(null);
   const { TextArea } = Input;
   const [form] = Form.useForm();
-  // const [formData, setFormData] = useState({
-  //   title: "",
-  //   location: "",
-  //   start_time: "",
-  //   team: "",
-  //   type_id: null,
-  //   type: "ประชุม",
-  //   description: "",
-  // });
   const [taskTypes, setTaskTypes] = useState([]);
-  // const [users, setUsers] = useState([]);
-  // const [selectedParticipantIds, setSelectedParticipantIds] = useState([]);
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
@@ -70,167 +62,25 @@ function App() {
     return `${Number(day)} ${monthNames[Number(month) - 1]} ${Number(year) + 543}`;
   }, [selectedKey]);
 
-  useEffect(() => {
-    const initApp = async () => {
-      try {
-        const liff = await initLiff();
+  useInitApp({
+    setCurrentUser,
+    fetchTaskEvents,
+    setIsInitializing,
+    setParticipants,
+    setTaskTypes,
+  });
 
-        if (!liff) {
-          return;
-        }
-
-        const idToken = liff.getIDToken();
-
-        if (!idToken) {
-          throw new Error(
-            "Missing LIFF ID Token (openid scope missing)"
-          );
-        }
-
-        const response = await fetch(`${apiUrl}/users`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id_token: idToken,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (response.status === 401) {
-          liff.logout();
-          liff.login();
-          return;
-        }
-        if (!response.ok) {
-          throw new Error(
-            result.error || "Failed to sync user"
-          );
-        }
-
-        setCurrentUser(result.user);
-
-        await Promise.all([
-          fetchTaskEvents(),
-          fetchTaskTypes(),
-          fetchUsers(),
-          fetchParticipants(),
-        ]);
-      } catch (error) {
-        console.error("LIFF init failed:", error);
-      } finally {
-        setIsInitializing(false);
-      }
-    };
-
-    initApp();
-  }, []);
 
   async function fetchTaskEvents() {
     try {
-      const response = await fetch(
-        `${apiUrl}/tasks`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to load tasks from backend"
-        );
-      }
-
-      const tasks = await response.json();
-
-      const calendarEvents = tasks.map((task) => {
-        const color = task.type?.color ?? '#6c5ce7'
-        const r = parseInt(color.slice(1, 3), 16)
-        const g = parseInt(color.slice(3, 5), 16)
-        const b = parseInt(color.slice(5, 7), 16)
-
-        return {
-          id: task.id,
-          title: task.title,
-          start: dayjs(task.start_time).format("YYYY-MM-DD"),
-          end: dayjs(task.end_time).add(1, "day").format("YYYY-MM-DD"),
-          allDay: true,
-          backgroundColor: hexToRgba(color, 0.15),
-          borderColor: 'transparent',
-          textColor: color,
-          extendedProps: {
-            task,
-            participants: task.task_participants,
-          },
-        }
-      })
+      const tasks = await fetchTasks();
+      const calendarEvents = tasks.map(toCalendarEvent);
 
       setEvents(calendarEvents);
-      console.log("Fetched tasks:", calendarEvents);
     } catch (error) {
-      console.error(
-        "Fetch tasks error:",
-        error
-      );
+      console.error("Fetch tasks error:", error);
     }
   }
-
-  const fetchParticipants =
-    async () => {
-      setLoading(true);
-      try {
-        const response =
-          await fetch(
-            `${apiUrl}/tasks/participants`
-          );
-
-        const result =
-          await response.json();
-
-        setParticipants(
-          result || []
-        );
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-  async function fetchTaskTypes() {
-    try {
-      const response = await fetch(`${apiUrl}/tasks/types`);
-      if (!response.ok) throw new Error("Failed to load task types");
-
-      const types = await response.json();
-      if (Array.isArray(types) && types.length > 0) {
-        setTaskTypes(types);
-        setFormData((prev) => {
-          const matched = types.find((item) => item.name === prev.type || item.id === prev.type_id);
-          return {
-            ...prev,
-            type_id: matched?.id ?? types[0].id,
-            type: matched?.name ?? types[0].name,
-          };
-        });
-      }
-    } catch (error) {
-      console.error("Failed to load task types from backend", error);
-    }
-  }
-
-  // async function fetchUsers() {
-  //   try {
-  //     const response = await fetch(`${apiUrl}/users`);
-  //     if (!response.ok) throw new Error("Failed to load users");
-
-  //     const userList = await response.json();
-  //     if (Array.isArray(userList)) {
-  //       setUsers(userList);
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to load users from backend", error);
-  //   }
-  // }
 
   const moveMonth = (direction) => {
     const calendarApi =
@@ -319,25 +169,6 @@ function App() {
     }
   };
 
-  // const validateForm = () => {
-  //   const errors = {};
-
-  //   if (!formData.title.trim()) {
-  //     errors.title = "กรุณากรอกชื่องาน";
-  //   }
-
-  //   if (!formData.start_time || !formData.end_time) {
-  //     errors.dateRange = "กรุณาเลือกช่วงเวลา";
-  //   }
-
-  //   setFormError(error?.message || "เกิดข้อผิดพลาด");
-
-  //   return Object.keys(errors).length === 0;
-  // };
-
-  // =========================
-  // available / busy
-  // =========================
 
   const selectedEvents = useMemo(() => {
     return events.filter((event) => {

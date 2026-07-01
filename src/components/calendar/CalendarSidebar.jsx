@@ -1,11 +1,4 @@
-import {
-    Card,
-    CardHeader,
-    CardContent,
-    CardTitle,
-    CardDescription,
-    Tabs,
-} from "antd"; // หรือ import ตามที่คุณใช้
+import { Card, Tabs } from "antd";
 
 function CalendarSidebar({
     selectedDate,
@@ -16,27 +9,29 @@ function CalendarSidebar({
 }) {
     return (
         <aside className="grid gap-5 xl:content-start">
-            <Card>
-                <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <Card
+                title={
                     <div>
-                        <CardDescription>วันที่เลือก</CardDescription>
-                        <CardTitle>{selectedDate}</CardTitle>
-                    </div>
-                </CardHeader>
-
-                <CardContent className="flex flex-col gap-3">
-                    {selectedEvents.length > 0 ? (
-                        <Tabs
-                            activeKey={activeTab}
-                            onChange={setActiveTab}
-                            items={tabItems}
-                        />
-                    ) : (
-                        <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                            ไม่มีงานในวันนี้
+                        <div className="text-xs text-gray-400">
+                            วันที่เลือก
                         </div>
-                    )}
-                </CardContent>
+                        <div className="text-base font-semibold">
+                            {selectedDate}
+                        </div>
+                    </div>
+                }
+            >
+                {selectedEvents.length > 0 ? (
+                    <Tabs
+                        activeKey={activeTab}
+                        onChange={setActiveTab}
+                        items={tabItems}
+                    />
+                ) : (
+                    <div className="rounded-lg border p-4 text-center text-gray-400">
+                        ไม่มีงานในวันนี้
+                    </div>
+                )}
             </Card>
         </aside>
     );

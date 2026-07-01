@@ -1,14 +1,5 @@
-import {
-    Empty,
-    EmptyContent,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
-} from "@/components/ui/empty";
-
+import { Empty, Button } from "antd";
 import { PulseLoader } from "react-spinners";
-import { Button } from "antd";
 
 export function SpinnerEmpty({
     title = "กำลังดำเนินการ",
@@ -16,31 +7,30 @@ export function SpinnerEmpty({
     onCancel,
 }) {
     return (
-        <Empty className="w-full text-white">
-            <EmptyHeader className="text-white">
-                <EmptyMedia variant="icon">
-                    <PulseLoader size={20} color="#ffffff" />
-                </EmptyMedia>
+        <div className="flex flex-col items-center justify-center text-white">
+            <Empty
+                description={false}
+                image={null}
+            >
+                <div className="flex flex-col items-center gap-3">
+                    <PulseLoader size={12} color="#ffffff" />
 
-                <EmptyTitle className="text-white">
-                    {title}
-                </EmptyTitle>
+                    <div className="text-center">
+                        <p className="text-lg font-semibold">{title}</p>
+                        <p className="text-sm text-white/70">{description}</p>
+                    </div>
 
-                <EmptyDescription className="text-white">
-                    {description}
-                </EmptyDescription>
-            </EmptyHeader>
-
-            <EmptyContent>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onCancel}
-                    className="text-white border-white/30 hover:bg-white/10"
-                >
-                    ยกเลิก
-                </Button>
-            </EmptyContent>
-        </Empty>
+                    {onCancel && (
+                        <Button
+                            onClick={onCancel}
+                            type="default"
+                            className="border-white/30 text-white hover:bg-white/10"
+                        >
+                            ยกเลิก
+                        </Button>
+                    )}
+                </div>
+            </Empty>
+        </div>
     );
 }
