@@ -4,6 +4,7 @@ import Calendar from "calendarjs";
 import Header from "./components/layout/Header";
 import CalendarCard from "./components/calendar/CalendarCard";
 import CalendarsSidebar from "./components/calendar/CalendarSidebar";
+import CreateTaskModal from "./components/modal/CreateTaskModal";
 import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun, X } from "lucide-react";
 import { initLiff } from "./liff";
 import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
@@ -759,7 +760,7 @@ function App() {
         </>
       )}
 
-      <Modal
+      {/* <Modal
         open={showCreateForm}
         title="เพิ่มกำหนดการใหม่"
         onCancel={() => {
@@ -962,7 +963,20 @@ function App() {
             </Button>
           </div>
         </Form>
-      </Modal>
+      </Modal> */}
+
+      <CreateTaskModal
+        open={showCreateForm}
+        form={form}
+        taskTypes={taskTypes}
+        participants={participants}
+        isSubmitting={isSubmitting}
+        handleCreateTask={handleCreateTask}
+        onClose={() => {
+          setShowCreateForm(false);
+          form.resetFields();
+        }}
+      />
     </main >
   );
 }
