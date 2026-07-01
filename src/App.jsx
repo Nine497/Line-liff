@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useMemo, useState, useRef } from "react";
 import Calendar from "calendarjs";
+import Header from "./components/layout/Header";
+import CalendarCard from "./components/calendar/CalendarCard";
+import CalendarsSidebar from "./components/calendar/CalendarSidebar";
 import { CalendarDays, ChevronLeft, ChevronRight, Moon, Plus, Sun, X } from "lucide-react";
 import { initLiff } from "./liff";
 import { DownloadOutlined, PlusOutlined } from '@ant-design/icons';
@@ -55,10 +58,6 @@ const apiUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
 const todayKey = dayjs().format(
   "YYYY-MM-DD"
 );
-// const tabLabels = [
-//   ["calendar", "ปฏิทิน"],
-//   ["agenda", "รายการ"],
-// ];
 
 function dayKey(day) {
   return `${day.year}-${day.month}-${day.date}`;
@@ -697,178 +696,43 @@ function App() {
         </div>
       ) : null}
 
-      {/* ส่วนโครงสร้างหลักกึ่งกลาง */}
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between gap-3 pb-4">
-          <a className="flex items-center gap-3 font-semibold" href="#calendarjs">
-            <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm">
-              {currentUser.picture_url ? (
-                <img
-                  src={currentUser.picture_url}
-                  alt={currentUser.display_name ?? "Current user"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-lg font-semibold">
-                  {currentUser.display_name?.[0] ?? "L"}
-                </span>
-              )}
-            </span>
-            <span>{currentUser.display_name ? currentUser.display_name : "ศรชล. Scheduler"}</span>
-          </a>
+        <Header
+          currentUser={currentUser}
+          isDark={isDark}
+          onToggleTheme={() =>
+            setTheme(isDark ? "light" : "dark")
+          }
+          onCreateTask={() => setShowCreateForm(true)}
+        />
 
-          <div className="flex items-center gap-2">
-            <Button
-              aria-label={isDark ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด"}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              size="icon"
-              type="button"
-              variant="outline"
-              disabled
-            >
-              {isDark ? <Sun /> : <Moon />}
-            </Button>
-            <Button type="primary" size="sm" icon={<PlusOutlined />} onClick={() => setShowCreateForm(true)}>
-              เพิ่มงาน
-            </Button>
-          </div>
-        </nav>
-
-        {/* เปลี่ยนจาก <main> เป็น <div> เพื่อไม่ให้ Tag ซ้ำซ้อน และใช้ flex-1 เพื่อดัน Footer */}
         <div className="flex flex-1 flex-col gap-5">
           <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
-            <Card className="overflow-hidden">
-              <CardHeader className="flex flex-col gap-4 border-b bg-card sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="grid size-10 place-items-center rounded-lg bg-secondary text-secondary-foreground">
-                    <CalendarDays />
-                  </span>
 
-                  <div className="flex flex-col gap-1">
-                    <CardDescription>ปฏิทิน</CardDescription>
+            <CalendarCard
+              month={month}
+              events={events}
+              calendarRef={calendarRef}
+              selectedKey={selectedKey}
+              isUploading={isUploading}
+              moveMonth={moveMonth}
+              goToday={goToday}
+              handleUpload={handleUpload}
+              setMonth={setMonth}
+              setSelectedKey={setSelectedKey}
+            />
 
-                    <CardTitle>
-                      {monthNames[month.month - 1]} {month.year + 543}
-                    </CardTitle>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    id="excel-upload"
-                    type="file"
-                    accept=".xlsx,.xls"
-                    onChange={handleUpload}
-                    className="hidden"
-                  />
-
-                  <Button
-                    variant="outline"
-                    icon={<DownloadOutlined />}
-                    onClick={() =>
-                      document
-                        .getElementById("excel-upload")
-                        .click()
-                    }
-                    loading={isUploading}
-                  >
-                    {isUploading ? "กำลังนำเข้าข้อมูล..." : "นำเข้า Excel"}
-                  </Button>
-
-                  <Button
-                    aria-label="เดือนก่อนหน้า"
-                    onClick={() => moveMonth(-1)}
-                    size="icon"
-                    variant="outline"
-                  >
-                    <ChevronLeft />
-                  </Button>
-
-                  <Button
-                    onClick={goToday}
-                    variant="outline"
-                  >
-                    วันนี้
-                  </Button>
-
-                  <Button
-                    aria-label="เดือนถัดไป"
-                    onClick={() => moveMonth(1)}
-                    size="icon"
-                    variant="outline"
-                  >
-                    <ChevronRight />
-                  </Button>
-                </div>
-              </CardHeader>
-
-              <CardContent className="flex flex-col gap-5 p-4 pt-4 sm:p-5">
-                <div className="overflow-hidden rounded-lg border">
-                  <FullCalendar
-                    ref={calendarRef}
-                    plugins={[
-                      dayGridPlugin,
-                      interactionPlugin,
-                    ]}
-                    initialView="dayGridMonth"
-                    locale={thLocale}
-                    events={events}
-                    displayEventTime={false}
-                    moreLinkClick="popover"
-                    expandRows={true}
-                    height="auto"
-                    headerToolbar={false}
-                    datesSet={(arg) => {
-                      const date = arg.view.currentStart;
-
-                      setMonth({
-                        year: date.getFullYear(),
-                        month: date.getMonth() + 1,
-                      });
-                    }}
-                    dateClick={(info) => {
-                      setSelectedKey(info.dateStr);
-                    }}
-                    dayCellClassNames={(arg) => {
-                      const key =
-                        dayjs(arg.date).format(
-                          "YYYY-MM-DD"
-                        );
-
-                      return key === selectedKey
-                        ? ["selected-day"]
-                        : [];
-                    }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <aside className="grid gap-5 xl:content-start">
-              <Card>
-                <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <CardDescription>วันที่เลือก</CardDescription>
-                    <CardTitle>{selectedDate}</CardTitle>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="flex flex-col gap-3">
-                  {selectedEvents.length > 0 ? (
-                    <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
-                  ) : (
-                    <div className="rounded-lg border p-4 text-center text-muted-foreground">
-                      ไม่มีงานในวันนี้
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </aside>
+            <CalendarSidebar
+              selectedDate={selectedDate}
+              selectedEvents={selectedEvents}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              tabItems={tabItems}
+            />
           </section >
         </div >
       </div >
 
-      {/* ย้าย Footer ออกมาด้านนอกสุด และเพิ่ม padding เพื่อความสวยงาม */}
       < footer className="w-full border-t bg-background py-4 mt-auto" >
         <div className="mx-auto flex flex-col items-center justify-center gap-1 text-center text-sm text-muted-foreground">
           <p className="font-medium text-foreground">
@@ -880,7 +744,6 @@ function App() {
         </div>
       </footer >
 
-      {/* ส่วนของ Dialog ต่างๆ (คงเดิม) */}
       {isUploading && (
         <>
           <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
