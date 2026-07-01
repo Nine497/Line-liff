@@ -28,6 +28,8 @@ import { hexToRgba } from "./utils/color";
 import { fetchTasks, fetchParticipants, fetchTaskTypes } from "./api/tasks";
 import { toCalendarEvent } from "./utils/taskMapper";
 import { useInitApp } from "./hooks/useInitApp";
+import EventCard from "./components/calendar/EventCard";
+import ParticipantCard from "./components/calendar/ParticipantCard";
 
 function App() {
   const [theme, setTheme] = useState("light");
@@ -226,136 +228,58 @@ function App() {
     return participants.filter((p) => busyMap.has(p.id));
   }, [participants, busyMap]);
 
-  const renderEvent = (event) => {
-    const participants =
-      event?.extendedProps?.task?.task_participants ?? [];
-    const color = event?.extendedProps?.task?.type?.color;
-    const typeName = event?.extendedProps?.task?.type?.name;
+  // const renderParticipant = (participant) => {
+  //   const events = busyMap.get(participant.id) || [];
+  //   const isBusy = events.length > 0;
 
-    const hex = color ?? '#2563eb'
-    const r = parseInt(hex.slice(1, 3), 16)
-    const g = parseInt(hex.slice(3, 5), 16)
-    const b = parseInt(hex.slice(5, 7), 16)
-    const bgColor = `rgba(${r},${g},${b},0.06)`
-    const borderColor = `rgba(${r},${g},${b},0.25)`
+  //   return (
+  //     <div
+  //       key={participant.id}
+  //       className={`flex items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-sm
+  //     ${isBusy
+  //           ? "border-l-4 border-l-red-500"
+  //           : "border-l-4 border-l-emerald-500"
+  //         }`}
+  //     >
+  //       <div className="min-w-0 flex-1">
+  //         <div className="flex items-center gap-2">
+  //           <p className="truncate text-sm font-semibold">
+  //             {participant.name}
+  //           </p>
 
-    return (
-      <div
-        key={event.id}
-        className="flex flex-col gap-3 rounded-xl p-4 transition-colors"
-        style={{
-          background: bgColor,
-          border: `1px solid ${borderColor}`,
-        }}
-      >
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span
-              className="mt-0.5 h-2.5 w-2.5 rounded-full flex-shrink-0"
-              style={{ background: hex }}
-            />
-            <p className="text-sm font-medium text-foreground leading-snug">
-              {event.title}
-            </p>
-          </div>
+  //           <span
+  //             className={`h-2.5 w-2.5 rounded-full ${isBusy ? "bg-red-500" : "bg-emerald-500"
+  //               }`}
+  //           />
+  //         </div>
 
-          {typeName && (
-            <span
-              className="rounded-full px-2.5 py-0.5 text-xs font-medium flex-shrink-0"
-              style={{
-                background: `rgba(${r},${g},${b},0.12)`,
-                color: hex,
-              }}
-            >
-              {typeName}
-            </span>
-          )}
-        </div>
+  //         {isBusy && (
+  //           <ul className="mt-2 space-y-1">
+  //             {events.map((e) => (
+  //               <li
+  //                 key={e.id}
+  //                 className="flex items-center gap-2 text-xs text-gray-500"
+  //               >
+  //                 <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+  //                 {e.title}
+  //               </li>
+  //             ))}
+  //           </ul>
+  //         )}
+  //       </div>
 
-        <div className="space-y-1.5">
-          <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
-            <Users className="h-3 w-3" />
-            ผู้เข้าร่วม
-          </p>
-
-          {participants.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {participants.map((tp) => (
-                <span
-                  key={tp.id ?? tp.participant?.id}
-                  className="rounded-full px-2.5 py-0.5 text-xs font-medium"
-                  style={{
-                    background: `rgba(${r},${g},${b},0.08)`,
-                    color: hex,
-                    border: `1px solid rgba(${r},${g},${b},0.2)`,
-                  }}
-                >
-                  {tp.participant?.name ?? "ไม่ทราบชื่อ"}
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs italic text-muted-foreground/50">
-              ไม่มีผู้เข้าร่วม
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  const renderParticipant = (participant) => {
-    const events = busyMap.get(participant.id) || [];
-    const isBusy = events.length > 0;
-
-    return (
-      <div
-        key={participant.id}
-        className={`flex items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-sm
-      ${isBusy
-            ? "border-l-4 border-l-red-500"
-            : "border-l-4 border-l-emerald-500"
-          }`}
-      >
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="truncate text-sm font-semibold">
-              {participant.name}
-            </p>
-
-            <span
-              className={`h-2.5 w-2.5 rounded-full ${isBusy ? "bg-red-500" : "bg-emerald-500"
-                }`}
-            />
-          </div>
-
-          {isBusy && (
-            <ul className="mt-2 space-y-1">
-              {events.map((e) => (
-                <li
-                  key={e.id}
-                  className="flex items-center gap-2 text-xs text-gray-500"
-                >
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                  {e.title}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium
-        ${isBusy
-              ? "bg-red-100 text-red-600"
-              : "bg-emerald-100 text-emerald-600"
-            }`}
-        >
-          {isBusy ? "ไม่ว่าง" : "ว่าง"}
-        </span>
-      </div>
-    );
-  };
+  //       <span
+  //         className={`rounded-full px-3 py-1 text-xs font-medium
+  //       ${isBusy
+  //             ? "bg-red-100 text-red-600"
+  //             : "bg-emerald-100 text-emerald-600"
+  //           }`}
+  //       >
+  //         {isBusy ? "ไม่ว่าง" : "ว่าง"}
+  //       </span>
+  //     </div>
+  //   );
+  // };
 
   const tabItems = useMemo(
     () => [
@@ -372,7 +296,12 @@ function App() {
           </span>
         ), children: (
           <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
-            {selectedEvents.map(renderEvent)}
+            {selectedEvents.map((event) => (
+              <EventCard
+                key={event.id}
+                event={event}
+              />
+            ))}
           </div>
         ),
       },
@@ -390,7 +319,13 @@ function App() {
         ),
         children: (
           <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
-            {availableParticipants.map(renderParticipant)}
+            {availableParticipants.map((participant) => (
+              <ParticipantCard
+                key={participant.id}
+                participant={participant}
+                busyMap={busyMap}
+              />
+            ))}
           </div>
         ),
       },
@@ -408,7 +343,13 @@ function App() {
         ),
         children: (
           <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
-            {busyParticipants.map(renderParticipant)}
+            {busyParticipants.map((participant) => (
+              <ParticipantCard
+                key={participant.id}
+                participant={participant}
+                busyMap={busyMap}
+              />
+            ))}
           </div>
         ),
       },
