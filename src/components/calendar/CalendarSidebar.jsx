@@ -26,6 +26,7 @@ function CalendarSidebar({
                         activeKey={activeTab}
                         onChange={setActiveTab}
                         items={tabItems}
+                        tabBarGutter={8}
                     />
                 ) : (
                     <div className="rounded-lg border p-4 text-center text-gray-400">

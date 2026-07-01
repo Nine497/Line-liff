@@ -12,7 +12,7 @@ import { BarLoader } from "react-spinners";
 import {
   Form,
   Input,
-  Tabs,
+  Badge,
   message, notification
 } from "antd";
 import dayjs from "dayjs";
@@ -311,20 +311,32 @@ function App() {
     return (
       <div
         key={participant.id}
-        className={`flex items-start justify-between gap-3 rounded-xl border-y border-r bg-background p-4 transition-colors hover:border-border/70
-        ${isBusy
-            ? "border-l-[3px] border-l-red-500 border-border/40"
-            : "border-l-[3px] border-l-emerald-500 border-border/40"
+        className={`flex items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-sm
+      ${isBusy
+            ? "border-l-4 border-l-red-500"
+            : "border-l-4 border-l-emerald-500"
           }`}
       >
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <p className="text-sm font-semibold text-foreground">{participant.name}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="truncate text-sm font-semibold">
+              {participant.name}
+            </p>
+
+            <span
+              className={`h-2.5 w-2.5 rounded-full ${isBusy ? "bg-red-500" : "bg-emerald-500"
+                }`}
+            />
+          </div>
 
           {isBusy && (
-            <ul className="space-y-1">
+            <ul className="mt-2 space-y-1">
               {events.map((e) => (
-                <li key={e.id} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="h-1 w-1 shrink-0 rounded-full bg-red-400" />
+                <li
+                  key={e.id}
+                  className="flex items-center gap-2 text-xs text-gray-500"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
                   {e.title}
                 </li>
               ))}
@@ -333,10 +345,10 @@ function App() {
         </div>
 
         <span
-          className={`shrink-0 rounded-full border px-3 py-1 text-sm font-semibold tracking-wide
-          ${isBusy
-              ? "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
-              : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300"
+          className={`rounded-full px-3 py-1 text-xs font-medium
+        ${isBusy
+              ? "bg-red-100 text-red-600"
+              : "bg-emerald-100 text-emerald-600"
             }`}
         >
           {isBusy ? "ไม่ว่าง" : "ว่าง"}
@@ -349,27 +361,53 @@ function App() {
     () => [
       {
         key: "events",
-        label: "กำหนดการ",
-        children: (
-          <div className="space-y-3">
+        label: (
+          <span className="px-3 inline-flex items-center gap-1.5">
+            กำหนดการ
+            {selectedEvents.length > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-xs font-medium text-white bg-[#1677ff] rounded-full">
+                {selectedEvents.length > 99 ? "99+" : selectedEvents.length}
+              </span>
+            )}
+          </span>
+        ), children: (
+          <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
             {selectedEvents.map(renderEvent)}
           </div>
         ),
       },
       {
         key: "available",
-        label: "ไม่ติดภารกิจ",
+        label: (
+          <span className="px-3 inline-flex items-center gap-1.5">
+            ว่าง
+            {availableParticipants.length > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-xs font-medium text-white bg-emerald-500 rounded-full">
+                {availableParticipants.length > 99 ? "99+" : availableParticipants.length}
+              </span>
+            )}
+          </span>
+        ),
         children: (
-          <div className="space-y-3">
+          <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
             {availableParticipants.map(renderParticipant)}
           </div>
         ),
       },
       {
         key: "busy",
-        label: "ติดภารกิจ",
+        label: (
+          <span className="px-3 inline-flex items-center gap-1.5">
+            ไม่ว่าง
+            {busyParticipants.length > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-xs font-medium text-white bg-red-500 rounded-full">
+                {busyParticipants.length > 99 ? "99+" : busyParticipants.length}
+              </span>
+            )}
+          </span>
+        ),
         children: (
-          <div className="space-y-3">
+          <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
             {busyParticipants.map(renderParticipant)}
           </div>
         ),
@@ -484,7 +522,7 @@ function App() {
         </div>
       ) : null}
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
+      <div className="flex w-full flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
         <Header
           currentUser={currentUser}
           isDark={isDark}

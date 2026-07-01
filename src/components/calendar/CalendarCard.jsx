@@ -22,9 +22,8 @@ export default function CalendarCard({
         <Card title="ปฏิทิน" className="overflow-hidden">
             <div className="flex flex-col gap-4">
                 {/* header */}
-                {/* header */}
                 <div className="flex items-center justify-between">
-                    <div className="text-base font-semibold text-gray-800">
+                    <div className="text-small font-semibold text-gray-800">
                         {monthNames[month.month - 1]} {month.year + 543}
                     </div>
 
