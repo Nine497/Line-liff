@@ -1,31 +1,22 @@
-import { apiUrl } from "../lib/api";
+import { apiClient } from "./apiClient";
 
+// =========================
+// Tasks
+// =========================
 export const fetchTasks = async () => {
-  const response = await fetch(`${apiUrl}/tasks`);
-
-  if (!response.ok) {
-    throw new Error("Failed to load tasks from backend");
-  }
-
-  return response.json();
+  return await apiClient("/tasks");
 };
 
+// =========================
+// Participants
+// =========================
 export const fetchParticipants = async () => {
-  const response = await fetch(`${apiUrl}/tasks/participants`);
-
-  if (!response.ok) {
-    throw new Error("Failed to load participants");
-  }
-
-  return response.json();
+  return await apiClient("/tasks/participants");
 };
 
+// =========================
+// Task Types
+// =========================
 export const fetchTaskTypes = async () => {
-  const response = await fetch(`${apiUrl}/tasks/types`);
-
-  if (!response.ok) {
-    throw new Error("Failed to load task types");
-  }
-
-  return response.json();
+  return await apiClient("/tasks/types");
 };
