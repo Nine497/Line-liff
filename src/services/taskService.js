@@ -11,8 +11,12 @@ export async function createTask(payload) {
 
   const result = await response.json();
 
-  return {
-    response,
-    result,
-  };
+  if (!response.ok) {
+    const error = new Error(result?.error || "Request failed");
+    error.status = response.status;
+    error.data = result;
+    throw error;
+  }
+
+  return result;
 }

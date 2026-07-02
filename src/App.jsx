@@ -276,42 +276,7 @@ function App() {
       setIsSubmitting(true);
       setFormError("");
 
-      const { response, result } = await createTask(payload);
-
-      // =========================
-      // มีคนติดงาน
-      // =========================
-      if (response.status === 409) {
-        notification.warning({
-          message: "ไม่สามารถสร้างงานได้",
-          placement: "topRight",
-          duration: 6,
-          description: (
-            <div className="space-y-1">
-              {result?.conflicts?.map((c, index) => {
-                const taskTitle =
-                  c.task_title?.length > 20
-                    ? `${c.task_title.slice(0, 20)}...`
-                    : c.task_title;
-
-                return (
-                  <div key={index}>
-                    • {c.participant_name} ติดงาน "{taskTitle}"
-                  </div>
-                );
-              })}
-            </div>
-          ),
-        });
-
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          result?.error || "ไม่สามารถบันทึกข้อมูลได้"
-        );
-      }
+      await createTask(payload);
 
       message.success("เพิ่มงานสำเร็จ");
 
@@ -319,16 +284,28 @@ function App() {
       setShowCreateForm(false);
 
       await fetchTaskEvents();
+
     } catch (error) {
       console.error(error);
 
-      message.error(
-        error.message || "ไม่สามารถบันทึกข้อมูลได้"
-      );
+      if (error.status === 409) {
+        notification.warning({
+          message: "ไม่สามารถสร้างงานได้",
+          description: (
+            <div>
+              {error.data?.conflicts?.map((c, i) => (
+                <div key={i}>
+                  • {c.participant_name} ติดงาน "{c.task_title}"
+                </div>
+              ))}
+            </div>
+          ),
+        });
+        return;
+      }
 
-      setFormError(
-        error.message || "เกิดข้อผิดพลาด"
-      );
+      message.error(error.message || "เกิดข้อผิดพลาด");
+      setFormError(error.message);
     } finally {
       setIsSubmitting(false);
     }
