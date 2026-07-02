@@ -24,12 +24,12 @@ import ParticipantCard from "./components/calendar/ParticipantCard";
 import InitialLoading from "./components/loading/InitialLoading";
 import { importTasks } from "./services/taskImportService";
 import { createTask } from "./services/taskService";
+import { useTaskEvents } from "./hooks/useTaskEvents";
 
 function App() {
   const [theme, setTheme] = useState("light");
   const [month, setMonth] = useState({ year: 2026, month: 6 });
   const [selectedKey, setSelectedKey] = useState(todayKey);
-  const [events, setEvents] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -44,6 +44,10 @@ function App() {
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
+  const {
+    events,
+    fetchTaskEvents,
+  } = useTaskEvents();
 
   useEffect(() => {
     document.body.style.overflow = showCreateForm ? "hidden" : "";
@@ -64,18 +68,6 @@ function App() {
     setParticipants,
     setTaskTypes,
   });
-
-
-  async function fetchTaskEvents() {
-    try {
-      const tasks = await fetchTasks();
-      const calendarEvents = tasks.map(toCalendarEvent);
-
-      setEvents(calendarEvents);
-    } catch (error) {
-      console.error("Fetch tasks error:", error);
-    }
-  }
 
   const moveMonth = (direction) => {
     const calendarApi =

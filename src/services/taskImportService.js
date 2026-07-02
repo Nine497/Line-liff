@@ -1,4 +1,4 @@
-import { apiUrl } from "../lib/api";
+import { apiClient } from "../api/apiClient";
 
 export async function importTasks(file, userId) {
   const formData = new FormData();
@@ -9,16 +9,11 @@ export async function importTasks(file, userId) {
 
   formData.append("file", file);
 
-  const response = await fetch(`${apiUrl}/tasks/import`, {
+  return await apiClient("/tasks/import", {
     method: "POST",
     body: formData,
+    headers: {
+      // ❗ ไม่ต้อง set Content-Type (browser จะจัด boundary ให้เอง)
+    },
   });
-
-  const result = await response.json();
-
-  if (!response.ok) {
-    throw new Error(result?.error || "Import failed");
-  }
-
-  return result;
 }

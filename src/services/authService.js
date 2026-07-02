@@ -1,4 +1,4 @@
-import { apiUrl } from "../lib/api";
+import { apiClient } from "../api/apiClient";
 
 export const authUser = async (liff) => {
   const idToken = liff.getIDToken();
@@ -7,23 +7,21 @@ export const authUser = async (liff) => {
     throw new Error("Missing LIFF ID Token");
   }
 
-  const response = await fetch(`${apiUrl}/users`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id_token: idToken }),
-  });
+  try {
+    const data = await apiClient("/users", {
+      method: "POST",
+      body: JSON.stringify({ id_token: idToken }),
+    });
 
-  const result = await response.json();
+    return data.user;
 
-  if (response.status === 401) {
-    liff.logout();
-    liff.login();
-    return null;
+  } catch (error) {
+    if (error.status === 401) {
+      liff.logout();
+      liff.login();
+      return null;
+    }
+
+    throw error;
   }
-
-  if (!response.ok) {
-    throw new Error(result.error || "Failed to sync user");
-  }
-
-  return result.user;
 };

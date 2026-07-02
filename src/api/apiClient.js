@@ -11,13 +11,20 @@ export async function apiClient(url, options = {}) {
 
   const data = await response.json().catch(() => null);
 
-  // =========================
-  // ❌ handle error ที่เดียว
-  // =========================
+  //  ERROR FORMAT
   if (!response.ok) {
     const error = new Error(data?.error || "API Error");
+
     error.status = response.status;
     error.data = data;
+
+    error.type =
+      response.status === 409
+        ? "CONFLICT"
+        : response.status === 401
+        ? "UNAUTHORIZED"
+        : "GENERAL_ERROR";
+
     throw error;
   }
 
