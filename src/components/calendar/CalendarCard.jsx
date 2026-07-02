@@ -19,13 +19,20 @@ export default function CalendarCard({
     setSelectedKey,
 }) {
     return (
-        <Card title="ปฏิทิน" className="overflow-hidden">
+        <Card
+            title={
+                <div className="flex items-center gap-2">
+                    <span>ปฏิทิน</span>
+                    <span className="text-gray-500">
+                        {monthNames[month.month - 1]} {month.year + 543}
+                    </span>
+                </div>
+            }
+            className="overflow-hidden"
+        >
             <div className="flex flex-col gap-4">
                 {/* header */}
                 <div className="flex items-center justify-between">
-                    <div className="text-small font-semibold text-gray-800">
-                        {monthNames[month.month - 1]} {month.year + 543}
-                    </div>
 
                     <div className="flex gap-2">
                         <Button onClick={() => moveMonth(-1)}>
@@ -39,6 +46,23 @@ export default function CalendarCard({
                         <Button onClick={() => moveMonth(1)}>
                             ▶
                         </Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                type="primary"
+                                loading={isUploading}
+                                onClick={() => document.getElementById("excelInput").click()}
+                            >
+                                Import Excel
+                            </Button>
+
+                            <input
+                                id="excelInput"
+                                type="file"
+                                accept=".xlsx,.xls"
+                                onChange={handleUpload}
+                                className="hidden"
+                            />
+                        </div>
                     </div>
                 </div>
 

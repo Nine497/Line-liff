@@ -5,9 +5,6 @@ function ParticipantCard({
     const events = busyMap.get(participant.id) || [];
     const isBusy = events.length > 0;
 
-    console.log("participant", participant);
-    console.log("busyMap", busyMap);
-
     return (
         <div
             className={`flex items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-sm

@@ -4,32 +4,26 @@ import Header from "./components/layout/Header";
 import CalendarCard from "./components/calendar/CalendarCard";
 import CalendarSidebar from "./components/calendar/CalendarSidebar";
 import CreateTaskModal from "./components/modal/CreateTaskModal";
-import { initLiff } from "./liff";
-import { Users } from "lucide-react"
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
-import { BarLoader } from "react-spinners";
 import {
   Form,
   Input,
-  Badge,
   message, notification
 } from "antd";
 import dayjs from "dayjs";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import thLocale from "@fullcalendar/core/locales/th";
 import "./styles/fullcalendar.css"
-import { weekdays, monthNames } from "./constants/calendar";
+import { monthNames } from "./constants/calendar";
 import { apiUrl } from "./lib/api";
 import { todayKey, dayKey } from "./utils/date";
-import { hexToRgba } from "./utils/color";
-import { fetchTasks, fetchParticipants, fetchTaskTypes } from "./api/tasks";
+import { fetchTasks } from "./api/tasks";
 import { toCalendarEvent } from "./utils/taskMapper";
 import { useInitApp } from "./hooks/useInitApp";
 import EventCard from "./components/calendar/EventCard";
 import ParticipantCard from "./components/calendar/ParticipantCard";
+import InitialLoading from "./components/loading/InitialLoading";
+import { importTasks } from "./services/taskImportService";
+import { createTask } from "./services/taskService";
 
 function App() {
   const [theme, setTheme] = useState("light");
@@ -50,7 +44,6 @@ function App() {
   const isDark = theme === "dark";
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = showCreateForm ? "hidden" : "";
@@ -128,49 +121,23 @@ function App() {
     setFormError("");
     setFormSuccess("");
 
-    const formData = new FormData();
-
     try {
       const userId = currentUser?.id ?? currentUser?.user_id;
 
-      if (userId) {
-        formData.append("user_id", userId);
-      }
+      const result = await importTasks(file, userId);
 
-      formData.append("file", file);
-
-      const response = await fetch(`${apiUrl}/tasks/import`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      // ❌ ต้องเช็คก่อน ไม่งั้น throw แล้ว code ด้านล่างไม่ทำงาน
-      if (!response.ok) {
-        message.error(`เกิดข้อผิดพลาด ${result?.error || "ไม่สามารถนำเข้าข้อมูลได้"}`);
-
-        throw new Error(result?.error || "Import failed");
-      }
-
-      // ✅ refresh data only
       await fetchTaskEvents();
 
-      // ✅ success notification
-      message.success(`นำเข้าข้อมูลสำเร็จ ${result?.count ?? 0} รายการ`,);
-
-      setFormSuccess(`นำเข้าสำเร็จ ${result?.count ?? 0} รายการ`);
-    } catch (error) {
-      console.error(error);
-      message.error(`เกิดข้อผิดพลาด ${error?.message || "ไม่สามารถนำเข้าข้อมูลได้"}`);
-
-      setFormError(error.message);
+      message.success(`นำเข้าสำเร็จ ${result.count} รายการ`);
+      setFormSuccess(`นำเข้าสำเร็จ ${result.count} รายการ`);
+    } catch (err) {
+      message.error(err.message);
+      setFormError(err.message);
     } finally {
       setIsUploading(false);
       e.target.value = "";
     }
   };
-
 
   const selectedEvents = useMemo(() => {
     return events.filter((event) => {
@@ -227,59 +194,6 @@ function App() {
   const busyParticipants = useMemo(() => {
     return participants.filter((p) => busyMap.has(p.id));
   }, [participants, busyMap]);
-
-  // const renderParticipant = (participant) => {
-  //   const events = busyMap.get(participant.id) || [];
-  //   const isBusy = events.length > 0;
-
-  //   return (
-  //     <div
-  //       key={participant.id}
-  //       className={`flex items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-sm
-  //     ${isBusy
-  //           ? "border-l-4 border-l-red-500"
-  //           : "border-l-4 border-l-emerald-500"
-  //         }`}
-  //     >
-  //       <div className="min-w-0 flex-1">
-  //         <div className="flex items-center gap-2">
-  //           <p className="truncate text-sm font-semibold">
-  //             {participant.name}
-  //           </p>
-
-  //           <span
-  //             className={`h-2.5 w-2.5 rounded-full ${isBusy ? "bg-red-500" : "bg-emerald-500"
-  //               }`}
-  //           />
-  //         </div>
-
-  //         {isBusy && (
-  //           <ul className="mt-2 space-y-1">
-  //             {events.map((e) => (
-  //               <li
-  //                 key={e.id}
-  //                 className="flex items-center gap-2 text-xs text-gray-500"
-  //               >
-  //                 <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-  //                 {e.title}
-  //               </li>
-  //             ))}
-  //           </ul>
-  //         )}
-  //       </div>
-
-  //       <span
-  //         className={`rounded-full px-3 py-1 text-xs font-medium
-  //       ${isBusy
-  //             ? "bg-red-100 text-red-600"
-  //             : "bg-emerald-100 text-emerald-600"
-  //           }`}
-  //       >
-  //         {isBusy ? "ไม่ว่าง" : "ว่าง"}
-  //       </span>
-  //     </div>
-  //   );
-  // };
 
   const tabItems = useMemo(
     () => [
@@ -362,18 +276,7 @@ function App() {
       setIsSubmitting(true);
       setFormError("");
 
-      const response = await fetch(
-        `${apiUrl}/tasks`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const result = await response.json();
+      const { response, result } = await createTask(payload);
 
       // =========================
       // มีคนติดงาน
@@ -430,38 +333,13 @@ function App() {
       setIsSubmitting(false);
     }
   };
+
   return (
     <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
-      {isInitializing ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/75 backdrop-blur-md">
-          <div className="flex min-w-[320px] flex-col items-center gap-4 rounded-3xl border border-border bg-card/95 p-6 text-center shadow-2xl">
-            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted">
-              {currentUser.picture_url ? (
-                <img
-                  src={currentUser.picture_url}
-                  alt={currentUser.display_name ?? "Current user"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-3xl font-semibold text-primary">
-                  {currentUser.display_name?.[0] ?? "U"}
-                </span>
-              )}
-            </div>
-            <div className="flex w-full flex-col items-center gap-5">
-              <BarLoader
-                width={150}
-                height={3}
-                color="#22c55e"
-              />
-
-              <p className="text-lg font-semibold">
-                กำลังเรียกข้อมูลผู้ใช้จาก LINE LIFF และฐานข้อมูล
-              </p>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      <InitialLoading
+        open={isInitializing}
+        currentUser={currentUser}
+      />
 
       <div className="flex w-full flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
         <Header
