@@ -15,9 +15,13 @@ export const fetchParticipants = async () => {
 };
 
 export const fetchAvailableParticipants = (start, end) => {
-  return apiClient(
-    `/tasks/participants/available?start=${start}&end=${end}`
-  );
+  return apiClient("/tasks/participants/available", {
+    method: "POST",
+    body: JSON.stringify({
+      start,
+      end,
+    }),
+  });
 };
 // =========================
 // Task Types

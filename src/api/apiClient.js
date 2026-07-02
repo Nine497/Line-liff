@@ -9,14 +9,25 @@ export async function apiClient(url, options = {}) {
     ...options,
   });
 
-  const data = await response.json().catch(() => null);
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
 
   // ❌ ERROR HANDLING
   if (!response.ok || !data?.success) {
-    const error = new Error(data?.error?.message || "API Error");
+    const error = new Error(
+      data?.error?.message || data?.message || "API Error"
+    );
+
     console.error("API Error:", {
       url,
-      status: response.status, }),  
+      status: response.status,
+      data,
+    });
+
     error.status = response.status;
     error.code = data?.error?.code || "UNKNOWN_ERROR";
     error.extra = data?.error?.extra || null;

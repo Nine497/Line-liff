@@ -25,6 +25,7 @@ import InitialLoading from "./components/loading/InitialLoading";
 import { importTasks } from "./services/taskImportService";
 import { createTask } from "./services/taskService";
 import { useTaskEvents } from "./hooks/useTaskEvents";
+import { unwrap } from "./utils/unwrap";
 
 function App() {
   const [theme, setTheme] = useState("light");
@@ -179,17 +180,13 @@ function App() {
     return map;
   }, [selectedEvents]);
 
-  const participantList = Array.isArray(participants?.data)
-    ? participants.data
-    : [];
-
   const availableParticipants = useMemo(() => {
-    return participantList.filter((p) => !busyMap.has(p.id));
-  }, [participantList, busyMap]);
+    return unwrap(participants).filter((p) => !busyMap.has(p.id));
+  }, [participants, busyMap]);
 
   const busyParticipants = useMemo(() => {
-    return participantList.filter((p) => busyMap.has(p.id));
-  }, [participantList, busyMap]);
+    return unwrap(participants).filter((p) => busyMap.has(p.id));
+  }, [participants, busyMap]);
 
   const tabItems = useMemo(
     () => [
