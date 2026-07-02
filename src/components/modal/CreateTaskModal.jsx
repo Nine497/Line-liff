@@ -11,9 +11,9 @@ import {
 } from "@ant-design/icons";
 
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { unwrap } from "../../utils/unwrap";
-
+import { fetchAvailableParticipants } from "../../api/tasks";
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
@@ -21,34 +21,47 @@ function CreateTaskModal({
     open,
     form,
     taskTypes,
-    participants,          // 👈 มาจาก parent เท่านั้น
-    setParticipants,       // 👈 optional (ถ้าจะ smart fetch)
+    participants,
+    setParticipants,
     isSubmitting,
     handleCreateTask,
     onClose,
-    fetchAvailableParticipants, // 👈 NEW (smart fetch)
 }) {
 
-    // ❌ ลบ state ซ้ำออก (สำคัญมาก)
-    const [selectedRange, setSelectedRange] = useState(null);
+    const [loadingParticipants, setLoadingParticipants] = useState(false);
 
-    // 🟢 smart fetch handler
-    const handleDateChange = async (value) => {
-        setSelectedRange(value);
+    const debounceRef = useRef(null);
 
-        if (!value) return;
+    const dateRange = Form.useWatch("dateRange", form);
 
-        const [start, end] = value;
+    // 🟢 SMART FETCH (clean + safe + debounce)
+    const handleDateChange = (value) => {
+        if (!value || !fetchAvailableParticipants) return;
 
-        if (fetchAvailableParticipants) {
-            const data = await fetchAvailableParticipants(
-                start.toISOString(),
-                end.toISOString()
-            );
+        clearTimeout(debounceRef.current);
 
-            setParticipants?.(data); // optional
-        }
+        debounceRef.current = setTimeout(async () => {
+            try {
+                setLoadingParticipants(true);
+
+                const [start, end] = value;
+
+                const data = await fetchAvailableParticipants(
+                    start.toISOString(),
+                    end.toISOString()
+                );
+
+                setParticipants?.(data);
+            } catch (err) {
+                console.error("fetch participants failed:", err);
+            } finally {
+                setLoadingParticipants(false);
+            }
+        }, 300);
     };
+
+    const safeParticipants = Array.isArray(participants) ? participants : [];
+    const safeTaskTypes = unwrap(taskTypes) || [];
 
     return (
         <Modal
@@ -70,8 +83,8 @@ function CreateTaskModal({
                         title: values.title.trim(),
                         type_id: values.type_id,
                         description: values.description?.trim() || "",
-                        start_time: values.dateRange[0].toISOString(),
-                        end_time: values.dateRange[1].toISOString(),
+                        start_time: values.dateRange?.[0]?.toISOString(),
+                        end_time: values.dateRange?.[1]?.toISOString(),
                         participant_ids: values.participants || [],
                     };
 
@@ -95,7 +108,7 @@ function CreateTaskModal({
                         { max: 100 },
                         {
                             validator: (_, value) => {
-                                if (!value || value.trim().length > 0) return Promise.resolve();
+                                if (!value || value.trim()) return Promise.resolve();
                                 return Promise.reject(new Error("ชื่องานต้องไม่เป็นค่าว่าง"));
                             },
                         },
@@ -114,7 +127,7 @@ function CreateTaskModal({
                         size="large"
                         className="w-full"
                         showTime
-                        onChange={handleDateChange}   // 🟢 SMART FETCH HERE
+                        onChange={handleDateChange}
                         format="DD/MM/YYYY HH:mm"
                         placeholder={["เริ่ม", "สิ้นสุด"]}
                         disabledDate={(current) =>
@@ -133,7 +146,7 @@ function CreateTaskModal({
                         >
                             <Select
                                 size="large"
-                                options={unwrap(taskTypes).map(t => ({
+                                options={safeTaskTypes.map(t => ({
                                     value: t.id,
                                     label: t.name
                                 }))}
@@ -150,11 +163,12 @@ function CreateTaskModal({
                                 size="large"
                                 mode="multiple"
                                 placeholder="เลือกผู้เข้าร่วม"
-                                options={unwrap(participants).map(p => ({
+                                loading={loadingParticipants}
+                                disabled={!dateRange}
+                                options={safeParticipants.map(p => ({
                                     value: p.id,
                                     label: p.name
                                 }))}
-                                disabled={!selectedRange} // 🟢 smart UX
                             />
                         </Form.Item>
                     </Col>

@@ -11,22 +11,19 @@ export async function apiClient(url, options = {}) {
 
   const data = await response.json().catch(() => null);
 
-  //  ERROR FORMAT
-  if (!response.ok) {
-    const error = new Error(data?.error || "API Error");
-
+  // ❌ ERROR HANDLING
+  if (!response.ok || !data?.success) {
+    const error = new Error(data?.error?.message || "API Error");
+    console.error("API Error:", {
+      url,
+      status: response.status, }),  
     error.status = response.status;
-    error.data = data;
-
-    error.type =
-      response.status === 409
-        ? "CONFLICT"
-        : response.status === 401
-        ? "UNAUTHORIZED"
-        : "GENERAL_ERROR";
+    error.code = data?.error?.code || "UNKNOWN_ERROR";
+    error.extra = data?.error?.extra || null;
 
     throw error;
   }
 
-  return data;
+  // ✔️ return เฉพาะ data จริง
+  return data.data;
 }

@@ -8,17 +8,25 @@ export const authUser = async (liff) => {
   }
 
   try {
-    const data = await apiClient("/users", {
+    // apiClient คืนค่า "data" แล้ว
+    const user = await apiClient("/users", {
       method: "POST",
       body: JSON.stringify({ id_token: idToken }),
     });
 
-    return data.user;
+    return user;
 
   } catch (error) {
+    console.error("authUser failed:", error);
+
     if (error.status === 401) {
-      liff.logout();
-      liff.login();
+      // กัน loop login
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      } else {
+        liff.logout();
+        liff.login();
+      }
       return null;
     }
 
