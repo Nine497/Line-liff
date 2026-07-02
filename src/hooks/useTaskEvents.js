@@ -7,7 +7,12 @@ export function useTaskEvents() {
 
   const fetchTaskEvents = async () => {
     try {
-      const tasks = await fetchTasks();
+      const res = await fetchTasks();
+
+      const tasks = Array.isArray(res)
+        ? res
+        : res?.data ?? [];
+
       const calendarEvents = tasks.map(toCalendarEvent);
 
       setEvents(calendarEvents);

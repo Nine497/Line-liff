@@ -14,6 +14,11 @@ export const fetchParticipants = async () => {
   return await apiClient("/tasks/participants");
 };
 
+export const fetchAvailableParticipants = (start, end) => {
+  return apiClient(
+    `/tasks/participants/available?start=${start}&end=${end}`
+  );
+};
 // =========================
 // Task Types
 // =========================

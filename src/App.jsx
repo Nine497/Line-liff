@@ -179,13 +179,17 @@ function App() {
     return map;
   }, [selectedEvents]);
 
+  const participantList = Array.isArray(participants?.data)
+    ? participants.data
+    : [];
+
   const availableParticipants = useMemo(() => {
-    return participants.filter((p) => !busyMap.has(p.id));
-  }, [participants, busyMap]);
+    return participantList.filter((p) => !busyMap.has(p.id));
+  }, [participantList, busyMap]);
 
   const busyParticipants = useMemo(() => {
-    return participants.filter((p) => busyMap.has(p.id));
-  }, [participants, busyMap]);
+    return participantList.filter((p) => busyMap.has(p.id));
+  }, [participantList, busyMap]);
 
   const tabItems = useMemo(
     () => [
