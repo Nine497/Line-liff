@@ -1,3 +1,5 @@
+import { formatEventSchedule } from "../../utils/date";
+
 function ParticipantCard({
     participant,
     busyMap,
@@ -7,43 +9,52 @@ function ParticipantCard({
 
     return (
         <div
-            className={`flex items-start justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 transition-all hover:shadow-sm
+            className={`flex items-start justify-between gap-3 rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md
       ${isBusy
-                    ? "border-l-4 border-l-red-500"
-                    : "border-l-4 border-l-emerald-500"
+                    ? "border-destructive/25"
+                    : "border-success/25"
                 }`}
         >
             <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold">
-                        {participant.name}
-                    </p>
-
+                <div className="flex min-w-0 items-center gap-2">
                     <span
-                        className={`h-2.5 w-2.5 rounded-full ${isBusy ? "bg-red-500" : "bg-emerald-500"
+                        className={`h-2 w-2 shrink-0 rounded-full ${isBusy ? "bg-destructive" : "bg-success"
                             }`}
                     />
+                    <p className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
+                        {participant.name}
+                    </p>
                 </div>
 
                 {isBusy && (
-                    <ul className="mt-2 space-y-1">
-                        {events.map((e) => (
-                            <li
-                                key={e.id}
-                                className="flex items-center gap-2 text-xs text-gray-500"
-                            >
-                                <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                                {e.title}
-                            </li>
-                        ))}
+                    <ul className="mt-2 min-w-0 space-y-1.5 pl-4">
+                        {events.map((e) => {
+                            const schedule = formatEventSchedule(e.start_time, e.end_time);
+
+                            return (
+                                <li key={e.id} className="min-w-0 text-xs text-muted-foreground">
+                                    <div className="flex min-w-0 items-center gap-2">
+                                        <span className="h-1 w-1 shrink-0 rounded-full bg-destructive/60" />
+                                        <span className="min-w-0 flex-1 truncate">{e.title}</span>
+                                    </div>
+                                    {schedule && (
+                                        <p className="truncate pl-3 text-[11px] text-muted-foreground/70">
+                                            {schedule.isAllDay
+                                                ? `ทั้งวัน · ${schedule.dateLabel}`
+                                                : schedule.label}
+                                        </p>
+                                    )}
+                                </li>
+                            );
+                        })}
                     </ul>
                 )}
             </div>
 
             <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${isBusy
-                        ? "bg-red-100 text-red-600"
-                        : "bg-emerald-100 text-emerald-600"
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${isBusy
+                        ? "bg-destructive-tint text-destructive"
+                        : "bg-success-tint text-success"
                     }`}
             >
                 {isBusy ? "ไม่ว่าง" : "ว่าง"}

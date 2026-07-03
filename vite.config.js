@@ -4,11 +4,13 @@ import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
 import path from "path";
 
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
  server: {
     allowedHosts: [
-      "4cd2-202-44-240-108.ngrok-free.app",
+      "e8be-202-44-240-108.ngrok-free.app",
     ],
   },
   resolve: {

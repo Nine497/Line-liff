@@ -1,19 +1,20 @@
 import {
-    Modal, Form, Input, Select, DatePicker, Button, Row, Col, Divider
+    Modal, Form, Input, Select, DatePicker, Button, Row, Col, Divider, message
 } from "antd";
 
 import {
-    FileTextOutlined,
-    TagsOutlined,
-    ClockCircleOutlined,
-    TeamOutlined,
-    AlignLeftOutlined,
-} from "@ant-design/icons";
+    FileText,
+    Tags,
+    Clock,
+    Users,
+    AlignLeft,
+} from "lucide-react";
 
 import dayjs from "dayjs";
 import { useRef, useState } from "react";
 import { unwrap } from "../../utils/unwrap";
 import { fetchAvailableParticipants } from "../../api/tasks";
+import "./task-sheet.css";
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
@@ -22,12 +23,17 @@ function CreateTaskModal({
     form,
     taskTypes,
     participants,
-    setParticipants,
     isSubmitting,
-    handleCreateTask,
+    onSubmit,
     onClose,
 }) {
 
+    // Date-scoped participants for this modal only — defaults to the full
+    // roster until a range is picked, and must NOT be shared with the
+    // app-wide `participants` state (that also drives the day sidebar).
+    const [availableParticipants, setAvailableParticipants] = useState(
+        Array.isArray(participants) ? participants : []
+    );
     const [loadingParticipants, setLoadingParticipants] = useState(false);
 
     const debounceRef = useRef(null);
@@ -36,7 +42,7 @@ function CreateTaskModal({
 
     // 🟢 SMART FETCH (clean + safe + debounce)
     const handleDateChange = (value) => {
-        if (!value || !fetchAvailableParticipants) return;
+        if (!value) return;
 
         clearTimeout(debounceRef.current);
 
@@ -51,25 +57,40 @@ function CreateTaskModal({
                     end.toISOString()
                 );
 
-                setParticipants?.(data);
+                const nextAvailable = unwrap(data);
+                setAvailableParticipants(nextAvailable);
+
+                // The date range changed, so any already-selected participant
+                // who is no longer in the available list must be dropped —
+                // otherwise they'd stay silently selected despite now being busy.
+                const availableIds = new Set(nextAvailable.map((p) => p.id));
+                const currentlySelected = form.getFieldValue("participants") || [];
+                const stillValid = currentlySelected.filter((id) => availableIds.has(id));
+
+                if (stillValid.length !== currentlySelected.length) {
+                    form.setFieldValue("participants", stillValid);
+                    message.warning("ผู้เข้าร่วมบางคนถูกนำออกเนื่องจากติดภารกิจในช่วงเวลาที่เลือกใหม่");
+                }
             } catch (err) {
                 console.error("fetch participants failed:", err);
+                message.error("โหลดรายชื่อผู้เข้าร่วมที่ว่างไม่สำเร็จ");
             } finally {
                 setLoadingParticipants(false);
             }
         }, 300);
     };
 
-    const safeParticipants = Array.isArray(participants) ? participants : [];
+    const safeParticipants = Array.isArray(availableParticipants) ? availableParticipants : [];
     const safeTaskTypes = unwrap(taskTypes) || [];
 
     return (
         <Modal
             open={open}
-            title={<span className="text-base font-semibold">เพิ่มกำหนดการใหม่</span>}
+            title={<span className="font-display text-base font-bold">เพิ่มกำหนดการใหม่</span>}
             onCancel={onClose}
             footer={null}
             width={720}
+            rootClassName="task-sheet"
             destroyOnHidden
         >
             <Divider className="!mt-3 !mb-5" />
@@ -88,7 +109,7 @@ function CreateTaskModal({
                         participant_ids: values.participants || [],
                     };
 
-                    await handleCreateTask(payload);
+                    await onSubmit(payload);
                 }}
                 initialValues={{
                     title: "",
@@ -100,7 +121,7 @@ function CreateTaskModal({
                 {/* TITLE */}
                 <Form.Item
                     label={<span className="flex items-center gap-1.5 font-medium">
-                        <FileTextOutlined className="text-gray-400" /> ชื่องาน
+                        <FileText className="h-3.5 w-3.5 text-muted-foreground" /> ชื่องาน
                     </span>}
                     name="title"
                     rules={[
@@ -119,7 +140,9 @@ function CreateTaskModal({
 
                 {/* RANGE */}
                 <Form.Item
-                    label={<span><ClockCircleOutlined /> ช่วงเวลา</span>}
+                    label={<span className="flex items-center gap-1.5 font-medium">
+                        <Clock className="h-3.5 w-3.5 text-muted-foreground" /> ช่วงเวลา
+                    </span>}
                     name="dateRange"
                     rules={[{ required: true }]}
                 >
@@ -140,12 +163,19 @@ function CreateTaskModal({
                 <Row gutter={16}>
                     <Col span={12}>
                         <Form.Item
-                            label={<span><TagsOutlined /> ประเภทงาน</span>}
+                            label={<span className="flex items-center gap-1.5 font-medium">
+                                <Tags className="h-3.5 w-3.5 text-muted-foreground" /> ประเภทงาน
+                            </span>}
                             name="type_id"
                             rules={[{ required: true }]}
                         >
                             <Select
                                 size="large"
+                                showSearch
+                                optionFilterProp="label"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                }
                                 options={safeTaskTypes.map(t => ({
                                     value: t.id,
                                     label: t.name
@@ -156,7 +186,9 @@ function CreateTaskModal({
 
                     <Col span={12}>
                         <Form.Item
-                            label={<span><TeamOutlined /> ผู้เข้าร่วม</span>}
+                            label={<span className="flex items-center gap-1.5 font-medium">
+                                <Users className="h-3.5 w-3.5 text-muted-foreground" /> ผู้เข้าร่วม
+                            </span>}
                             name="participants"
                         >
                             <Select
@@ -165,6 +197,11 @@ function CreateTaskModal({
                                 placeholder="เลือกผู้เข้าร่วม"
                                 loading={loadingParticipants}
                                 disabled={!dateRange}
+                                showSearch
+                                optionFilterProp="label"
+                                filterOption={(input, option) =>
+                                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                                }
                                 options={safeParticipants.map(p => ({
                                     value: p.id,
                                     label: p.name
@@ -176,7 +213,9 @@ function CreateTaskModal({
 
                 {/* DESCRIPTION */}
                 <Form.Item
-                    label={<span><AlignLeftOutlined /> รายละเอียด</span>}
+                    label={<span className="flex items-center gap-1.5 font-medium">
+                        <AlignLeft className="h-3.5 w-3.5 text-muted-foreground" /> รายละเอียด
+                    </span>}
                     name="description"
                 >
                     <TextArea rows={4} maxLength={500} />
@@ -187,7 +226,7 @@ function CreateTaskModal({
                 <div className="flex justify-end gap-2">
                     <Button onClick={onClose}>ยกเลิก</Button>
                     <Button type="primary" htmlType="submit" loading={isSubmitting}>
-                        บันทึก
+                        บันทึกกำหนดการ
                     </Button>
                 </div>
             </Form>

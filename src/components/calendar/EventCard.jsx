@@ -1,21 +1,22 @@
-import { Users } from "lucide-react";
+import { AlignLeft, Clock, Users } from "lucide-react";
+import { hexToRgba } from "../../utils/color";
+import { getEventColor } from "../../constants/eventColors";
+import { formatEventSchedule } from "../../utils/date";
 
 function EventCard({ event }) {
-    const participants =
-        event?.extendedProps?.task?.task_participants ?? [];
-    const color = event?.extendedProps?.task?.type?.color;
-    const typeName = event?.extendedProps?.task?.type?.name;
+    const task = event?.extendedProps?.task;
+    const participants = task?.task_participants ?? [];
+    const type = task?.type;
+    const typeName = type?.name;
 
-    const hex = color ?? '#2563eb'
-    const r = parseInt(hex.slice(1, 3), 16)
-    const g = parseInt(hex.slice(3, 5), 16)
-    const b = parseInt(hex.slice(5, 7), 16)
-    const bgColor = `rgba(${r},${g},${b},0.06)`
-    const borderColor = `rgba(${r},${g},${b},0.25)`
+    const hex = getEventColor(type)
+    const bgColor = hexToRgba(hex, 0.06)
+    const borderColor = hexToRgba(hex, 0.25)
+
+    const schedule = formatEventSchedule(task?.start_time, task?.end_time);
 
     return (
         <div
-            key={event.id}
             className="flex flex-col gap-3 rounded-xl p-4 transition-colors"
             style={{
                 background: bgColor,
@@ -34,20 +35,41 @@ function EventCard({ event }) {
                 </div>
 
                 {typeName && (
-                    <span
-                        className="rounded-full px-2.5 py-0.5 text-xs font-medium flex-shrink-0"
-                        style={{
-                            background: `rgba(${r},${g},${b},0.12)`,
-                            color: hex,
-                        }}
-                    >
+                    <span className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+                        <span
+                            className="h-1.5 w-1.5 rounded-full"
+                            style={{ background: hex }}
+                        />
                         {typeName}
                     </span>
                 )}
             </div>
 
+            {schedule && (
+                <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                    <Clock className="h-3 w-3 flex-shrink-0 text-muted-foreground/70" />
+                    {schedule.isAllDay ? (
+                        <>
+                            <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-muted-foreground">
+                                ทั้งวัน
+                            </span>
+                            <span className="text-muted-foreground/70">{schedule.dateLabel}</span>
+                        </>
+                    ) : (
+                        <span className="font-medium text-muted-foreground">{schedule.label}</span>
+                    )}
+                </div>
+            )}
+
+            {task?.description && (
+                <div className="flex items-start gap-1.5 text-xs">
+                    <AlignLeft className="mt-0.5 h-3 w-3 flex-shrink-0 text-muted-foreground/70" />
+                    <p className="line-clamp-3 text-muted-foreground">{task.description}</p>
+                </div>
+            )}
+
             <div className="space-y-1.5">
-                <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
+                <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/70">
                     <Users className="h-3 w-3" />
                     ผู้เข้าร่วม
                 </p>
@@ -57,12 +79,7 @@ function EventCard({ event }) {
                         {participants.map((tp) => (
                             <span
                                 key={tp.id ?? tp.participant?.id}
-                                className="rounded-full px-2.5 py-0.5 text-xs font-medium"
-                                style={{
-                                    background: `rgba(${r},${g},${b},0.08)`,
-                                    color: hex,
-                                    border: `1px solid rgba(${r},${g},${b},0.2)`,
-                                }}
+                                className="rounded-full border border-border bg-card px-2.5 py-0.5 text-xs font-medium text-foreground"
                             >
                                 {tp.participant?.name ?? "ไม่ทราบชื่อ"}
                             </span>

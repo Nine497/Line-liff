@@ -1,0 +1,48 @@
+/* On phones, present the "add task" dialog as a bottom sheet — thumb-reachable
+   in LINE's in-app browser — instead of a centered dialog. Desktop keeps the
+   default centered antd Modal. */
+@media (max-width: 640px) {
+  .task-sheet .ant-modal-wrap,
+  .ant-modal-root.task-sheet .ant-modal-wrap {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .task-sheet .ant-modal,
+  .ant-modal-root.task-sheet .ant-modal {
+    top: 0;
+    margin: 0;
+    max-width: 100%;
+    width: 100% !important;
+    padding-bottom: 0;
+  }
+
+  .task-sheet .ant-modal-content,
+  .ant-modal-root.task-sheet .ant-modal-content {
+    border-radius: 16px 16px 0 0;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    position: relative;
+    max-height: 88dvh;
+    overflow-y: auto;
+    animation: none !important;
+  }
+
+  .task-sheet .ant-modal-content::before,
+  .ant-modal-root.task-sheet .ant-modal-content::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border-strong);
+  }
+
+  .task-sheet .ant-modal-header,
+  .ant-modal-root.task-sheet .ant-modal-header {
+    padding-top: 10px;
+  }
+}

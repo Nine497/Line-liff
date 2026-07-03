@@ -1,22 +1,14 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ConfigProvider, App as AntdApp } from "antd";
 
 import "./index.css";
 import App from "./App.jsx";
+import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ConfigProvider
-      theme={{
-        token: {
-          fontFamily: '"LINE Seed Sans TH", sans-serif',
-        },
-      }}
-    >
-      <AntdApp>
-        <App />
-      </AntdApp>
-    </ConfigProvider>
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>
 );

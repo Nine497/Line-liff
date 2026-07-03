@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { fetchTasks } from "../api/tasks";
 import { toCalendarEvent } from "../utils/taskMapper";
 
 export function useTaskEvents() {
   const [events, setEvents] = useState([]);
 
-  const fetchTaskEvents = async () => {
+  const fetchTaskEvents = useCallback(async () => {
     try {
       const res = await fetchTasks();
 
@@ -19,7 +19,7 @@ export function useTaskEvents() {
     } catch (error) {
       console.error("Fetch tasks error:", error);
     }
-  };
+  }, []);
 
   return {
     events,

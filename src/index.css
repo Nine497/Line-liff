@@ -1,10 +1,11 @@
-@import url("https://cdn.jsdelivr.net/gh/lazywasabi/thai-web-fonts@7/fonts/LINESeedSansTH/LINESeedSansTH.css");
 @import "tailwindcss";
 
 @theme inline {
   --font-sans:
-    "LINE Seed Sans TH", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "IBM Plex Sans Thai", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
+  --font-display:
+    "Chakra Petch", "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -20,65 +21,75 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-tint: var(--destructive-tint);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
+  --color-success: var(--success);
+  --color-success-tint: var(--success-tint);
   --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 6px);
+  --radius-xl: calc(var(--radius) + 12px);
 }
 
+/*
+ * Navy government/duty-ops palette (ศรชล blue) — a single confident navy as
+ * the only accent, neutral cool-slate surfaces, and semantic green/red kept
+ * strictly for availability status. Generous radius + shadow-based elevation
+ * replace the old bordered/bracketed "chart room" look for a calmer,
+ * modern admin-console feel.
+ */
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.985 0.004 255);
-  --foreground: oklch(0.16 0.018 255);
-  --card: oklch(1 0 0);
+  --background: #F5F7FB;
+  --foreground: #101B2D;
+  --card: #FFFFFF;
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.72 0.19 151);
-  --primary-foreground: oklch(0.99 0.002 145);
-  --secondary: oklch(0.95 0.013 255);
-  --secondary-foreground: oklch(0.22 0.025 255);
-  --muted: oklch(0.95 0.013 255);
-  --muted-foreground: oklch(0.48 0.032 255);
-  --accent: oklch(0.94 0.033 219);
-  --accent-foreground: oklch(0.24 0.075 243);
-  --destructive: oklch(0.62 0.22 25);
-  --border: oklch(0.89 0.013 255);
+  --primary: #0B3D6B;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E8EEF5;
+  --secondary-foreground: #16324F;
+  --muted: #EEF2F8;
+  --muted-foreground: #5B6B84;
+  --accent: rgba(11, 61, 107, 0.08);
+  --accent-foreground: #0B3D6B;
+  --destructive: #C0392B;
+  --destructive-tint: rgba(192, 57, 43, 0.10);
+  --border: rgba(16, 27, 45, 0.09);
+  --border-strong: rgba(16, 27, 45, 0.18);
   --input: var(--border);
-  --ring: oklch(0.72 0.19 151);
-  --chart-1: oklch(0.64 0.18 252);
-  --chart-2: oklch(0.72 0.19 151);
-  --chart-3: oklch(0.6 0.18 285);
+  --ring: #0B3D6B;
+  --success: #147D53;
+  --success-tint: rgba(20, 125, 83, 0.10);
 }
 
 .dark {
-  --background: oklch(0.15 0.018 255);
-  --foreground: oklch(0.96 0.006 255);
-  --card: oklch(0.2 0.018 255);
+  --background: #0A1826;
+  --foreground: #E8EEF6;
+  --card: #10233A;
   --card-foreground: var(--foreground);
   --popover: var(--card);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.76 0.2 151);
-  --primary-foreground: oklch(0.12 0.02 151);
-  --secondary: oklch(0.26 0.022 255);
-  --secondary-foreground: oklch(0.94 0.006 255);
-  --muted: oklch(0.25 0.02 255);
-  --muted-foreground: oklch(0.72 0.025 255);
-  --accent: oklch(0.29 0.045 230);
-  --accent-foreground: oklch(0.9 0.045 225);
-  --destructive: oklch(0.68 0.2 25);
-  --border: oklch(0.32 0.022 255);
+  --primary: #5B9BD5;
+  --primary-foreground: #071627;
+  --secondary: #16314D;
+  --secondary-foreground: #E8EEF6;
+  --muted: #16314D;
+  --muted-foreground: #93A9C2;
+  --accent: rgba(91, 155, 213, 0.16);
+  --accent-foreground: #CFE1F5;
+  --destructive: #E1786A;
+  --destructive-tint: rgba(225, 120, 106, 0.15);
+  --border: rgba(232, 238, 246, 0.10);
+  --border-strong: rgba(232, 238, 246, 0.20);
   --input: var(--border);
-  --ring: oklch(0.76 0.2 151);
-  --chart-1: oklch(0.72 0.16 252);
-  --chart-2: oklch(0.76 0.2 151);
-  --chart-3: oklch(0.72 0.16 285);
+  --ring: #5B9BD5;
+  --success: #4FBE95;
+  --success-tint: rgba(79, 190, 149, 0.15);
 }
 
 * {
@@ -90,18 +101,14 @@ html {
 }
 
 html, body {
-  font-family:
-    "LINE Seed Sans TH", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;}
+  font-family: var(--font-sans);
+}
 
 body {
   min-width: 320px;
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family:
-    "LINE Seed Sans TH", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -113,12 +120,19 @@ a {
   font: inherit;
 }
 
-/* global.css */
 ::-webkit-scrollbar {
   width: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: var(--border-strong);
   border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

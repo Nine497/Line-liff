@@ -1,54 +1,148 @@
 "use client";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Header from "./components/layout/Header";
 import CalendarCard from "./components/calendar/CalendarCard";
 import CalendarSidebar from "./components/calendar/CalendarSidebar";
 import CreateTaskModal from "./components/modal/CreateTaskModal";
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
-import {
-  Form,
-  Input,
-  message, notification
-} from "antd";
-import dayjs from "dayjs";
+import { ConfigProvider, App as AntdApp, Form, theme as antdTheme, message } from "antd";
 import "./styles/fullcalendar.css"
 import { monthNames } from "./constants/calendar";
-import { apiUrl } from "./lib/api";
-import { todayKey, dayKey } from "./utils/date";
-import { fetchTasks } from "./api/tasks";
-import { toCalendarEvent } from "./utils/taskMapper";
+import { todayKey } from "./utils/date";
 import { useInitApp } from "./hooks/useInitApp";
-import EventCard from "./components/calendar/EventCard";
-import ParticipantCard from "./components/calendar/ParticipantCard";
-import InitialLoading from "./components/loading/InitialLoading";
-import { importTasks } from "./services/taskImportService";
-import { createTask } from "./services/taskService";
 import { useTaskEvents } from "./hooks/useTaskEvents";
-import { unwrap } from "./utils/unwrap";
+import { useCalendarNav } from "./hooks/useCalendarNav";
+import { useDaySelection } from "./hooks/useDaySelection";
+import { useExcelImport } from "./hooks/useExcelImport";
+import { useCreateTask } from "./hooks/useCreateTask";
+import { useMyEvents } from "./hooks/useMyEvents";
+import { useSidebarTabItems } from "./components/calendar/SidebarTabs";
+import InitialLoading from "./components/loading/InitialLoading";
+
+const navyLight = {
+  colorPrimary: "#0B3D6B",
+  colorSuccess: "#147D53",
+  colorWarning: "#0B3D6B",
+  colorError: "#C0392B",
+  colorInfo: "#0B3D6B",
+  colorLink: "#0B3D6B",
+  borderRadius: 12,
+  fontFamily: '"IBM Plex Sans Thai", sans-serif',
+  colorBgContainer: "#FFFFFF",
+  colorBgElevated: "#FFFFFF",
+  colorBgLayout: "#F5F7FB",
+  colorBorder: "rgba(16, 27, 45, 0.16)",
+  colorBorderSecondary: "rgba(16, 27, 45, 0.09)",
+  colorText: "#101B2D",
+  colorTextSecondary: "#5B6B84",
+  colorTextTertiary: "#8592A6",
+};
+
+const navyDark = {
+  colorPrimary: "#5B9BD5",
+  colorSuccess: "#4FBE95",
+  colorWarning: "#5B9BD5",
+  colorError: "#E1786A",
+  colorInfo: "#5B9BD5",
+  colorLink: "#5B9BD5",
+  borderRadius: 12,
+  fontFamily: '"IBM Plex Sans Thai", sans-serif',
+  colorBgContainer: "#10233A",
+  colorBgElevated: "#132A45",
+  colorBgLayout: "#0A1826",
+  colorBorder: "rgba(232, 238, 246, 0.22)",
+  colorBorderSecondary: "rgba(232, 238, 246, 0.10)",
+  colorText: "#E8EEF6",
+  colorTextSecondary: "#93A9C2",
+  colorTextTertiary: "#6D84A0",
+};
 
 function App() {
   const [theme, setTheme] = useState("light");
-  const [month, setMonth] = useState({ year: 2026, month: 6 });
+  const isDark = theme === "dark";
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDark);
+  }, [isDark]);
+
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+        token: isDark ? navyDark : navyLight,
+      }}
+    >
+      <AntdApp>
+        <AppShell setTheme={setTheme} isDark={isDark} />
+      </AntdApp>
+    </ConfigProvider>
+  );
+}
+
+function AppShell({ setTheme, isDark }) {
   const [selectedKey, setSelectedKey] = useState(todayKey);
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formSuccess, setFormSuccess] = useState("");
-  const [formError, setFormError] = useState("");
   const [participants, setParticipants] = useState([]);
-  const calendarRef = useRef(null);
-  const { TextArea } = Input;
   const [form] = Form.useForm();
   const [taskTypes, setTaskTypes] = useState([]);
-  const isDark = theme === "dark";
-  const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("events");
+
+  const { events, fetchTaskEvents } = useTaskEvents();
+  const { calendarRef, month, setMonth, moveMonth, goToday } = useCalendarNav();
+  const { isUploading, handleUpload } = useExcelImport(fetchTaskEvents);
+  const { isSubmitting, handleCreateTask } = useCreateTask(fetchTaskEvents);
   const {
-    events,
-    fetchTaskEvents,
-  } = useTaskEvents();
+    showMineOnly,
+    myTaskIds,
+    isLoadingMine,
+    hasFetchedMine,
+    toggleMineOnly,
+    reloadMyEvents,
+  } = useMyEvents();
+
+  // Availability (busy/available tabs) must always reason about every task,
+  // so useDaySelection stays on the full `events` list regardless of the
+  // "My Events" filter — only what's *displayed* narrows down.
+  const {
+    selectedEvents,
+    busyMap,
+    availableParticipants,
+    busyParticipants,
+  } = useDaySelection(events, selectedKey, participants);
+
+  const displayEvents = useMemo(() => {
+    if (!showMineOnly) return events;
+    return events.filter((e) => myTaskIds.has(e.id));
+  }, [events, showMineOnly, myTaskIds]);
+
+  const displaySelectedEvents = useMemo(() => {
+    if (!showMineOnly) return selectedEvents;
+    return selectedEvents.filter((e) => myTaskIds.has(e.id));
+  }, [selectedEvents, showMineOnly, myTaskIds]);
+
+  const tabItems = useSidebarTabItems({
+    selectedEvents: displaySelectedEvents,
+    availableParticipants,
+    busyParticipants,
+    busyMap,
+    showMineOnly,
+  });
+
+  const onToggleMine = async () => {
+    try {
+      const { turnedOn, participant } = await toggleMineOnly(currentUser.line_id);
+
+      if (turnedOn && !participant) {
+        message.info("ไม่พบข้อมูลผู้เข้าร่วมที่ผูกกับบัญชี LINE นี้ กรุณาติดต่อผู้ดูแลระบบ");
+      }
+    } catch (err) {
+      console.error("Load my events error:", err);
+      message.error("โหลดกำหนดการของฉันไม่สำเร็จ");
+    }
+  };
 
   useEffect(() => {
     document.body.style.overflow = showCreateForm ? "hidden" : "";
@@ -70,239 +164,28 @@ function App() {
     setTaskTypes,
   });
 
-  const moveMonth = (direction) => {
-    const calendarApi =
-      calendarRef.current?.getApi();
-
-    if (!calendarApi) return;
-
-    if (direction > 0) {
-      calendarApi.next();
-    } else {
-      calendarApi.prev();
-    }
-
-    const currentDate =
-      calendarApi.getDate();
-
-    setMonth({
-      year: currentDate.getFullYear(),
-      month: currentDate.getMonth() + 1,
-    });
-  };
-
-  const goToday = () => {
-    const calendarApi =
-      calendarRef.current?.getApi();
-
-    if (!calendarApi) return;
-
-    calendarApi.today();
-
-    const today = new Date();
-
-    setSelectedKey(
-      today.toISOString().split("T")[0]
-    );
-  };
-
-  const handleUpload = async (e) => {
+  const onFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    const userId = currentUser?.id ?? currentUser?.user_id;
 
-    setIsUploading(true);
-    setFormError("");
-    setFormSuccess("");
+    handleUpload(file, userId);
 
-    try {
-      const userId = currentUser?.id ?? currentUser?.user_id;
-
-      const result = await importTasks(file, userId);
-
-      await fetchTaskEvents();
-
-      message.success(`นำเข้าสำเร็จ ${result.count} รายการ`);
-      setFormSuccess(`นำเข้าสำเร็จ ${result.count} รายการ`);
-    } catch (err) {
-      message.error(err.message);
-      setFormError(err.message);
-    } finally {
-      setIsUploading(false);
-      e.target.value = "";
-    }
+    e.target.value = "";
   };
 
-  const selectedEvents = useMemo(() => {
-    return events.filter((event) => {
-      const selected = dayjs(selectedKey);
+  const onSubmitTask = (payload) =>
+    handleCreateTask(payload, {
+      onSuccess: () => {
+        form.resetFields();
+        setShowCreateForm(false);
 
-      const start = dayjs(event.start);
-      const end = event.end
-        ? dayjs(event.end).subtract(1, "day")
-        : start;
-
-      return (
-        (selected.isAfter(start, "day") ||
-          selected.isSame(start, "day")) &&
-        (selected.isBefore(end, "day") ||
-          selected.isSame(end, "day"))
-      );
-    });
-  }, [events, selectedKey]);
-
-  const busyMap = useMemo(() => {
-    const map = new Map();
-
-    for (const event of selectedEvents) {
-      const participants =
-        event?.extendedProps?.task
-          ?.task_participants ?? [];
-
-      for (const tp of participants) {
-        const participant = tp?.participant;
-
-        if (!participant?.id) continue;
-
-        if (!map.has(participant.id)) {
-          map.set(participant.id, []);
+        // Keep the "My Events" cache in sync in case the new task is
+        // assigned to the current user.
+        if (hasFetchedMine) {
+          reloadMyEvents(currentUser.line_id);
         }
-
-        map.get(participant.id).push({
-          id: event.id,
-          title: event.title,
-          start_time:
-            event.extendedProps.task
-              .start_time,
-        });
-      }
-    }
-
-    return map;
-  }, [selectedEvents]);
-
-  const availableParticipants = useMemo(() => {
-    return unwrap(participants).filter((p) => !busyMap.has(p.id));
-  }, [participants, busyMap]);
-
-  const busyParticipants = useMemo(() => {
-    return unwrap(participants).filter((p) => busyMap.has(p.id));
-  }, [participants, busyMap]);
-
-  const tabItems = useMemo(
-    () => [
-      {
-        key: "events",
-        label: (
-          <span className="px-3 inline-flex items-center gap-1.5">
-            กำหนดการ
-            {selectedEvents.length > 0 && (
-              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-xs font-medium text-white bg-[#1677ff] rounded-full">
-                {selectedEvents.length > 99 ? "99+" : selectedEvents.length}
-              </span>
-            )}
-          </span>
-        ), children: (
-          <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
-            {selectedEvents.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-              />
-            ))}
-          </div>
-        ),
       },
-      {
-        key: "available",
-        label: (
-          <span className="px-3 inline-flex items-center gap-1.5">
-            ว่าง
-            {availableParticipants.length > 0 && (
-              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-xs font-medium text-white bg-emerald-500 rounded-full">
-                {availableParticipants.length > 99 ? "99+" : availableParticipants.length}
-              </span>
-            )}
-          </span>
-        ),
-        children: (
-          <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
-            {availableParticipants.map((participant) => (
-              <ParticipantCard
-                key={participant.id}
-                participant={participant}
-                busyMap={busyMap}
-              />
-            ))}
-          </div>
-        ),
-      },
-      {
-        key: "busy",
-        label: (
-          <span className="px-3 inline-flex items-center gap-1.5">
-            ไม่ว่าง
-            {busyParticipants.length > 0 && (
-              <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-xs font-medium text-white bg-red-500 rounded-full">
-                {busyParticipants.length > 99 ? "99+" : busyParticipants.length}
-              </span>
-            )}
-          </span>
-        ),
-        children: (
-          <div className="max-h-[55vh] overflow-y-auto pr-1 space-y-3">
-            {busyParticipants.map((participant) => (
-              <ParticipantCard
-                key={participant.id}
-                participant={participant}
-                busyMap={busyMap}
-              />
-            ))}
-          </div>
-        ),
-      },
-    ],
-    [availableParticipants, busyParticipants, selectedEvents]
-  );
-
-  const handleCreateTask = async (payload) => {
-    try {
-      setIsSubmitting(true);
-      setFormError("");
-
-      await createTask(payload);
-
-      message.success("เพิ่มงานสำเร็จ");
-
-      form.resetFields();
-      setShowCreateForm(false);
-
-      await fetchTaskEvents();
-
-    } catch (error) {
-      console.error(error);
-
-      if (error.status === 409) {
-        notification.warning({
-          message: "ไม่สามารถสร้างงานได้",
-          description: (
-            <div>
-              {error.data?.conflicts?.map((c, i) => (
-                <div key={i}>
-                  • {c.participant_name} ติดงาน "{c.task_title}"
-                </div>
-              ))}
-            </div>
-          ),
-        });
-        return;
-      }
-
-      message.error(error.message || "เกิดข้อผิดพลาด");
-      setFormError(error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    });
 
   return (
     <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
@@ -311,7 +194,7 @@ function App() {
         currentUser={currentUser}
       />
 
-      <div className="flex w-full flex-1 flex-col px-4 py-4 sm:px-6 lg:px-8">
+      <div className="flex w-full flex-1 flex-col px-4 py-5 sm:px-6 lg:px-8">
         <Header
           currentUser={currentUser}
           isDark={isDark}
@@ -321,20 +204,23 @@ function App() {
           onCreateTask={() => setShowCreateForm(true)}
         />
 
-        <div className="flex flex-1 flex-col gap-5">
-          <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
+        <div className="flex flex-1 flex-col gap-6">
+          <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
 
             <CalendarCard
               month={month}
-              events={events}
+              events={displayEvents}
               calendarRef={calendarRef}
               selectedKey={selectedKey}
               isUploading={isUploading}
               moveMonth={moveMonth}
-              goToday={goToday}
-              handleUpload={handleUpload}
+              goToday={() => goToday(setSelectedKey)}
+              handleUpload={onFileChange}
               setMonth={setMonth}
               setSelectedKey={setSelectedKey}
+              showMineOnly={showMineOnly}
+              isLoadingMine={isLoadingMine}
+              onToggleMine={onToggleMine}
             />
 
             <CalendarSidebar
@@ -348,14 +234,12 @@ function App() {
         </div >
       </div >
 
-      < footer className="w-full border-t bg-background py-4 mt-auto" >
-        <div className="mx-auto flex flex-col items-center justify-center gap-1 text-center text-sm text-muted-foreground">
-          <p className="font-medium text-foreground">
-            LINE LIFF Scheduler © {new Date().getFullYear()}
+      < footer className="w-full border-t border-border bg-background py-4 mt-auto" >
+        <div className="mx-auto flex flex-col items-center justify-center gap-1 text-center text-xs text-muted-foreground">
+          <p className="font-display font-medium text-foreground">
+            ศรชล.
           </p>
-          <div className="flex items-center gap-2">
-            <span>Powered by React • Supabase</span>
-          </div>
+          <span>© {new Date().getFullYear() + 543}</span>
         </div>
       </footer >
 
@@ -373,13 +257,14 @@ function App() {
           </div>
         </>
       )}
+
       <CreateTaskModal
         open={showCreateForm}
         form={form}
         taskTypes={taskTypes}
         participants={participants}
         isSubmitting={isSubmitting}
-        handleCreateTask={handleCreateTask}
+        onSubmit={onSubmitTask}
         onClose={() => {
           setShowCreateForm(false);
           form.resetFields();

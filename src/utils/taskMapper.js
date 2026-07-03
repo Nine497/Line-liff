@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
-import { hexToRgba } from "../utils/color";
+import { hexToRgba, getContrastText } from "../utils/color";
+import { getEventColor } from "../constants/eventColors";
 
 export const toCalendarEvent = (task) => {
-  const color = task.type?.color ?? "#6c5ce7";
+  const color = getEventColor(task.type);
 
   return {
     id: task.id,
@@ -10,9 +11,9 @@ export const toCalendarEvent = (task) => {
     start: dayjs(task.start_time).format("YYYY-MM-DD"),
     end: dayjs(task.end_time).add(1, "day").format("YYYY-MM-DD"),
     allDay: true,
-    backgroundColor: hexToRgba(color, 0.15),
+    backgroundColor: hexToRgba(color, 0.9),
     borderColor: "transparent",
-    textColor: color,
+    textColor: getContrastText(color),
     extendedProps: {
       task,
       participants: task.task_participants,

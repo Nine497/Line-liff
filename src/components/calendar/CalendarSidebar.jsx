@@ -8,16 +8,17 @@ function CalendarSidebar({
     tabItems,
 }) {
     return (
-        <aside className="grid gap-5 xl:content-start">
+        <aside className="grid min-w-0 gap-5 xl:content-start">
             <Card
+                className="min-w-0 shadow-sm"
                 title={
-                    <div>
-                        <div className="text-xs text-gray-400">
-                            วันที่เลือก
-                        </div>
-                        <div className="text-base font-semibold">
+                    <div className="flex items-baseline justify-between gap-2 py-1">
+                        <h2 className="font-display text-base font-bold text-foreground">
                             {selectedDate}
-                        </div>
+                        </h2>
+                        <span className="font-display text-[11px] text-muted-foreground">
+                            รายการวันที่เลือก
+                        </span>
                     </div>
                 }
             >
@@ -29,8 +30,13 @@ function CalendarSidebar({
                         tabBarGutter={8}
                     />
                 ) : (
-                    <div className="rounded-lg border p-4 text-center text-gray-400">
-                        ไม่มีงานในวันนี้
+                    <div className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-8 text-center">
+                        <p className="text-sm font-medium text-foreground">
+                            ยังไม่มีกำหนดการในวันนี้
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                            แตะ "เพิ่มงาน" เพื่อบันทึกกำหนดการแรกของวันนี้
+                        </p>
                     </div>
                 )}
             </Card>

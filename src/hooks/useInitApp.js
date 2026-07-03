@@ -1,6 +1,5 @@
 
 import { useEffect} from "react";
-import liff from "@line/liff";
 import { initLiff } from "../liff";
 import { authUser } from "../services/authService";
 import { loadInitialData } from "../services/initDataService";
@@ -39,5 +38,8 @@ export const useInitApp = ({
     };
 
     initApp();
+    // Intentionally mount-only: LIFF login/init must run exactly once.
+    // The setters are stable, and fetchTaskEvents is memoized via useCallback.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 };
