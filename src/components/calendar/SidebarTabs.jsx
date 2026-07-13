@@ -20,7 +20,7 @@ export function useSidebarTabItems({
         </span>
       ),
       children: selectedEvents.length > 0 ? (
-        <div className="max-h-[55vh] min-w-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
+        <div className="h-full min-w-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
           {selectedEvents.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}
@@ -42,7 +42,7 @@ export function useSidebarTabItems({
         </span>
       ),
       children: (
-        <div className="max-h-[55vh] min-w-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
+        <div className="h-full min-w-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
           {availableParticipants.map((participant) => (
             <ParticipantCard
               key={participant.id}
@@ -62,7 +62,7 @@ export function useSidebarTabItems({
         </span>
       ),
       children: (
-        <div className="max-h-[55vh] min-w-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
+        <div className="h-full min-w-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
           {busyParticipants.map((participant) => (
             <ParticipantCard
               key={participant.id}

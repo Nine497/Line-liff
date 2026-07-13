@@ -1,4 +1,5 @@
 import { Card, Tabs } from "antd";
+import "./sidebar-tabs.css";
 
 function CalendarSidebar({
     selectedDate,
@@ -8,9 +9,18 @@ function CalendarSidebar({
     tabItems,
 }) {
     return (
-        <aside className="grid min-w-0 gap-5 xl:content-start">
+        <aside className="grid min-w-0 gap-5">
             <Card
-                className="min-w-0 shadow-sm"
+                className="flex min-w-0 flex-col shadow-sm xl:h-full"
+                styles={{
+                    body: {
+                        flex: 1,
+                        minHeight: 0,
+                        display: "flex",
+                        flexDirection: "column",
+                        overflow: "hidden",
+                    },
+                }}
                 title={
                     <div className="flex items-baseline justify-between gap-2 py-1">
                         <h2 className="font-display text-base font-bold text-foreground">
@@ -24,13 +34,14 @@ function CalendarSidebar({
             >
                 {selectedEvents.length > 0 ? (
                     <Tabs
+                        className="sidebar-tabs"
                         activeKey={activeTab}
                         onChange={setActiveTab}
                         items={tabItems}
                         tabBarGutter={8}
                     />
                 ) : (
-                    <div className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-8 text-center">
+                    <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-muted/40 p-8 text-center">
                         <p className="text-sm font-medium text-foreground">
                             ยังไม่มีกำหนดการในวันนี้
                         </p>

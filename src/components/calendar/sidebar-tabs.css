@@ -1,0 +1,20 @@
+/* Lets the "today's schedule" card match the calendar's height: the tab
+   content area stretches to fill the card (min-height = card) and its list
+   scrolls internally instead of growing past it (max-height = calendar,
+   since the card itself is stretched to the calendar's height by the grid). */
+.sidebar-tabs.ant-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.sidebar-tabs .ant-tabs-content-holder {
+  flex: 1;
+  min-height: 0;
+}
+
+.sidebar-tabs .ant-tabs-content,
+.sidebar-tabs .ant-tabs-tabpane {
+  height: 100%;
+}
