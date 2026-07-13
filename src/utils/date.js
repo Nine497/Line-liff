@@ -39,6 +39,8 @@ export function formatEventSchedule(startTime, endTime) {
     label: isMultiDay
       ? `${shortDate(start)} ${start.format("HH:mm")} – ${shortDate(end)} ${end.format("HH:mm")} น.`
       : `${start.format("HH:mm")} – ${end.format("HH:mm")} น.`,
-    dateLabel: isMultiDay ? `${shortDate(start)} – ${shortDate(end)}` : shortDate(start),
+    // label already embeds both dates when it spans days ("2 ส.ค. 07:00 –
+    // 8 ส.ค. 07:00 น."), so a separate dateLabel there would just repeat it.
+    dateLabel: isMultiDay ? null : shortDate(start),
   };
 }
