@@ -19,7 +19,9 @@
   }
 
   .task-sheet .ant-modal-content,
-  .ant-modal-root.task-sheet .ant-modal-content {
+  .ant-modal-root.task-sheet .ant-modal-content,
+  .task-sheet .ant-modal-container,
+  .ant-modal-root.task-sheet .ant-modal-container {
     border-radius: 16px 16px 0 0;
     padding-bottom: max(20px, env(safe-area-inset-bottom));
     position: relative;
@@ -29,7 +31,9 @@
   }
 
   .task-sheet .ant-modal-content::before,
-  .ant-modal-root.task-sheet .ant-modal-content::before {
+  .ant-modal-root.task-sheet .ant-modal-content::before,
+  .task-sheet .ant-modal-container::before,
+  .ant-modal-root.task-sheet .ant-modal-container::before {
     content: "";
     position: absolute;
     top: 10px;
