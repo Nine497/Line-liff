@@ -4,6 +4,7 @@ import Header from "./components/layout/Header";
 import CalendarCard from "./components/calendar/CalendarCard";
 import CalendarSidebar from "./components/calendar/CalendarSidebar";
 import CreateTaskModal from "./components/modal/CreateTaskModal";
+import EventDetailModal from "./components/modal/EventDetailModal";
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { ConfigProvider, App as AntdApp, Form, theme as antdTheme, message } from "antd";
@@ -85,6 +86,7 @@ function AppShell({ setTheme, isDark }) {
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [form] = Form.useForm();
   const [taskTypes, setTaskTypes] = useState([]);
@@ -221,6 +223,7 @@ function AppShell({ setTheme, isDark }) {
               showMineOnly={showMineOnly}
               isLoadingMine={isLoadingMine}
               onToggleMine={onToggleMine}
+              onEventClick={setSelectedEvent}
             />
 
             <CalendarSidebar
@@ -257,6 +260,11 @@ function AppShell({ setTheme, isDark }) {
           </div>
         </>
       )}
+
+      <EventDetailModal
+        event={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+      />
 
       <CreateTaskModal
         open={showCreateForm}

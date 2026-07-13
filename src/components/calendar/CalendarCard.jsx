@@ -22,6 +22,7 @@ export default function CalendarCard({
     showMineOnly,
     isLoadingMine,
     onToggleMine,
+    onEventClick,
 }) {
     const fileInputRef = useRef(null);
 
@@ -116,6 +117,10 @@ export default function CalendarCard({
                     }}
                     dateClick={(info) => {
                         setSelectedKey(info.dateStr);
+                    }}
+                    eventClick={(info) => {
+                        info.jsEvent.stopPropagation();
+                        onEventClick?.(info.event);
                     }}
                 />
             </div>
