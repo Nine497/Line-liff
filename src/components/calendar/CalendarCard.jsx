@@ -54,7 +54,11 @@ export default function CalendarCard({
 
     return (
         <Card ref={cardRef} className="overflow-hidden shadow-sm" styles={{ body: { padding: 0 } }}>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3.5">
+            {/* Column on phones (each group stretches full-width via the
+                default flex-col stretch, so wrapped controls inside get a
+                real width to resolve against) — row on sm+ where everything
+                fits inline. */}
+            <div className="flex flex-col gap-3 border-b border-border px-4 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
@@ -77,7 +81,12 @@ export default function CalendarCard({
                     </button>
                 </div>
 
-                <div className="flex items-center gap-2">
+                {/* flex-wrap here (not just on the outer row) is what keeps
+                    this from overflowing past the card's edge on phones —
+                    four controls in a non-wrapping row don't fit under
+                    ~420px, and the card's overflow-hidden was silently
+                    clipping whatever didn't fit instead of showing it. */}
+                <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
                         onClick={goToday}
@@ -104,23 +113,29 @@ export default function CalendarCard({
 
                     {/* Same idea as "ของฉัน" but for anyone — filters the
                         already-loaded events by participant instead of the
-                        current LINE user, so no extra request is needed. */}
-                    <Select
-                        allowClear
-                        showSearch
-                        placeholder="ดูตามคน"
-                        style={{ height: 44, width: 160 }}
-                        value={selectedParticipantId ?? undefined}
-                        onChange={(value) => onSelectParticipant?.(value ?? null)}
-                        options={participantOptions}
-                        optionFilterProp="label"
-                        filterOption={(input, option) =>
-                            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                        }
-                    />
+                        current LINE user, so no extra request is needed.
+                        Plain click-to-pick dropdown, not showSearch — a
+                        typeable combobox left its search cursor/focus state
+                        visible even after picking an option, which read as
+                        broken. Full-width when it wraps onto its own line on
+                        a phone, fixed-width once there's room to sit inline.
+                        The width lives on this wrapper, not the Select
+                        itself — antd's own CSS beats a Tailwind width class
+                        applied directly to .ant-select. */}
+                    <div className="w-full sm:w-40">
+                        <Select
+                            allowClear
+                            placeholder="ดูตามคน"
+                            style={{ height: 44, width: "100%" }}
+                            value={selectedParticipantId ?? undefined}
+                            onChange={(value) => onSelectParticipant?.(value ?? null)}
+                            options={participantOptions}
+                        />
+                    </div>
 
                     <Button
                         type="primary"
+                        className="w-full sm:w-auto"
                         style={{ height: 44 }}
                         icon={<Upload className="h-3.5 w-3.5" strokeWidth={2.25} />}
                         loading={isUploading}
