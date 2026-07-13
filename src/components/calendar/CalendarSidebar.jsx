@@ -7,11 +7,13 @@ function CalendarSidebar({
     activeTab,
     setActiveTab,
     tabItems,
+    maxHeight,
 }) {
     return (
         <aside className="grid min-w-0 gap-5">
             <Card
-                className="flex min-w-0 flex-col shadow-sm xl:h-full"
+                className="calendar-sidebar-card flex min-w-0 flex-col shadow-sm"
+                style={maxHeight ? { "--sidebar-max-h": `${maxHeight}px` } : undefined}
                 styles={{
                     body: {
                         flex: 1,

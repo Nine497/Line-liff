@@ -1,7 +1,17 @@
-/* Lets the "today's schedule" card match the calendar's height: the tab
-   content area stretches to fill the card (min-height = card) and its list
-   scrolls internally instead of growing past it (max-height = calendar,
-   since the card itself is stretched to the calendar's height by the grid). */
+/* Lets the "today's schedule" card match the calendar's height. CSS Grid's
+   row auto-sizing uses each item's *unclipped* content height, so a plain
+   height:100% would let a long list inflate both columns together instead of
+   scrolling — the calendar's real rendered height is measured in JS
+   (CalendarCard's ResizeObserver -> App's calendarHeight state) and applied
+   here as an explicit pixel cap, only once the cards sit side by side. */
+@media (min-width: 1280px) {
+  .calendar-sidebar-card {
+    max-height: var(--sidebar-max-h, none);
+    min-height: var(--sidebar-max-h, auto);
+    overflow: hidden;
+  }
+}
+
 .sidebar-tabs.ant-tabs {
   display: flex;
   flex-direction: column;

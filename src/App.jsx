@@ -87,6 +87,7 @@ function AppShell({ setTheme, isDark }) {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [calendarHeight, setCalendarHeight] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [form] = Form.useForm();
   const [taskTypes, setTaskTypes] = useState([]);
@@ -224,6 +225,7 @@ function AppShell({ setTheme, isDark }) {
               isLoadingMine={isLoadingMine}
               onToggleMine={onToggleMine}
               onEventClick={setSelectedEvent}
+              onHeightChange={setCalendarHeight}
             />
 
             <CalendarSidebar
@@ -232,6 +234,7 @@ function AppShell({ setTheme, isDark }) {
               activeTab={activeTab}
               setActiveTab={setActiveTab}
               tabItems={tabItems}
+              maxHeight={calendarHeight}
             />
           </section >
         </div >

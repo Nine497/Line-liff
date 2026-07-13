@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { Card, Button } from "antd";
 import { Upload, ChevronLeft, ChevronRight, UserRound } from "lucide-react";
 import dayjs from "dayjs";
@@ -23,11 +23,32 @@ export default function CalendarCard({
     isLoadingMine,
     onToggleMine,
     onEventClick,
+    onHeightChange,
 }) {
     const fileInputRef = useRef(null);
+    const cardRef = useRef(null);
+
+    useLayoutEffect(() => {
+        const node = cardRef.current;
+        if (!node || !onHeightChange) return;
+
+        // Read synchronously (not just via ResizeObserver) so the height is
+        // available on the very first paint instead of one frame later —
+        // ResizeObserver's callback is tied to the rendering pipeline, which
+        // browsers can throttle for backgrounded/inactive tabs.
+        onHeightChange(node.getBoundingClientRect().height);
+
+        const observer = new ResizeObserver(([entry]) => {
+            onHeightChange(entry.contentRect.height);
+        });
+        observer.observe(node);
+
+        return () => observer.disconnect();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [events, month]);
 
     return (
-        <Card className="overflow-hidden shadow-sm" styles={{ body: { padding: 0 } }}>
+        <Card ref={cardRef} className="overflow-hidden shadow-sm" styles={{ body: { padding: 0 } }}>
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3.5">
                 <div className="flex items-center gap-2">
                     <button
