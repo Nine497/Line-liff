@@ -39,6 +39,6 @@ export function formatEventSchedule(startTime, endTime) {
     label: isMultiDay
       ? `${shortDate(start)} ${start.format("HH:mm")} – ${shortDate(end)} ${end.format("HH:mm")} น.`
       : `${start.format("HH:mm")} – ${end.format("HH:mm")} น.`,
-    dateLabel: isMultiDay ? `${shortDate(start)} – ${shortDate(end)}` : null,
+    dateLabel: isMultiDay ? `${shortDate(start)} – ${shortDate(end)}` : shortDate(start),
   };
 }
