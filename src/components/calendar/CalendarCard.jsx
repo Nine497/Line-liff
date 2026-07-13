@@ -1,8 +1,9 @@
 import { useLayoutEffect, useRef } from "react";
-import { Card, Button } from "antd";
+import { Card, Button, Select } from "antd";
 import { Upload, ChevronLeft, ChevronRight, UserRound } from "lucide-react";
 import dayjs from "dayjs";
 import { monthNames } from "../../constants/calendar";
+import { unwrap } from "../../utils/unwrap";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -22,11 +23,15 @@ export default function CalendarCard({
     showMineOnly,
     isLoadingMine,
     onToggleMine,
+    participants,
+    selectedParticipantId,
+    onSelectParticipant,
     onEventClick,
     onHeightChange,
 }) {
     const fileInputRef = useRef(null);
     const cardRef = useRef(null);
+    const participantOptions = unwrap(participants).map((p) => ({ value: p.id, label: p.name }));
 
     useLayoutEffect(() => {
         const node = cardRef.current;
@@ -96,6 +101,23 @@ export default function CalendarCard({
                         <UserRound className="h-3.5 w-3.5" />
                         {isLoadingMine ? "กำลังโหลด..." : "ของฉัน"}
                     </button>
+
+                    {/* Same idea as "ของฉัน" but for anyone — filters the
+                        already-loaded events by participant instead of the
+                        current LINE user, so no extra request is needed. */}
+                    <Select
+                        allowClear
+                        showSearch
+                        placeholder="ดูตามคน"
+                        style={{ height: 44, width: 160 }}
+                        value={selectedParticipantId ?? undefined}
+                        onChange={(value) => onSelectParticipant?.(value ?? null)}
+                        options={participantOptions}
+                        optionFilterProp="label"
+                        filterOption={(input, option) =>
+                            (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+                        }
+                    />
 
                     <Button
                         type="primary"

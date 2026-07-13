@@ -8,7 +8,7 @@ export function useSidebarTabItems({
   availableParticipants,
   busyParticipants,
   busyMap,
-  showMineOnly,
+  isFiltered,
 }) {
   return useMemo(() => [
     {
@@ -28,7 +28,7 @@ export function useSidebarTabItems({
       ) : (
         <div className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-6 text-center">
           <p className="text-sm font-medium text-foreground">
-            {showMineOnly ? "คุณไม่มีกำหนดการในวันนี้" : "ยังไม่มีกำหนดการในวันนี้"}
+            {isFiltered ? "ไม่มีกำหนดการที่ตรงกับตัวกรองในวันนี้" : "ยังไม่มีกำหนดการในวันนี้"}
           </p>
         </div>
       ),
@@ -73,5 +73,5 @@ export function useSidebarTabItems({
         </div>
       ),
     },
-  ], [selectedEvents, availableParticipants, busyParticipants, busyMap, showMineOnly]);
+  ], [selectedEvents, availableParticipants, busyParticipants, busyMap, isFiltered]);
 }

@@ -88,6 +88,7 @@ function AppShell({ setTheme, isDark }) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [calendarHeight, setCalendarHeight] = useState(null);
+  const [selectedParticipantId, setSelectedParticipantId] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [form] = Form.useForm();
   const [taskTypes, setTaskTypes] = useState([]);
@@ -116,22 +117,42 @@ function AppShell({ setTheme, isDark }) {
     busyParticipants,
   } = useDaySelection(events, selectedKey, participants);
 
+  // "ดูตามคน" reuses the task_participants already embedded on every loaded
+  // event, so picking any participant filters instantly with no extra API
+  // call — unlike "ของฉัน", which resolves the current LINE user server-side.
+  const participantTaskIds = useMemo(() => {
+    if (!selectedParticipantId) return null;
+
+    const ids = new Set();
+    events.forEach((e) => {
+      const tps = e.extendedProps?.task?.task_participants ?? [];
+      if (tps.some((tp) => tp.participant?.id === selectedParticipantId)) {
+        ids.add(e.id);
+      }
+    });
+    return ids;
+  }, [events, selectedParticipantId]);
+
   const displayEvents = useMemo(() => {
-    if (!showMineOnly) return events;
-    return events.filter((e) => myTaskIds.has(e.id));
-  }, [events, showMineOnly, myTaskIds]);
+    let list = events;
+    if (showMineOnly) list = list.filter((e) => myTaskIds.has(e.id));
+    if (participantTaskIds) list = list.filter((e) => participantTaskIds.has(e.id));
+    return list;
+  }, [events, showMineOnly, myTaskIds, participantTaskIds]);
 
   const displaySelectedEvents = useMemo(() => {
-    if (!showMineOnly) return selectedEvents;
-    return selectedEvents.filter((e) => myTaskIds.has(e.id));
-  }, [selectedEvents, showMineOnly, myTaskIds]);
+    let list = selectedEvents;
+    if (showMineOnly) list = list.filter((e) => myTaskIds.has(e.id));
+    if (participantTaskIds) list = list.filter((e) => participantTaskIds.has(e.id));
+    return list;
+  }, [selectedEvents, showMineOnly, myTaskIds, participantTaskIds]);
 
   const tabItems = useSidebarTabItems({
     selectedEvents: displaySelectedEvents,
     availableParticipants,
     busyParticipants,
     busyMap,
-    showMineOnly,
+    isFiltered: showMineOnly || !!selectedParticipantId,
   });
 
   const onToggleMine = async () => {
@@ -224,6 +245,9 @@ function AppShell({ setTheme, isDark }) {
               showMineOnly={showMineOnly}
               isLoadingMine={isLoadingMine}
               onToggleMine={onToggleMine}
+              participants={participants}
+              selectedParticipantId={selectedParticipantId}
+              onSelectParticipant={setSelectedParticipantId}
               onEventClick={setSelectedEvent}
               onHeightChange={setCalendarHeight}
             />
