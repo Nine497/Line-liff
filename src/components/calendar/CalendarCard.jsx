@@ -117,12 +117,14 @@ export default function CalendarCard({
                         Plain click-to-pick dropdown, not showSearch — a
                         typeable combobox left its search cursor/focus state
                         visible even after picking an option, which read as
-                        broken. Full-width when it wraps onto its own line on
-                        a phone, fixed-width once there's room to sit inline.
-                        The width lives on this wrapper, not the Select
-                        itself — antd's own CSS beats a Tailwind width class
-                        applied directly to .ant-select. */}
-                    <div className="w-full sm:w-40">
+                        broken. On phones it's pushed onto its own full-width
+                        row below "วันนี้ / ของฉัน / นำเข้า Excel" via `order`
+                        (DOM position is unchanged, so sm+ keeps the original
+                        inline order — order-last only takes effect below the
+                        sm breakpoint). The width lives on this wrapper, not
+                        the Select itself — antd's own CSS beats a Tailwind
+                        width class applied directly to .ant-select. */}
+                    <div className="order-last w-full sm:order-none sm:w-40">
                         <Select
                             allowClear
                             placeholder="ดูตามคน"
@@ -135,7 +137,6 @@ export default function CalendarCard({
 
                     <Button
                         type="primary"
-                        className="w-full sm:w-auto"
                         style={{ height: 44 }}
                         icon={<Upload className="h-3.5 w-3.5" strokeWidth={2.25} />}
                         loading={isUploading}
