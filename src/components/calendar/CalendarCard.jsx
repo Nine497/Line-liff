@@ -55,7 +55,7 @@ export default function CalendarCard({
                         type="button"
                         aria-label="เดือนก่อนหน้า"
                         onClick={() => moveMonth(-1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -66,7 +66,7 @@ export default function CalendarCard({
                         type="button"
                         aria-label="เดือนถัดไป"
                         onClick={() => moveMonth(1)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
                     >
                         <ChevronRight className="h-4 w-4" />
                     </button>
@@ -76,7 +76,7 @@ export default function CalendarCard({
                     <button
                         type="button"
                         onClick={goToday}
-                        className="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card px-3 font-display text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
+                        className="flex h-11 items-center gap-1.5 rounded-lg border border-border bg-card px-3 font-display text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
                     >
                         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                         วันนี้
@@ -88,7 +88,7 @@ export default function CalendarCard({
                         disabled={isLoadingMine}
                         aria-pressed={showMineOnly}
                         title="แสดงเฉพาะกำหนดการของฉัน"
-                        className={`flex h-8 items-center gap-1.5 rounded-lg border px-3 font-display text-xs font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${showMineOnly
+                        className={`flex h-11 items-center gap-1.5 rounded-lg border px-3 font-display text-xs font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${showMineOnly
                                 ? "border-primary bg-primary text-primary-foreground"
                                 : "border-border bg-card text-foreground hover:border-primary/40 hover:bg-secondary"
                             }`}
@@ -99,6 +99,7 @@ export default function CalendarCard({
 
                     <Button
                         type="primary"
+                        style={{ height: 44 }}
                         icon={<Upload className="h-3.5 w-3.5" strokeWidth={2.25} />}
                         loading={isUploading}
                         onClick={() => fileInputRef.current?.click()}

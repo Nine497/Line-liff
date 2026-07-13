@@ -26,7 +26,9 @@ function AddEventButton({ onClick }) {
             <button
                 type="button"
                 onClick={onClick}
-                className="xl:hidden fixed bottom-5 right-5 z-40 flex cursor-pointer items-center gap-1.5 rounded-full bg-primary px-5 py-3.5 font-display text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
+                // bottom offset clears the iOS home-indicator / Android gesture
+                // bar instead of sitting flush against it on notched devices.
+                className="xl:hidden fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-5 z-40 flex cursor-pointer items-center gap-1.5 rounded-full bg-primary px-5 py-3.5 font-display text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
             >
                 <Plus className="h-4 w-4" strokeWidth={2.5} /> เพิ่มงาน
             </button>

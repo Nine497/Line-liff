@@ -45,6 +45,9 @@ function Header({
                     <span className="text-[10.5px] text-muted-foreground">{date}</span>
                 </div>
 
+                {/* Hit area is 44x44 (touch-target min) even though the visible
+                    track stays a compact 22x38 pill — the track is purely
+                    visual and centered inside the real tappable button. */}
                 <button
                     type="button"
                     role="switch"
@@ -55,13 +58,15 @@ function Header({
                             : "เปลี่ยนเป็นโหมดมืด"
                     }
                     onClick={onToggleTheme}
-                    className="relative h-[22px] w-[38px] shrink-0 cursor-pointer rounded-full border border-border bg-secondary transition-colors"
+                    className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center"
                 >
-                    <span
-                        className={`absolute top-[1px] left-[1px] flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform ${isDark ? "translate-x-4" : "translate-x-0"
-                            }`}
-                    >
-                        {isDark ? <Moon className="h-2.5 w-2.5" /> : <Sun className="h-2.5 w-2.5" />}
+                    <span className="relative h-[22px] w-[38px] rounded-full border border-border bg-secondary transition-colors">
+                        <span
+                            className={`absolute top-[1px] left-[1px] flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform ${isDark ? "translate-x-4" : "translate-x-0"
+                                }`}
+                        >
+                            {isDark ? <Moon className="h-2.5 w-2.5" /> : <Sun className="h-2.5 w-2.5" />}
+                        </span>
                     </span>
                 </button>
 
