@@ -47,7 +47,7 @@ function EventDetailModal({ event, onClose }) {
         >
             <Divider className="!mt-3 !mb-5" />
 
-            <div className="flex max-h-[60vh] flex-col gap-5 overflow-y-auto pr-1">
+            <div className="flex flex-col gap-5">
                 {/* Date & time — the first thing anyone checking an event needs. */}
                 {schedule && (
                     <div

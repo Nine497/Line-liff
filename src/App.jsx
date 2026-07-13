@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import Header from "./components/layout/Header";
-import CompassMark from "./components/layout/CompassMark";
 import CalendarCard from "./components/calendar/CalendarCard";
 import CalendarSidebar from "./components/calendar/CalendarSidebar";
 import CreateTaskModal from "./components/modal/CreateTaskModal";
@@ -241,17 +240,11 @@ function AppShell({ setTheme, isDark }) {
         </div >
       </div >
 
-      < footer className="w-full border-t border-border bg-background py-6 mt-auto" >
-        <div className="mx-auto flex flex-col items-center gap-2 text-center">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <CompassMark className="h-4 w-4" />
-          </span>
-          <p className="font-display text-sm font-bold text-foreground">
-            ศูนย์ยุทธการ ศรชล.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            ระบบเวรยามและกำหนดการ · © {new Date().getFullYear() + 543}
-          </p>
+      < footer className="w-full border-t border-border bg-background py-4 mt-auto" >
+        <div className="mx-auto text-center text-xs text-muted-foreground">
+          <span className="font-display font-semibold text-foreground">ศูนย์ยุทธการ ศรชล.</span>
+          {" · ระบบเวรและกำหนดการ · © "}
+          {new Date().getFullYear() + 543}
         </div>
       </footer >
 
