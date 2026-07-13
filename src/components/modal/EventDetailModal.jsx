@@ -3,6 +3,7 @@ import { Clock, AlignLeft, Users, Tags } from "lucide-react";
 import { hexToRgba } from "../../utils/color";
 import { getEventColor } from "../../constants/eventColors";
 import { formatEventSchedule } from "../../utils/date";
+import "./task-sheet.css";
 
 function EventDetailModal({ event, onClose }) {
     const task = event?.extendedProps?.task;
@@ -31,12 +32,13 @@ function EventDetailModal({ event, onClose }) {
             onCancel={onClose}
             footer={null}
             width={520}
+            rootClassName="task-sheet"
             destroyOnHidden
         >
             <Divider className="!mt-3 !mb-5" />
 
             <div
-                className="flex flex-col gap-4 rounded-xl p-4"
+                className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto rounded-xl p-4"
                 style={{ background: bgColor, border: `1px solid ${borderColor}` }}
             >
                 {typeName && (
