@@ -105,6 +105,7 @@ export default function CalendarCard({
                     displayEventTime={false}
                     headerToolbar={false}
                     height="auto"
+                    dayMaxEvents={3}
                     dayCellClassNames={(arg) =>
                         dayjs(arg.date).format("YYYY-MM-DD") === selectedKey ? "selected-day" : ""
                     }
