@@ -127,10 +127,28 @@ export default function ImportWizardModal({
             const displayTitle = title || "ไม่มีชื่องาน";
             const displayDate = dateVal !== undefined ? String(dateVal) : "ไม่มีวันที่";
             
+            const extraData = [];
+            STANDARD_FIELDS.forEach(field => {
+                if (field.key !== "ชื่องาน" && field.key !== "วันที่") {
+                    const mappedHeader = mapping[field.key];
+                    let val = mappedHeader ? row[mappedHeader] : undefined;
+                    
+                    if (isDuty) {
+                        if (field.key === "ประเภท" && val === undefined) val = "เวร";
+                        if (field.key === "เวลาเริ่ม" && val === undefined) val = "08:30";
+                        if (field.key === "เวลาสิ้นสุด" && val === undefined) val = "16:30";
+                    }
+                    
+                    if (val !== undefined && String(val).trim() !== "") {
+                        extraData.push({ label: field.label.split(" ")[0], value: String(val) });
+                    }
+                }
+            });
+            
             if (missingReason.length === 0) {
-                valid.push({ index: index + 2, title: displayTitle, date: displayDate }); // +2 because index 0 is row 2 in excel (after headers)
+                valid.push({ id: index, index: index + 2, title: displayTitle, date: displayDate, extra: extraData });
             } else {
-                invalid.push({ index: index + 2, title: displayTitle, date: displayDate, reason: missingReason.join(", ") });
+                invalid.push({ id: index, index: index + 2, title: displayTitle, date: displayDate, extra: extraData, reason: missingReason.join(", ") });
             }
         });
         
@@ -139,8 +157,29 @@ export default function ImportWizardModal({
         setCurrentStep(3);
     };
 
+    const toggleToInvalid = (r) => {
+        setPreviewValidRows(prev => prev.filter(item => item.id !== r.id));
+        setPreviewInvalidRows(prev => {
+            const next = [{...r, reason: "ถูกคัดออกโดยผู้ใช้", isManual: true}, ...prev];
+            return next.sort((a, b) => a.id - b.id);
+        });
+    };
+
+    const toggleToValid = (r) => {
+        setPreviewInvalidRows(prev => prev.filter(item => item.id !== r.id));
+        setPreviewValidRows(prev => {
+            const restored = {...r};
+            delete restored.reason;
+            delete restored.isManual;
+            const next = [...prev, restored];
+            return next.sort((a, b) => a.id - b.id);
+        });
+    };
+
     const handleConfirm = () => {
-        onConfirm(mapping, importType === 'duty', selectedFile, excelData);
+        const validIds = new Set(previewValidRows.map(r => r.id));
+        const finalExcelData = excelData.filter((_, index) => validIds.has(index));
+        onConfirm(mapping, importType === 'duty', selectedFile, finalExcelData);
     };
 
     const isDuty = importType === 'duty';
@@ -319,7 +358,7 @@ export default function ImportWizardModal({
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Valid Rows */}
-                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[300px]">
+                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[350px]">
                                 <div className="bg-emerald-500/10 p-3 border-b border-emerald-500/20 text-emerald-600 flex justify-between items-center">
                                     <span className="font-semibold">แถวที่ผ่าน (นำเข้าได้)</span>
                                     <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">{previewValidRows.length}</span>
@@ -330,9 +369,28 @@ export default function ImportWizardModal({
                                     ) : (
                                         <ul className="space-y-1">
                                             {previewValidRows.map(r => (
-                                                <li key={r.index} className="text-xs p-2 rounded hover:bg-secondary border border-transparent hover:border-border transition-colors">
-                                                    <div className="font-medium text-foreground truncate">{r.title}</div>
-                                                    <div className="text-muted-foreground truncate">บรรทัดที่ {r.index} | {r.date}</div>
+                                                <li key={r.id} className="group text-xs p-2 rounded hover:bg-secondary border border-transparent hover:border-border transition-colors flex items-start gap-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-medium text-foreground truncate">{r.title}</div>
+                                                        <div className="text-muted-foreground truncate mb-1">บ. {r.index} | {r.date}</div>
+                                                        {r.extra && r.extra.length > 0 && (
+                                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                                {r.extra.map((ex, i) => (
+                                                                    <span key={i} className="bg-background text-[10px] px-1.5 py-0.5 rounded text-muted-foreground border border-border flex items-center">
+                                                                        <span className="opacity-70 mr-1">{ex.label}:</span>
+                                                                        <span className="text-foreground truncate max-w-[100px]">{ex.value}</span>
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleToInvalid(r)}
+                                                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-all shrink-0"
+                                                        title="คัดออก"
+                                                    >
+                                                        คัดออก
+                                                    </button>
                                                 </li>
                                             ))}
                                         </ul>
@@ -341,7 +399,7 @@ export default function ImportWizardModal({
                             </div>
                             
                             {/* Invalid Rows */}
-                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[300px]">
+                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[350px]">
                                 <div className="bg-destructive/10 p-3 border-b border-destructive/20 text-destructive flex justify-between items-center">
                                     <span className="font-semibold">แถวที่ไม่ผ่าน (ถูกข้าม)</span>
                                     <span className="bg-destructive text-white px-2 py-0.5 rounded-full text-xs font-bold">{previewInvalidRows.length}</span>
@@ -352,12 +410,33 @@ export default function ImportWizardModal({
                                     ) : (
                                         <ul className="space-y-1">
                                             {previewInvalidRows.map(r => (
-                                                <li key={r.index} className="text-xs p-2 rounded hover:bg-destructive/5 border border-transparent hover:border-destructive/10 transition-colors">
-                                                    <div className="font-medium text-destructive truncate">{r.title}</div>
-                                                    <div className="text-muted-foreground truncate flex justify-between">
-                                                        <span>บ. {r.index} | {r.date}</span>
-                                                        <span className="text-destructive font-medium shrink-0 ml-2">({r.reason})</span>
+                                                <li key={r.id} className="group text-xs p-2 rounded hover:bg-destructive/5 border border-transparent hover:border-destructive/10 transition-colors flex items-start gap-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-medium text-destructive truncate">{r.title}</div>
+                                                        <div className="text-muted-foreground truncate flex justify-between mb-1">
+                                                            <span>บ. {r.index} | {r.date}</span>
+                                                            <span className="text-destructive font-medium shrink-0 ml-2">({r.reason})</span>
+                                                        </div>
+                                                        {r.extra && r.extra.length > 0 && (
+                                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                                {r.extra.map((ex, i) => (
+                                                                    <span key={i} className="bg-background text-[10px] px-1.5 py-0.5 rounded text-muted-foreground border border-border flex items-center opacity-80">
+                                                                        <span className="mr-1">{ex.label}:</span>
+                                                                        <span className="truncate max-w-[100px]">{ex.value}</span>
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                     </div>
+                                                    {r.isManual && (
+                                                        <button 
+                                                            onClick={() => toggleToValid(r)}
+                                                            className="opacity-0 group-hover:opacity-100 p-1.5 rounded bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-all shrink-0"
+                                                            title="นำกลับเข้า"
+                                                        >
+                                                            นำกลับ
+                                                        </button>
+                                                    )}
                                                 </li>
                                             ))}
                                         </ul>
