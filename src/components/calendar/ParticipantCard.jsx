@@ -41,7 +41,9 @@ function ParticipantCard({
                                         <p className="truncate pl-3 text-[11px] text-muted-foreground/70">
                                             {schedule.isAllDay
                                                 ? `ทั้งวัน · ${schedule.dateLabel}`
-                                                : schedule.label}
+                                                : schedule.isMultiDay
+                                                    ? schedule.label
+                                                    : `${schedule.dateLabel} · ${schedule.label}`}
                                         </p>
                                     )}
                                 </li>

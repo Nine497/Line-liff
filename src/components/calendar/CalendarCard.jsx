@@ -192,6 +192,13 @@ export default function CalendarCard({
                             month: date.getMonth() + 1,
                         });
                     }}
+                    selectable={true}
+                    select={(info) => {
+                        // FullCalendar's select gives an exclusive end date (info.endStr is the day after).
+                        // We subtract 1 day to make our selectedDateRange inclusive.
+                        const endDate = dayjs(info.endStr).subtract(1, "day").format("YYYY-MM-DD");
+                        setSelectedDateRange([info.startStr, endDate]);
+                    }}
                     dateClick={(info) => {
                         setSelectedDateRange([info.dateStr, info.dateStr]);
                     }}

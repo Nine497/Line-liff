@@ -28,7 +28,7 @@ export function useSidebarTabItems({
       ) : (
         <div className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-6 text-center">
           <p className="text-sm font-medium text-foreground">
-            {isFiltered ? "ไม่มีกำหนดการที่ตรงกับตัวกรองในวันนี้" : "ยังไม่มีกำหนดการในวันนี้"}
+            {isFiltered ? "ไม่มีกำหนดการที่ตรงกับตัวกรองในช่วงเวลาที่เลือก" : "ยังไม่มีกำหนดการในช่วงเวลาที่เลือก"}
           </p>
         </div>
       ),
@@ -54,7 +54,7 @@ export function useSidebarTabItems({
       ) : (
         <div className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-6 text-center">
           <p className="text-sm font-medium text-foreground">
-            {isFiltered ? "ไม่มีผู้ที่ว่างตรงกับตัวกรองในวันนี้" : "ไม่มีผู้ที่ว่างในวันนี้"}
+            {isFiltered ? "ไม่มีผู้ที่ว่างตรงกับตัวกรองในช่วงเวลาที่เลือก" : "ไม่มีผู้ที่ว่างในช่วงเวลาที่เลือก"}
           </p>
         </div>
       ),
@@ -80,7 +80,7 @@ export function useSidebarTabItems({
       ) : (
         <div className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-6 text-center">
           <p className="text-sm font-medium text-foreground">
-            {isFiltered ? "ไม่มีผู้ที่ไม่ว่างตรงกับตัวกรองในวันนี้" : "ไม่มีผู้ที่ไม่ว่างในวันนี้"}
+            {isFiltered ? "ไม่มีผู้ที่ไม่ว่างตรงกับตัวกรองในช่วงเวลาที่เลือก" : "ไม่มีผู้ที่ไม่ว่างในช่วงเวลาที่เลือก"}
           </p>
         </div>
       ),

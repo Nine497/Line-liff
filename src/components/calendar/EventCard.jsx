@@ -56,7 +56,9 @@ function EventCard({ event }) {
                             <span className="text-muted-foreground/70">{schedule.dateLabel}</span>
                         </>
                     ) : (
-                        <span className="font-medium text-muted-foreground">{schedule.label}</span>
+                        <span className="font-medium text-muted-foreground">
+                            {schedule.isMultiDay ? schedule.label : `${schedule.dateLabel} · ${schedule.label}`}
+                        </span>
                     )}
                 </div>
             )}

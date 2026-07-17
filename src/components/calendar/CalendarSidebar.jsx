@@ -1,6 +1,31 @@
-import { Card, Tabs, DatePicker } from "antd";
-import dayjs from "dayjs";
+import { Card, Tabs } from "antd";
 import "./sidebar-tabs.css";
+import { monthNames } from "../../constants/calendar";
+
+function formatSidebarDate(dateRange) {
+    if (!dateRange || dateRange.length < 2) return "";
+    const start = dateRange[0];
+    const end = dateRange[1];
+    
+    const [sYear, sMonth, sDay] = start.split("-");
+    const startStr = `${Number(sDay)} ${monthNames[Number(sMonth) - 1]} ${Number(sYear) + 543}`;
+    
+    if (start === end) return startStr;
+    
+    const [eYear, eMonth, eDay] = end.split("-");
+    
+    // If same year and month, show "1 - 5 มกราคม 2569"
+    if (sYear === eYear && sMonth === eMonth) {
+        return `${Number(sDay)} - ${Number(eDay)} ${monthNames[Number(sMonth) - 1]} ${Number(sYear) + 543}`;
+    }
+    // If same year but different month, show "1 มกราคม - 5 กุมภาพันธ์ 2569"
+    if (sYear === eYear) {
+        return `${Number(sDay)} ${monthNames[Number(sMonth) - 1]} - ${Number(eDay)} ${monthNames[Number(eMonth) - 1]} ${Number(sYear) + 543}`;
+    }
+    // Different year
+    const endStr = `${Number(eDay)} ${monthNames[Number(eMonth) - 1]} ${Number(eYear) + 543}`;
+    return `${startStr} - ${endStr}`;
+}
 
 function CalendarSidebar({
     selectedDateRange,
@@ -11,6 +36,8 @@ function CalendarSidebar({
     tabItems,
     maxHeight,
 }) {
+    const dateDisplay = formatSidebarDate(selectedDateRange);
+
     return (
         <aside className="grid min-w-0 gap-5">
             <Card
@@ -26,26 +53,13 @@ function CalendarSidebar({
                     },
                 }}
                 title={
-                    <div className="flex flex-col gap-2 py-2">
-                        <div className="flex items-baseline justify-between">
-                            <h2 className="font-display text-[15px] font-bold text-foreground">
-                                ค้นหาวันว่าง
-                            </h2>
-                            <span className="font-display text-[11px] text-muted-foreground">
-                                กำหนดช่วงวันเพื่อดูคิวงาน
-                            </span>
-                        </div>
-                        <DatePicker.RangePicker
-                            format="D MMM YYYY"
-                            value={selectedDateRange ? [dayjs(selectedDateRange[0]), dayjs(selectedDateRange[1])] : null}
-                            onChange={(dates) => {
-                                if (dates && dates.length === 2) {
-                                    setSelectedDateRange([dates[0].format("YYYY-MM-DD"), dates[1].format("YYYY-MM-DD")]);
-                                }
-                            }}
-                            style={{ width: "100%" }}
-                            allowClear={false}
-                        />
+                    <div className="flex items-baseline justify-between gap-2 py-1">
+                        <h2 className="font-display text-[15px] font-bold text-foreground">
+                            {dateDisplay}
+                        </h2>
+                        <span className="font-display text-[11px] text-muted-foreground whitespace-nowrap">
+                            ช่วงวันที่เลือก
+                        </span>
                     </div>
                 }
             >
