@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Modal, Select, Button, Steps, Alert, Upload as AntdUpload, message } from "antd";
-import { ArrowRightLeft, CalendarDays, ShieldAlert, Inbox } from "lucide-react";
+import { CalendarDays, ShieldAlert, Inbox } from "lucide-react";
 import * as XLSX from "xlsx";
 
 const { Dragger } = AntdUpload;
@@ -33,38 +33,23 @@ export default function ImportWizardModal({
     const [previewValidRows, setPreviewValidRows] = useState([]);
     const [previewInvalidRows, setPreviewInvalidRows] = useState([]);
 
-    // Reset when opened/closed
-    useEffect(() => {
-        if (isOpen) {
-            setCurrentStep(0);
-            setImportType(null);
-            setSelectedFile(null);
-            setExcelHeaders([]);
-            setExcelData([]);
-            setMapping({});
-            setPreviewValidRows([]);
-            setPreviewInvalidRows([]);
-        }
-    }, [isOpen]);
-
-    // Auto-map logic when moving to step 2 (mapping)
-    useEffect(() => {
-        if (currentStep === 2 && excelHeaders.length > 0) {
-            const initialMapping = {};
-            STANDARD_FIELDS.forEach(field => {
-                let matchedHeader = excelHeaders.find(h => h === field.key);
-                if (!matchedHeader) {
-                    matchedHeader = excelHeaders.find(h => 
-                        h.includes(field.key) || field.key.includes(h)
-                    );
-                }
-                if (matchedHeader) {
-                    initialMapping[field.key] = matchedHeader;
-                }
-            });
-            setMapping(initialMapping);
-        }
-    }, [currentStep, excelHeaders]);
+    // Best-effort auto-map: match each standard field to an Excel header by
+    // exact name, falling back to a substring match either direction.
+    const buildAutoMapping = (headers) => {
+        const initialMapping = {};
+        STANDARD_FIELDS.forEach(field => {
+            let matchedHeader = headers.find(h => h === field.key);
+            if (!matchedHeader) {
+                matchedHeader = headers.find(h =>
+                    h.includes(field.key) || field.key.includes(h)
+                );
+            }
+            if (matchedHeader) {
+                initialMapping[field.key] = matchedHeader;
+            }
+        });
+        return initialMapping;
+    };
 
     const handleFileSelect = (file) => {
         const isExcel = file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.type === "application/vnd.ms-excel" || file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
@@ -96,6 +81,7 @@ export default function ImportWizardModal({
                 setExcelHeaders(headers);
                 setExcelData(rows);
                 setSelectedFile(file);
+                setMapping(buildAutoMapping(headers));
                 setCurrentStep(2); // move to mapping step
             } catch (err) {
                 message.error("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel");
@@ -117,9 +103,15 @@ export default function ImportWizardModal({
             let dateVal = mapping["วันที่"] ? row[mapping["วันที่"]] : undefined;
             
             if (isDuty) {
-                if (title === undefined) title = "การเข้าเวร";
+                // Blank mapped cells ("") must default the same way an
+                // entirely-unmapped column does — otherwise this preview
+                // disagrees with useExcelImport's actual submit-time
+                // defaulting (`!newRow["ชื่องาน"]`, which treats "" and
+                // undefined the same) and rows that would succeed get
+                // shown here as invalid and dropped from the import.
+                if (title === undefined || String(title).trim() === "") title = "การเข้าเวร";
             }
-            
+
             let missingReason = [];
             if (title === undefined || String(title).trim() === "") missingReason.push("ขาดชื่องาน");
             if (dateVal === undefined || String(dateVal).trim() === "") missingReason.push("ขาดวันที่");
@@ -133,10 +125,11 @@ export default function ImportWizardModal({
                     const mappedHeader = mapping[field.key];
                     let val = mappedHeader ? row[mappedHeader] : undefined;
                     
+                    const isBlank = val === undefined || String(val).trim() === "";
                     if (isDuty) {
-                        if (field.key === "ประเภท" && val === undefined) val = "เวร";
-                        if (field.key === "เวลาเริ่ม" && val === undefined) val = "08:30";
-                        if (field.key === "เวลาสิ้นสุด" && val === undefined) val = "16:30";
+                        if (field.key === "ประเภท" && isBlank) val = "เวร";
+                        if (field.key === "เวลาเริ่ม" && isBlank) val = "08:30";
+                        if (field.key === "เวลาสิ้นสุด" && isBlank) val = "16:30";
                     }
                     
                     if (val !== undefined && String(val).trim() !== "") {
