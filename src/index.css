@@ -69,29 +69,29 @@
 }
 
 .dark {
-  /* Premium Dark Mode (Sleek Zinc) */
-  --background: #09090B;
-  --foreground: #FAFAFA;
-  --card: #18181B;
-  --card-foreground: #FAFAFA;
-  --popover: #18181B;
-  --popover-foreground: #FAFAFA;
-  --primary: #3B82F6; /* Bright Electric Blue for contrast */
+  /* Octet Design: Dark header palette */
+  --background: #12131A;
+  --foreground: #F5F5F7;
+  --card: #1E1F28;
+  --card-foreground: #F5F5F7;
+  --popover: #1E1F28;
+  --popover-foreground: #F5F5F7;
+  --primary: #145CE3;
   --primary-foreground: #FFFFFF;
-  --secondary: #27272A;
-  --secondary-foreground: #FAFAFA;
-  --muted: #27272A;
-  --muted-foreground: #A1A1AA;
-  --accent: rgba(59, 130, 246, 0.15);
-  --accent-foreground: #93C5FD;
-  --destructive: #F87171;
-  --destructive-tint: rgba(248, 113, 113, 0.15);
-  --border: #27272A;
-  --border-strong: #3F3F46;
+  --secondary: #2C2E3C;
+  --secondary-foreground: #F5F5F7;
+  --muted: #2C2E3C;
+  --muted-foreground: #717077;
+  --accent: #3A3C4B;
+  --accent-foreground: #F5F5F7;
+  --destructive: #EF4444;
+  --destructive-tint: rgba(239, 68, 68, 0.15);
+  --border: #2C2E3C;
+  --border-strong: #3A3C4B;
   --input: var(--border);
-  --ring: rgba(59, 130, 246, 0.4);
-  --success: #34D399;
-  --success-tint: rgba(52, 211, 153, 0.15);
+  --ring: rgba(20, 92, 227, 0.4);
+  --success: #10B981;
+  --success-tint: rgba(16, 185, 129, 0.15);
 }
 
 * {
