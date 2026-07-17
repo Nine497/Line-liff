@@ -9,6 +9,19 @@ export class ErrorBoundary extends Component {
 
   componentDidCatch(error, info) {
     console.error("Unhandled render error:", error, info);
+    
+    // Auto-reload the page if a dynamically imported chunk fails to load
+    // (Happens when deploying a new version while a user is still on the old version)
+    if (
+      error.message &&
+      error.message.includes("Failed to fetch dynamically imported module")
+    ) {
+      if (!sessionStorage.getItem("chunk_failed_reload")) {
+        sessionStorage.setItem("chunk_failed_reload", "true");
+        window.location.reload(true);
+        return;
+      }
+    }
   }
 
   render() {
