@@ -69,34 +69,33 @@
 }
 
 .dark {
-  /* A genuine dark counterpart to the slate/blue light theme, not an
-     inverted light palette: a near-black blue-gray base, a clearly
-     brighter/lighter card so surfaces read as elevated instead of flat,
-     translucent borders (rgba, not a mid-gray solid) that stay elegant
-     against black instead of chalky, and a primary lightened a shade so
-     it still pops on a dark background. */
-  --background: #0A0F1D;
-  --foreground: #E8ECF4;
-  --card: #131B2E;
-  --card-foreground: #E8ECF4;
-  --popover: #161F35;
-  --popover-foreground: #E8ECF4;
+  /* True black (OLED-style) — background is pure black, cards/popovers
+     step up in small, deliberate increments (#141414 / #1C1C1C) so
+     surfaces still read as elevated against it instead of everything
+     blurring into the same black. Translucent white borders instead of
+     a mid-gray solid keep edges legible without looking chalky. */
+  --background: #000000;
+  --foreground: #F2F2F2;
+  --card: #141414;
+  --card-foreground: #F2F2F2;
+  --popover: #1C1C1C;
+  --popover-foreground: #F2F2F2;
   --primary: #3B82F6;
-  --primary-foreground: #071021;
-  --secondary: #1C2740;
-  --secondary-foreground: #C7D2E3;
-  --muted: #1C2740;
-  --muted-foreground: #8A97AF;
-  --accent: rgba(59, 130, 246, 0.16);
+  --primary-foreground: #05070C;
+  --secondary: #202020;
+  --secondary-foreground: #D4D4D4;
+  --muted: #202020;
+  --muted-foreground: #9A9A9A;
+  --accent: rgba(59, 130, 246, 0.18);
   --accent-foreground: #BFDBFE;
   --destructive: #F87171;
-  --destructive-tint: rgba(248, 113, 113, 0.16);
-  --border: rgba(148, 163, 184, 0.14);
-  --border-strong: rgba(148, 163, 184, 0.28);
+  --destructive-tint: rgba(248, 113, 113, 0.18);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.18);
   --input: var(--border);
-  --ring: rgba(59, 130, 246, 0.45);
+  --ring: rgba(59, 130, 246, 0.5);
   --success: #34D399;
-  --success-tint: rgba(52, 211, 153, 0.16);
+  --success-tint: rgba(52, 211, 153, 0.18);
 }
 
 * {
