@@ -17,7 +17,7 @@ export default function CalendarCard({
     isUploading,
     moveMonth,
     goToday,
-    handleUpload,
+    onOpenImportWizard,
     setMonth,
     setSelectedDateRange,
     showMineOnly,
@@ -29,7 +29,6 @@ export default function CalendarCard({
     onEventClick,
     onHeightChange,
 }) {
-    const fileInputRef = useRef(null);
     const cardRef = useRef(null);
     const participantOptions = unwrap(participants).map((p) => ({ value: p.id, label: p.name }));
 
@@ -139,18 +138,10 @@ export default function CalendarCard({
                         style={{ height: 44 }}
                         icon={<Upload className="h-3.5 w-3.5" strokeWidth={2.25} />}
                         loading={isUploading}
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={onOpenImportWizard}
                     >
                         นำเข้า Excel
                     </Button>
-
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".xlsx,.xls"
-                        onChange={handleUpload}
-                        className="hidden"
-                    />
                 </div>
             </div>
 

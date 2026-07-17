@@ -8,50 +8,16 @@ export function useExcelImport(fetchTaskEvents) {
   
   // Mapping Modal States
   const [isMappingModalOpen, setIsMappingModalOpen] = useState(false);
-  const [excelHeaders, setExcelHeaders] = useState([]);
-  const [excelData, setExcelData] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
 
-  // 1. User selects a file
-  const handleFileSelect = (file, userId) => {
-    if (!file) return;
-
+  // 1. Open Wizard
+  const handleOpenWizard = (userId) => {
     setCurrentUserId(userId);
-    setSelectedFile(file);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        // Convert to JSON (array of arrays to easily get headers)
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        if (jsonData.length === 0) {
-          message.error("ไฟล์ Excel ว่างเปล่า");
-          return;
-        }
-
-        const headers = jsonData[0]; // First row is headers
-        const rows = XLSX.utils.sheet_to_json(worksheet); // Array of objects
-        
-        setExcelHeaders(headers);
-        setExcelData(rows);
-        setIsMappingModalOpen(true);
-      } catch (err) {
-        message.error("เกิดข้อผิดพลาดในการอ่านไฟล์ Excel");
-        console.error(err);
-      }
-    };
-    reader.readAsArrayBuffer(file);
+    setIsMappingModalOpen(true);
   };
 
-  // 2. User confirms mapping
-  const handleConfirmMapping = async (mapping, isDuty) => {
+  // 2. User confirms mapping from Wizard Step 3
+  const handleConfirmMapping = async (mapping, isDuty, selectedFile, excelData) => {
     setIsUploading(true);
     
     try {
@@ -106,22 +72,17 @@ export function useExcelImport(fetchTaskEvents) {
 
   const handleCancelMapping = () => {
     setIsMappingModalOpen(false);
-    setSelectedFile(null);
-    setExcelHeaders([]);
-    setExcelData([]);
   };
 
   return {
     isUploading,
-    handleUpload: handleFileSelect, // Renamed internally, but kept external API same
+    handleOpenWizard,
     
     // Props for the modal
     mappingModalProps: {
       isOpen: isMappingModalOpen,
       onClose: handleCancelMapping,
       onConfirm: handleConfirmMapping,
-      excelHeaders,
-      fileName: selectedFile?.name,
       isProcessing: isUploading
     }
   };

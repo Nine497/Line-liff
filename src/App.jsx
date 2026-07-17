@@ -6,7 +6,7 @@ import CalendarSidebar from "./components/calendar/CalendarSidebar";
 import React, { Suspense } from "react";
 const CreateTaskModal = React.lazy(() => import("./components/modal/CreateTaskModal"));
 const EventDetailModal = React.lazy(() => import("./components/modal/EventDetailModal"));
-const ExcelMappingModal = React.lazy(() => import("./components/calendar/ExcelMappingModal"));
+const ImportWizardModal = React.lazy(() => import("./components/calendar/ImportWizardModal"));
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { ConfigProvider, App as AntdApp, Form, theme as antdTheme, message } from "antd";
@@ -71,7 +71,7 @@ function AppShell({ setTheme, isDark }) {
 
   const { events, fetchTaskEvents } = useTaskEvents();
   const { calendarRef, month, setMonth, moveMonth, goToday } = useCalendarNav();
-  const { isUploading, handleUpload, mappingModalProps } = useExcelImport(fetchTaskEvents);
+  const { isUploading, handleOpenWizard, mappingModalProps } = useExcelImport(fetchTaskEvents);
   const { isSubmitting, handleCreateTask } = useCreateTask(fetchTaskEvents);
   const {
     showMineOnly,
@@ -160,13 +160,9 @@ function AppShell({ setTheme, isDark }) {
     setTaskTypes,
   });
 
-  const onFileChange = (e) => {
-    const file = e.target.files?.[0];
+  const onOpenWizardClick = () => {
     const userId = currentUser?.id ?? currentUser?.user_id;
-
-    handleUpload(file, userId);
-
-    e.target.value = "";
+    handleOpenWizard(userId);
   };
 
   const onSubmitTask = (payload) =>
@@ -232,7 +228,8 @@ function AppShell({ setTheme, isDark }) {
                 goToday();
                 setSelectedDateRange([todayKey, todayKey]);
               }}
-              handleUpload={onFileChange}
+              onOpenImportWizard={onOpenWizardClick}
+              isUploading={isUploading}
               setMonth={setMonth}
               setSelectedDateRange={setSelectedDateRange}
               showMineOnly={showMineOnly}
@@ -308,7 +305,7 @@ function AppShell({ setTheme, isDark }) {
         )}
 
         {mappingModalProps && mappingModalProps.isOpen && (
-          <ExcelMappingModal {...mappingModalProps} />
+          <ImportWizardModal {...mappingModalProps} />
         )}
       </Suspense>
     </main >
