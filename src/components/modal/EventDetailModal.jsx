@@ -15,6 +15,28 @@ function avatarColor(key) {
     return AVATAR_PALETTE[Math.abs(hash) % AVATAR_PALETTE.length];
 }
 
+// One endpoint ("เริ่ม"/"ถึง") of a multi-day span — kept as its own row so a
+// long date+time pair never has to compete for space on the same line as
+// its counterpart the way the old single concatenated string did.
+function ScheduleEndpoint({ label, point, hex, showTime }) {
+    return (
+        <div className="flex items-center gap-3">
+            <span
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+                style={{ background: hexToRgba(hex, 0.16), color: hex }}
+            >
+                {label}
+            </span>
+            <div className="min-w-0">
+                <p className="text-base font-bold leading-tight text-foreground tabular-nums">
+                    {showTime ? `${point.time} น.` : point.date}
+                </p>
+                {showTime && <p className="text-sm text-muted-foreground">{point.date}</p>}
+            </div>
+        </div>
+    );
+}
+
 function EventDetailModal({ event, onClose }) {
     const task = event?.extendedProps?.task;
     const participants = task?.task_participants ?? [];
@@ -36,7 +58,7 @@ function EventDetailModal({ event, onClose }) {
                         className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full"
                         style={{ background: hex }}
                     />
-                    <span className="line-clamp-2 break-words">{event?.title}</span>
+                    <span className="break-words">{event?.title}</span>
                 </span>
             }
             onCancel={onClose}
@@ -48,33 +70,55 @@ function EventDetailModal({ event, onClose }) {
             <Divider className="!mt-3 !mb-5" />
 
             <div className="flex flex-col gap-5">
-                {/* Date & time — the first thing anyone checking an event needs. */}
+                {/* Date & time — the first thing anyone checking an event needs.
+                    A multi-day span gets its own "เริ่ม/ถึง" row each so the two
+                    dates+times never have to squeeze onto one line together. */}
                 {schedule && (
                     <div
-                        className="flex items-center gap-3 rounded-xl p-4"
+                        className="rounded-xl p-4"
                         style={{ background: hexToRgba(hex, 0.08), border: `1px solid ${hexToRgba(hex, 0.25)}` }}
                     >
-                        <span
-                            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
-                            style={{ background: hexToRgba(hex, 0.16) }}
-                        >
-                            <CalendarDays className="h-5 w-5" style={{ color: hex }} />
-                        </span>
-                        <div className="min-w-0">
-                            {schedule.isAllDay ? (
-                                <>
-                                    <p className="text-base font-bold leading-tight text-foreground">ทั้งวัน</p>
-                                    <p className="text-sm text-muted-foreground">{schedule.dateLabel}</p>
-                                </>
-                            ) : (
-                                <>
-                                    <p className="text-base font-bold leading-tight text-foreground">{schedule.label}</p>
-                                    {schedule.dateLabel && (
-                                        <p className="text-sm text-muted-foreground">{schedule.dateLabel}</p>
+                        {schedule.isMultiDay ? (
+                            <div className="flex flex-col gap-3">
+                                <ScheduleEndpoint
+                                    label="เริ่ม"
+                                    point={schedule.start}
+                                    hex={hex}
+                                    showTime={!schedule.isAllDay}
+                                />
+                                <div className="ml-4 h-3 w-px bg-border-strong" />
+                                <ScheduleEndpoint
+                                    label="ถึง"
+                                    point={schedule.end}
+                                    hex={hex}
+                                    showTime={!schedule.isAllDay}
+                                />
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3">
+                                <span
+                                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
+                                    style={{ background: hexToRgba(hex, 0.16) }}
+                                >
+                                    <CalendarDays className="h-5 w-5" style={{ color: hex }} />
+                                </span>
+                                <div className="min-w-0">
+                                    {schedule.isAllDay ? (
+                                        <>
+                                            <p className="text-base font-bold leading-tight text-foreground">ทั้งวัน</p>
+                                            <p className="text-sm text-muted-foreground">{schedule.dateLabel}</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-lg font-bold leading-tight tabular-nums text-foreground">{schedule.label}</p>
+                                            {schedule.dateLabel && (
+                                                <p className="text-sm text-muted-foreground">{schedule.dateLabel}</p>
+                                            )}
+                                        </>
                                     )}
-                                </>
-                            )}
-                        </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -120,9 +164,9 @@ function EventDetailModal({ event, onClose }) {
                 {(typeName || task?.description) && (
                     <div className="space-y-2 border-t border-border pt-4">
                         {typeName && (
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                <Tags className="h-3.5 w-3.5 flex-shrink-0" />
-                                <span className="flex items-center gap-1.5 rounded-full bg-muted px-2 py-0.5">
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                <Tags className="h-4 w-4 flex-shrink-0" />
+                                <span className="flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 font-medium">
                                     <span className="h-1.5 w-1.5 rounded-full" style={{ background: hex }} />
                                     {typeName}
                                 </span>
@@ -130,8 +174,8 @@ function EventDetailModal({ event, onClose }) {
                         )}
 
                         {task?.description && (
-                            <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
-                                <AlignLeft className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" />
+                            <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
+                                <AlignLeft className="mt-0.5 h-4 w-4 flex-shrink-0" />
                                 <p className="whitespace-pre-line">{task.description}</p>
                             </div>
                         )}

@@ -24,23 +24,36 @@ export function formatEventSchedule(startTime, endTime) {
   const isAllDay = isMidnight(start) && isMidnight(end);
   const isMultiDay = !start.isSame(end, "day");
 
+  // Structured start/end points let a caller (e.g. the detail modal) lay
+  // out a multi-day span as two clearly separated rows instead of one long
+  // concatenated string — `label`/`dateLabel` stay as the flat summary used
+  // by compact contexts like the event card.
+  const startPoint = { date: shortDate(start), time: start.format("HH:mm") };
+  const endPoint = { date: shortDate(end), time: end.format("HH:mm") };
+
   if (isAllDay) {
     return {
       isAllDay: true,
+      isMultiDay,
       label: "ทั้งวัน",
       dateLabel: isMultiDay
         ? `${shortDate(start)} – ${shortDate(end)}`
         : shortDate(start),
+      start: startPoint,
+      end: endPoint,
     };
   }
 
   return {
     isAllDay: false,
+    isMultiDay,
     label: isMultiDay
       ? `${shortDate(start)} ${start.format("HH:mm")} – ${shortDate(end)} ${end.format("HH:mm")} น.`
       : `${start.format("HH:mm")} – ${end.format("HH:mm")} น.`,
     // label already embeds both dates when it spans days ("2 ส.ค. 07:00 –
     // 8 ส.ค. 07:00 น."), so a separate dateLabel there would just repeat it.
     dateLabel: isMultiDay ? null : shortDate(start),
+    start: startPoint,
+    end: endPoint,
   };
 }
