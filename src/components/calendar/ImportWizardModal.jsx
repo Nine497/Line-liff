@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Modal, Select, Button, Steps, Alert, Upload as AntdUpload, message } from "antd";
 import { CalendarDays, ShieldAlert, Inbox } from "lucide-react";
 import * as XLSX from "xlsx";
@@ -33,6 +33,17 @@ export default function ImportWizardModal({
     const [previewValidRows, setPreviewValidRows] = useState([]);
     const [previewInvalidRows, setPreviewInvalidRows] = useState([]);
 
+    // The modal is only ever mounted while isOpen is true (App.jsx unmounts
+    // it on close) — if the user closes it while a FileReader is still
+    // parsing a large sheet, this stops the eventual onload from calling
+    // setState on an already-unmounted component.
+    const isMountedRef = useRef(true);
+    useEffect(() => {
+        return () => {
+            isMountedRef.current = false;
+        };
+    }, []);
+
     // Best-effort auto-map: match each standard field to an Excel header by
     // exact name, falling back to a substring match either direction.
     const buildAutoMapping = (headers) => {
@@ -60,6 +71,8 @@ export default function ImportWizardModal({
 
         const reader = new FileReader();
         reader.onload = (e) => {
+            if (!isMountedRef.current) return;
+
             try {
                 const data = new Uint8Array(e.target.result);
                 // Use cellDates to convert Excel date serials to proper JS Date objects

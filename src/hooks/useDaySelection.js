@@ -28,7 +28,12 @@ export function useDaySelection(events, selectedDateRange, participants) {
       .sort((a, b) => {
         const aStart = a?.extendedProps?.task?.start_time;
         const bStart = b?.extendedProps?.task?.start_time;
-        return dayjs(aStart).valueOf() - dayjs(bStart).valueOf();
+        // dayjs(undefined) resolves to "now", so an event missing
+        // start_time used to sort by render time instead of a fixed
+        // position, making it jump around across re-renders/refetches.
+        const aTime = aStart ? dayjs(aStart).valueOf() : Infinity;
+        const bTime = bStart ? dayjs(bStart).valueOf() : Infinity;
+        return aTime - bTime;
       });
   }, [events, selectedDateRange]);
 

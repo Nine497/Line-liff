@@ -22,7 +22,7 @@ export function useCreateTask(fetchTaskEvents) {
           message: "ไม่สามารถสร้างงานได้",
           description: (
             <div>
-              {error.data?.conflicts?.map((c, i) => (
+              {error.extra?.map((c, i) => (
                 <div key={i}>
                   • {c.participant_name} ติดงาน "{c.task_title}"
                 </div>

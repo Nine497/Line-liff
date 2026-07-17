@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import dayjs from "dayjs";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { unwrap } from "../../utils/unwrap";
 import { fetchAvailableParticipants } from "../../api/tasks";
 import "./task-sheet.css";
@@ -29,18 +29,31 @@ function CreateTaskModal({
     onClose,
 }) {
 
-    // Date-scoped participants for this modal only — defaults to the full
-    // roster until a range is picked, and must NOT be shared with the
-    // app-wide `participants` state (that also drives the day sidebar).
-    const [availableParticipants, setAvailableParticipants] = useState(
-        Array.isArray(participants) ? participants : []
-    );
+    // Date-scoped participants for this modal only — null until a range is
+    // picked and fetched, in which case `safeParticipants` below falls back
+    // to the live app-wide `participants` prop (so it stays in sync even if
+    // that list is still loading when the modal opens, instead of a stale
+    // snapshot baked in at mount). Must not be shared with the app-wide
+    // `participants` state itself (that also drives the day sidebar).
+    const [availableParticipants, setAvailableParticipants] = useState(null);
     const [loadingParticipants, setLoadingParticipants] = useState(false);
 
     const debounceRef = useRef(null);
+    // Guards against an out-of-order response: if the user changes the date
+    // range twice quickly, two fetches can be in flight and the first one
+    // may resolve *after* the second — without this, its stale result would
+    // silently overwrite the correct, more recent availability list.
+    const requestSeqRef = useRef(0);
 
     const [locationOptions, setLocationOptions] = useState([]);
     const locationDebounceRef = useRef(null);
+
+    useEffect(() => {
+        return () => {
+            clearTimeout(debounceRef.current);
+            clearTimeout(locationDebounceRef.current);
+        };
+    }, []);
 
     const dateRange = Form.useWatch("dateRange", form);
 
@@ -76,6 +89,8 @@ function CreateTaskModal({
         clearTimeout(debounceRef.current);
 
         debounceRef.current = setTimeout(async () => {
+            const seq = ++requestSeqRef.current;
+
             try {
                 setLoadingParticipants(true);
 
@@ -85,6 +100,10 @@ function CreateTaskModal({
                     start.toISOString(),
                     end.toISOString()
                 );
+
+                // A newer date-range change may have fired its own request
+                // while this one was in flight — ignore this stale response.
+                if (seq !== requestSeqRef.current) return;
 
                 const nextAvailable = unwrap(data);
                 setAvailableParticipants(nextAvailable);
@@ -101,15 +120,18 @@ function CreateTaskModal({
                     message.warning("ผู้เข้าร่วมบางคนถูกนำออกเนื่องจากติดภารกิจในช่วงเวลาที่เลือกใหม่");
                 }
             } catch (err) {
+                if (seq !== requestSeqRef.current) return;
                 console.error("fetch participants failed:", err);
                 message.error("โหลดรายชื่อผู้เข้าร่วมที่ว่างไม่สำเร็จ");
             } finally {
-                setLoadingParticipants(false);
+                if (seq === requestSeqRef.current) setLoadingParticipants(false);
             }
         }, 300);
     };
 
-    const safeParticipants = Array.isArray(availableParticipants) ? availableParticipants : [];
+    const safeParticipants = dateRange
+        ? (Array.isArray(availableParticipants) ? availableParticipants : [])
+        : (Array.isArray(participants) ? participants : []);
     const safeTaskTypes = unwrap(taskTypes) || [];
 
     return (

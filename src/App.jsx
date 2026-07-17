@@ -11,7 +11,6 @@ import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { ConfigProvider, App as AntdApp, Form, theme as antdTheme, message } from "antd";
 import "./styles/fullcalendar.css"
-import { monthNames } from "./constants/calendar";
 import { todayKey } from "./utils/date";
 import { useInitApp } from "./hooks/useInitApp";
 import { useTaskEvents } from "./hooks/useTaskEvents";
@@ -26,10 +25,27 @@ import { navyLight, navyDark } from "./theme/colors";
 
 const THEME_STORAGE_KEY = "line-liff-theme";
 
+// Some LIFF in-app WebViews (notably iOS private-mode restrictions) can
+// throw on any localStorage access — guard both directions so that doesn't
+// crash the whole app during the very first render.
+function readStoredTheme() {
+  try {
+    return localStorage.getItem(THEME_STORAGE_KEY) || "light";
+  } catch {
+    return "light";
+  }
+}
+
+function writeStoredTheme(theme) {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch {
+    // Storage unavailable — theme just won't persist across reloads.
+  }
+}
+
 function App() {
-  const [theme, setTheme] = useState(
-    () => localStorage.getItem(THEME_STORAGE_KEY) || "light"
-  );
+  const [theme, setTheme] = useState(readStoredTheme);
   const isDark = theme === "dark";
 
   useEffect(() => {
@@ -37,7 +53,7 @@ function App() {
   }, [isDark]);
 
   useEffect(() => {
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    writeStoredTheme(theme);
   }, [theme]);
 
   return (
@@ -132,9 +148,11 @@ function AppShell({ setTheme, isDark }) {
 
   const onToggleMine = async () => {
     try {
-      const { turnedOn, participant } = await toggleMineOnly(currentUser.line_id);
+      const { turnedOn, participant, notReady } = await toggleMineOnly(currentUser.line_id);
 
-      if (turnedOn && !participant) {
+      if (notReady) {
+        message.info("กำลังโหลดข้อมูลผู้ใช้ กรุณาลองใหม่อีกครั้งในอีกสักครู่");
+      } else if (turnedOn && !participant) {
         message.info("ไม่พบข้อมูลผู้เข้าร่วมที่ผูกกับบัญชี LINE นี้ กรุณาติดต่อผู้ดูแลระบบ");
       }
     } catch (err) {
@@ -229,7 +247,6 @@ function AppShell({ setTheme, isDark }) {
                 setSelectedDateRange([todayKey, todayKey]);
               }}
               onOpenImportWizard={onOpenWizardClick}
-              isUploading={isUploading}
               setMonth={setMonth}
               setSelectedDateRange={setSelectedDateRange}
               showMineOnly={showMineOnly}

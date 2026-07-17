@@ -78,9 +78,9 @@ function EventCard({ event }) {
 
                 {participants.length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
-                        {participants.map((tp) => (
+                        {participants.map((tp, i) => (
                             <span
-                                key={tp.id ?? tp.participant?.id}
+                                key={tp.id ?? tp.participant?.id ?? i}
                                 className="rounded-full border border-border bg-card px-2.5 py-0.5 text-xs font-medium text-foreground"
                             >
                                 {tp.participant?.name ?? "ไม่ทราบชื่อ"}

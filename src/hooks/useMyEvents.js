@@ -37,14 +37,21 @@ export function useMyEvents() {
     }
   }, [queryClient]);
 
-  // Returns { turnedOn, participant } so the caller can react to the fetch
-  // result (e.g. notify when no participant is linked to this LINE account)
-  // without racing React's async state updates.
+  // Returns { turnedOn, participant, notReady } so the caller can react to
+  // the fetch result (e.g. notify when no participant is linked to this
+  // LINE account) without racing React's async state updates.
   const toggleMineOnly = useCallback(
     async (lineId) => {
       if (showMineOnly) {
         setShowMineOnly(false);
         return { turnedOn: false, participant: myParticipant };
+      }
+
+      if (!lineId) {
+        // currentUser hasn't finished loading yet — distinct from a
+        // genuinely unlinked LINE account, so the caller must not show
+        // the "account not linked, contact admin" message for this case.
+        return { turnedOn: false, participant: null, notReady: true };
       }
 
       const participant = hasFetchedMine ? myParticipant : await loadMyEvents(lineId);

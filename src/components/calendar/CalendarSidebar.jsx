@@ -29,7 +29,6 @@ function formatSidebarDate(dateRange) {
 
 function CalendarSidebar({
     selectedDateRange,
-    setSelectedDateRange,
     selectedEvents,
     activeTab,
     setActiveTab,

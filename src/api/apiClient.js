@@ -1,3 +1,4 @@
+import liff from "@line/liff";
 import { apiUrl } from "../lib/api";
 
 export async function apiClient(url, options = {}) {
@@ -6,10 +7,23 @@ export async function apiClient(url, options = {}) {
   // would silently corrupt the request.
   const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
 
+  // Mutating routes verify this token server-side and resolve the real
+  // creator/user from it — by the time any API call happens, initLiff()
+  // has already succeeded, so getIDToken() is safe to call here.
+  let authHeader = {};
+  try {
+    const token = liff.getIDToken?.();
+    if (token) authHeader = { Authorization: `Bearer ${token}` };
+  } catch {
+    // Not logged in yet (e.g. the very first /users call during init) —
+    // proceed without it; routes that require auth will reject anyway.
+  }
+
   const response = await fetch(`${apiUrl}${url}`, {
     ...options,
     headers: {
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      ...authHeader,
       ...options.headers,
     },
   });
