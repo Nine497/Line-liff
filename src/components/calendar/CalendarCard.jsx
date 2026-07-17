@@ -174,7 +174,7 @@ export default function CalendarCard({
                     // actual rendered height — otherwise a day with many tasks
                     // (e.g. 6) squeezes them together with no gap to fit the
                     // fixed row height instead of showing them all cleanly.
-                    dayMaxEvents={3}
+                    dayMaxEvents={false}
                     dayCellClassNames={(arg) =>
                         dayjs(arg.date).format("YYYY-MM-DD") === selectedKey ? "selected-day" : ""
                     }

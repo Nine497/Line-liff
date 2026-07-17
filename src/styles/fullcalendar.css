@@ -100,21 +100,19 @@
 .fc .fc-scroller {
   flex: 1 !important;
   min-height: 0 !important;
-  height: 100% !important;
-  overflow: hidden !important;
 }
 
 /* ปิด scroll ภายใน */
 .fc .fc-scroller-harness {
-  height: 100% !important;
+  min-height: 100% !important;
 }
 
 /* ทำให้แต่ละแถวกระจายเท่ากัน */
 .fc .fc-daygrid-body table {
-  height: 100%;
+  min-height: 100%;
 }
 .fc .fc-daygrid-row {
-  height: calc(100% / 6); /* หาร 6 แถว */
+  min-height: calc(100% / 6); /* หาร 6 แถว (เป็นขั้นต่ำเพื่อให้เต็มจอ แต่ขยายได้) */
 }
 .fc .fc-daygrid-day:has(.fc-event:hover) {
   background: transparent !important;
