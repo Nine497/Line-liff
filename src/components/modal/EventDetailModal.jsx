@@ -1,5 +1,5 @@
-import { Modal, Divider } from "antd";
-import { AlignLeft, Users, Tags, CalendarDays } from "lucide-react";
+import { Modal } from "antd";
+import { AlignLeft, Users, CalendarDays } from "lucide-react";
 import { hexToRgba } from "../../utils/color";
 import { getEventColor } from "../../constants/eventColors";
 import { formatEventSchedule } from "../../utils/date";
@@ -17,7 +17,7 @@ function avatarColor(key) {
 
 // One endpoint ("เริ่ม"/"ถึง") of a multi-day span — kept as its own row so a
 // long date+time pair never has to compete for space on the same line as
-// its counterpart the way the old single concatenated string did.
+// its counterpart the way a single concatenated string used to.
 function ScheduleEndpoint({ label, point, hex, showTime }) {
     return (
         <div className="flex items-center gap-3">
@@ -50,16 +50,29 @@ function EventDetailModal({ event, onClose }) {
         <Modal
             open={!!event}
             title={
-                // pr-8 keeps long titles clear of antd's absolutely-positioned
-                // close button; line-clamp-2 stops runaway titles from pushing
-                // the header (and thus the close button) even taller.
-                <span className="flex items-start gap-2 pr-8 font-display text-base font-bold leading-snug">
+                // A colored icon badge gives the event's category an
+                // immediate visual anchor instead of a small dot; the type
+                // pill sits right under the title so it's legible on first
+                // glance rather than buried at the bottom of the modal.
+                <div className="flex items-start gap-3 pr-8">
                     <span
-                        className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full"
-                        style={{ background: hex }}
-                    />
-                    <span className="break-words">{event?.title}</span>
-                </span>
+                        className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
+                        style={{ background: hexToRgba(hex, 0.14) }}
+                    >
+                        <CalendarDays className="h-5 w-5" style={{ color: hex }} />
+                    </span>
+                    <div className="min-w-0 pt-0.5">
+                        <p className="break-words font-display text-lg font-bold leading-snug text-foreground">
+                            {event?.title}
+                        </p>
+                        {typeName && (
+                            <span className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+                                <span className="h-1.5 w-1.5 rounded-full" style={{ background: hex }} />
+                                {typeName}
+                            </span>
+                        )}
+                    </div>
+                </div>
             }
             onCancel={onClose}
             footer={null}
@@ -67,9 +80,7 @@ function EventDetailModal({ event, onClose }) {
             rootClassName="task-sheet"
             destroyOnHidden
         >
-            <Divider className="!mt-3 !mb-5" />
-
-            <div className="flex flex-col gap-5">
+            <div className="mt-5 flex flex-col gap-4">
                 {/* Date & time — the first thing anyone checking an event needs.
                     A multi-day span gets its own "เริ่ม/ถึง" row each so the two
                     dates+times never have to squeeze onto one line together. */}
@@ -122,9 +133,11 @@ function EventDetailModal({ event, onClose }) {
                     </div>
                 )}
 
-                {/* Participants — the other primary thing this modal exists for. */}
-                <div className="space-y-2.5">
-                    <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                {/* Participants — shown as a bordered list of rows rather than
+                    wrapping pills, which reads more predictably once there
+                    are more than a handful of names. */}
+                <div>
+                    <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-foreground">
                         <Users className="h-4 w-4 text-muted-foreground" />
                         ผู้เข้าร่วม
                         <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
@@ -133,52 +146,45 @@ function EventDetailModal({ event, onClose }) {
                     </p>
 
                     {participants.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
                             {participants.map((tp) => {
                                 const name = tp.participant?.name ?? "ไม่ทราบชื่อ";
                                 const key = tp.id ?? tp.participant?.id;
                                 const color = avatarColor(tp.participant?.id ?? name);
 
                                 return (
-                                    <span
-                                        key={key}
-                                        className="flex items-center gap-2 rounded-full border border-border bg-card py-1 pl-1 pr-3 text-sm font-medium text-foreground shadow-sm"
-                                    >
+                                    <div key={key} className="flex items-center gap-3 bg-card px-3 py-2.5">
                                         <span
-                                            className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                                            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
                                             style={{ background: color }}
                                         >
                                             {name.charAt(0)}
                                         </span>
-                                        {name}
-                                    </span>
+                                        <span className="truncate text-sm font-medium text-foreground">{name}</span>
+                                    </div>
                                 );
                             })}
                         </div>
                     ) : (
-                        <p className="text-sm italic text-muted-foreground/60">ไม่มีผู้เข้าร่วม</p>
+                        <p className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-4 text-center text-sm italic text-muted-foreground/60">
+                            ไม่มีผู้เข้าร่วม
+                        </p>
                     )}
                 </div>
 
-                {/* Secondary metadata — present, but visually quiet. */}
-                {(typeName || task?.description) && (
-                    <div className="space-y-2 border-t border-border pt-4">
-                        {typeName && (
-                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                <Tags className="h-4 w-4 flex-shrink-0" />
-                                <span className="flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 font-medium">
-                                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: hex }} />
-                                    {typeName}
-                                </span>
-                            </div>
-                        )}
-
-                        {task?.description && (
-                            <div className="flex items-start gap-1.5 text-sm text-muted-foreground">
-                                <AlignLeft className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                                <p className="whitespace-pre-line">{task.description}</p>
-                            </div>
-                        )}
+                {/* Description — a quote-style accent card in the event's own
+                    color ties it back to the header without repeating the
+                    type pill again. */}
+                {task?.description && (
+                    <div
+                        className="rounded-xl bg-muted/40 p-4"
+                        style={{ borderLeft: `3px solid ${hex}` }}
+                    >
+                        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            <AlignLeft className="h-3.5 w-3.5" />
+                            รายละเอียดเพิ่มเติม
+                        </p>
+                        <p className="mt-1.5 whitespace-pre-line text-sm text-foreground/90">{task.description}</p>
                     </div>
                 )}
             </div>
