@@ -68,7 +68,7 @@ export default function CalendarCard({
                         type="button"
                         aria-label="เดือนก่อนหน้า"
                         onClick={() => moveMonth(-1)}
-                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-secondary text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -79,22 +79,17 @@ export default function CalendarCard({
                         type="button"
                         aria-label="เดือนถัดไป"
                         onClick={() => moveMonth(1)}
-                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-card text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-secondary text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
                     >
                         <ChevronRight className="h-4 w-4" />
                     </button>
                 </div>
 
-                {/* flex-wrap here (not just on the outer row) is what keeps
-                    this from overflowing past the card's edge on phones —
-                    four controls in a non-wrapping row don't fit under
-                    ~420px, and the card's overflow-hidden was silently
-                    clipping whatever didn't fit instead of showing it. */}
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
                         onClick={goToday}
-                        className="flex h-11 items-center gap-1.5 rounded-lg border border-border bg-card px-3 font-display text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:bg-secondary"
+                        className="flex h-11 items-center gap-1.5 rounded-lg border border-border bg-secondary px-3 font-display text-xs font-semibold text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
                     >
                         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                         วันนี้
@@ -108,7 +103,7 @@ export default function CalendarCard({
                         title="แสดงเฉพาะกำหนดการของฉัน"
                         className={`flex h-11 items-center gap-1.5 rounded-lg border px-3 font-display text-xs font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${showMineOnly
                                 ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-card text-foreground hover:border-primary/40 hover:bg-secondary"
+                                : "border-border bg-secondary text-secondary-foreground hover:border-primary/40 hover:bg-muted"
                             }`}
                     >
                         <UserRound className="h-3.5 w-3.5" />
