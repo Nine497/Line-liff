@@ -21,7 +21,7 @@ function Header({
                     {currentUser.picture_url ? (
                         <img
                             src={currentUser.picture_url}
-                            alt={currentUser.display_name ?? "Current user"}
+                            alt={currentUser.display_name ?? "ผู้ใช้งานปัจจุบัน"}
                             className="h-full w-full object-cover"
                         />
                     ) : (

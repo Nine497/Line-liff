@@ -19,6 +19,13 @@ export class ErrorBoundary extends Component {
           <p className="text-sm text-muted-foreground">
             กรุณาปิดและเปิดแอปใหม่อีกครั้ง
           </p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="mt-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          >
+            โหลดใหม่
+          </button>
         </div>
       );
     }

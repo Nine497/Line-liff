@@ -1,5 +1,5 @@
 
-import { useEffect} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { initLiff } from "../liff";
 import { authUser } from "../services/authService";
 import { loadInitialData } from "../services/initDataService";
@@ -7,39 +7,54 @@ import { loadInitialData } from "../services/initDataService";
 export const useInitApp = ({
   setCurrentUser,
   fetchTaskEvents,
-  setIsInitializing,  
+  setIsInitializing,
   setParticipants,
   setTaskTypes,
 }) => {
-  useEffect(() => {
-    const initApp = async () => {
-      try {
-        const liff = await initLiff();
-        if (!liff) return;
+  const [initError, setInitError] = useState(null);
 
-        const user = await authUser(liff);
-        if (!user) return;
+  const runInit = useCallback(async () => {
+    try {
+      const liff = await initLiff();
+      if (!liff) return;
 
-        setCurrentUser(user);
+      const user = await authUser(liff);
+      if (!user) return;
 
-        const data = await loadInitialData();
+      setCurrentUser(user);
 
-        // ✅ ถูกต้องแล้ว
-        setParticipants(data.participants || []);
-        setTaskTypes(data.types || []);
+      const data = await loadInitialData();
 
-        await fetchTaskEvents();
+      // ✅ ถูกต้องแล้ว
+      setParticipants(data.participants || []);
+      setTaskTypes(data.types || []);
 
-      } catch (error) {
-        console.error("LIFF init failed:", error);
-      } finally {
-        setIsInitializing(false);
-      }
-    };
+      await fetchTaskEvents();
 
-    initApp();
-    // Intentionally mount-only: LIFF login/init must run exactly once.
-    // The setters are stable, and fetchTaskEvents is memoized via useCallback.
+    } catch (error) {
+      console.error("LIFF init failed:", error);
+      setInitError("โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsInitializing(false);
+    }
+    // Setters are stable, and fetchTaskEvents is memoized via useCallback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Intentionally mount-only: LIFF login/init must run exactly once.
+    // runInit is shared with retryInit (a plain event handler), so the
+    // setState calls inside it are safe despite the static lint warning.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    runInit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const retryInit = useCallback(() => {
+    setIsInitializing(true);
+    setInitError(null);
+    runInit();
+  }, [runInit, setIsInitializing]);
+
+  return { initError, retryInit };
 };

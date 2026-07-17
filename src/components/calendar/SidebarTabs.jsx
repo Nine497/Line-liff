@@ -41,7 +41,7 @@ export function useSidebarTabItems({
           <TabCount count={availableParticipants.length} tone="success" />
         </span>
       ),
-      children: (
+      children: availableParticipants.length > 0 ? (
         <div className="h-full min-w-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
           {availableParticipants.map((participant) => (
             <ParticipantCard
@@ -50,6 +50,12 @@ export function useSidebarTabItems({
               busyMap={busyMap}
             />
           ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-6 text-center">
+          <p className="text-sm font-medium text-foreground">
+            {isFiltered ? "ไม่มีผู้ที่ว่างตรงกับตัวกรองในวันนี้" : "ไม่มีผู้ที่ว่างในวันนี้"}
+          </p>
         </div>
       ),
     },
@@ -61,7 +67,7 @@ export function useSidebarTabItems({
           <TabCount count={busyParticipants.length} tone="destructive" />
         </span>
       ),
-      children: (
+      children: busyParticipants.length > 0 ? (
         <div className="h-full min-w-0 space-y-3 overflow-x-hidden overflow-y-auto pr-1">
           {busyParticipants.map((participant) => (
             <ParticipantCard
@@ -70,6 +76,12 @@ export function useSidebarTabItems({
               busyMap={busyMap}
             />
           ))}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-6 text-center">
+          <p className="text-sm font-medium text-foreground">
+            {isFiltered ? "ไม่มีผู้ที่ไม่ว่างตรงกับตัวกรองในวันนี้" : "ไม่มีผู้ที่ไม่ว่างในวันนี้"}
+          </p>
         </div>
       ),
     },

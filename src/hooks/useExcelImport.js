@@ -17,7 +17,7 @@ export function useExcelImport(fetchTaskEvents) {
 
       message.success(`นำเข้าสำเร็จ ${result.count} รายการ`);
     } catch (err) {
-      message.error(err.message);
+      message.error(err.message || "เกิดข้อผิดพลาดในการนำเข้าไฟล์");
     } finally {
       setIsUploading(false);
     }

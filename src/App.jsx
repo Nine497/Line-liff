@@ -20,52 +20,23 @@ import { useCreateTask } from "./hooks/useCreateTask";
 import { useMyEvents } from "./hooks/useMyEvents";
 import { useSidebarTabItems } from "./components/calendar/SidebarTabs";
 import InitialLoading from "./components/loading/InitialLoading";
+import { navyLight, navyDark } from "./theme/colors";
 
-const navyLight = {
-  colorPrimary: "#0B3D6B",
-  colorSuccess: "#147D53",
-  colorWarning: "#0B3D6B",
-  colorError: "#C0392B",
-  colorInfo: "#0B3D6B",
-  colorLink: "#0B3D6B",
-  borderRadius: 12,
-  fontFamily: '"IBM Plex Sans Thai", sans-serif',
-  colorBgContainer: "#FFFFFF",
-  colorBgElevated: "#FFFFFF",
-  colorBgLayout: "#F5F7FB",
-  colorBorder: "rgba(16, 27, 45, 0.16)",
-  colorBorderSecondary: "rgba(16, 27, 45, 0.09)",
-  colorText: "#101B2D",
-  colorTextSecondary: "#5B6B84",
-  colorTextTertiary: "#8592A6",
-};
-
-const navyDark = {
-  colorPrimary: "#5B9BD5",
-  colorSuccess: "#4FBE95",
-  colorWarning: "#5B9BD5",
-  colorError: "#E1786A",
-  colorInfo: "#5B9BD5",
-  colorLink: "#5B9BD5",
-  borderRadius: 12,
-  fontFamily: '"IBM Plex Sans Thai", sans-serif',
-  colorBgContainer: "#10233A",
-  colorBgElevated: "#132A45",
-  colorBgLayout: "#0A1826",
-  colorBorder: "rgba(232, 238, 246, 0.22)",
-  colorBorderSecondary: "rgba(232, 238, 246, 0.10)",
-  colorText: "#E8EEF6",
-  colorTextSecondary: "#93A9C2",
-  colorTextTertiary: "#6D84A0",
-};
+const THEME_STORAGE_KEY = "line-liff-theme";
 
 function App() {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem(THEME_STORAGE_KEY) || "light"
+  );
   const isDark = theme === "dark";
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
+
+  useEffect(() => {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
 
   return (
     <ConfigProvider
@@ -180,7 +151,7 @@ function AppShell({ setTheme, isDark }) {
     return `${Number(day)} ${monthNames[Number(month) - 1]} ${Number(year) + 543}`;
   }, [selectedKey]);
 
-  useInitApp({
+  const { initError, retryInit } = useInitApp({
     setCurrentUser,
     fetchTaskEvents,
     setIsInitializing,
@@ -218,7 +189,22 @@ function AppShell({ setTheme, isDark }) {
         currentUser={currentUser}
       />
 
-      <div className="flex w-full flex-1 flex-col px-4 py-5 sm:px-6 lg:px-8">
+      {!isInitializing && initError && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/95 p-6 text-center">
+          <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-card p-7 shadow-xl">
+            <p className="text-base font-semibold text-foreground">{initError}</p>
+            <button
+              type="button"
+              onClick={retryInit}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            >
+              ลองใหม่
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-4 py-5 sm:px-6 lg:px-8">
         <Header
           currentUser={currentUser}
           isDark={isDark}
