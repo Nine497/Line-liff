@@ -6,6 +6,7 @@ import CalendarSidebar from "./components/calendar/CalendarSidebar";
 import React, { Suspense } from "react";
 const CreateTaskModal = React.lazy(() => import("./components/modal/CreateTaskModal"));
 const EventDetailModal = React.lazy(() => import("./components/modal/EventDetailModal"));
+const ExcelMappingModal = React.lazy(() => import("./components/calendar/ExcelMappingModal"));
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { ConfigProvider, App as AntdApp, Form, theme as antdTheme, message } from "antd";
@@ -70,7 +71,7 @@ function AppShell({ setTheme, isDark }) {
 
   const { events, fetchTaskEvents } = useTaskEvents();
   const { calendarRef, month, setMonth, moveMonth, goToday } = useCalendarNav();
-  const { isUploading, handleUpload } = useExcelImport(fetchTaskEvents);
+  const { isUploading, handleUpload, mappingModalProps } = useExcelImport(fetchTaskEvents);
   const { isSubmitting, handleCreateTask } = useCreateTask(fetchTaskEvents);
   const {
     showMineOnly,
@@ -304,6 +305,10 @@ function AppShell({ setTheme, isDark }) {
               form.resetFields();
             }}
           />
+        )}
+
+        {mappingModalProps && mappingModalProps.isOpen && (
+          <ExcelMappingModal {...mappingModalProps} />
         )}
       </Suspense>
     </main >
