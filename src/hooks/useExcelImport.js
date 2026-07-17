@@ -61,10 +61,17 @@ export function useExcelImport(fetchTaskEvents) {
       });
 
       // Call the existing API
-      const result = await importTasks(newFile, currentUserId);
+      const result = await importTasks(newFile, currentUserId, isDuty);
 
       await fetchTaskEvents();
-      message.success(`นำเข้าสำเร็จ ${result.count} รายการ`);
+
+      // Duty imports upsert existing shifts by (title, start, end), so a
+      // re-upload is a mix of newly-created and updated rows worth calling
+      // out separately instead of one flat "imported" count.
+      const summary = result.updated
+        ? `นำเข้าสำเร็จ ${result.count} รายการใหม่, อัปเดต ${result.updated} รายการ`
+        : `นำเข้าสำเร็จ ${result.count} รายการ`;
+      message.success(summary);
       setIsMappingModalOpen(false);
     } catch (err) {
       message.error(err.message || "เกิดข้อผิดพลาดในการนำเข้าไฟล์");

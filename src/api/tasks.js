@@ -50,7 +50,7 @@ export const createTask = async (payload) => {
 // =========================
 // Import Excel
 // =========================
-export const importTasks = async (file, userId) => {
+export const importTasks = async (file, userId, isDuty = false) => {
   const formData = new FormData();
 
   if (userId) {
@@ -58,6 +58,7 @@ export const importTasks = async (file, userId) => {
   }
 
   formData.append("file", file);
+  formData.append("is_duty", isDuty ? "true" : "false");
 
   return await apiClient("/tasks/import", {
     method: "POST",
