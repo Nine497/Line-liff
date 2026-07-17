@@ -1,8 +1,10 @@
-import { Card, Tabs } from "antd";
+import { Card, Tabs, DatePicker } from "antd";
+import dayjs from "dayjs";
 import "./sidebar-tabs.css";
 
 function CalendarSidebar({
-    selectedDate,
+    selectedDateRange,
+    setSelectedDateRange,
     selectedEvents,
     activeTab,
     setActiveTab,
@@ -24,13 +26,26 @@ function CalendarSidebar({
                     },
                 }}
                 title={
-                    <div className="flex items-baseline justify-between gap-2 py-1">
-                        <h2 className="font-display text-base font-bold text-foreground">
-                            {selectedDate}
-                        </h2>
-                        <span className="font-display text-[11px] text-muted-foreground">
-                            รายการวันที่เลือก
-                        </span>
+                    <div className="flex flex-col gap-2 py-2">
+                        <div className="flex items-baseline justify-between">
+                            <h2 className="font-display text-[15px] font-bold text-foreground">
+                                ค้นหาวันว่าง
+                            </h2>
+                            <span className="font-display text-[11px] text-muted-foreground">
+                                กำหนดช่วงวันเพื่อดูคิวงาน
+                            </span>
+                        </div>
+                        <DatePicker.RangePicker
+                            format="D MMM YYYY"
+                            value={selectedDateRange ? [dayjs(selectedDateRange[0]), dayjs(selectedDateRange[1])] : null}
+                            onChange={(dates) => {
+                                if (dates && dates.length === 2) {
+                                    setSelectedDateRange([dates[0].format("YYYY-MM-DD"), dates[1].format("YYYY-MM-DD")]);
+                                }
+                            }}
+                            style={{ width: "100%" }}
+                            allowClear={false}
+                        />
                     </div>
                 }
             >

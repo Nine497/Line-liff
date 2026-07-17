@@ -2,22 +2,25 @@ import { useMemo } from "react";
 import dayjs from "dayjs";
 import { unwrap } from "../utils/unwrap";
 
-export function useDaySelection(events, selectedKey, participants) {
+export function useDaySelection(events, selectedDateRange, participants) {
   const selectedEvents = useMemo(() => {
     return events
       .filter((event) => {
-        const selected = dayjs(selectedKey);
+        if (!selectedDateRange || selectedDateRange.length < 2) return false;
+        
+        const rangeStart = dayjs(selectedDateRange[0]);
+        const rangeEnd = dayjs(selectedDateRange[1]);
 
         const start = dayjs(event.start);
         const end = event.end
           ? dayjs(event.end).subtract(1, "day")
           : start;
 
+        // Check if event overlaps with the selected date range
+        // Event starts before or on the range end AND event ends after or on the range start
         return (
-          (selected.isAfter(start, "day") ||
-            selected.isSame(start, "day")) &&
-          (selected.isBefore(end, "day") ||
-            selected.isSame(end, "day"))
+          (start.isBefore(rangeEnd, "day") || start.isSame(rangeEnd, "day")) &&
+          (end.isAfter(rangeStart, "day") || end.isSame(rangeStart, "day"))
         );
       })
       // Supabase has no guaranteed return order, so without this the list
@@ -27,7 +30,7 @@ export function useDaySelection(events, selectedKey, participants) {
         const bStart = b?.extendedProps?.task?.start_time;
         return dayjs(aStart).valueOf() - dayjs(bStart).valueOf();
       });
-  }, [events, selectedKey]);
+  }, [events, selectedDateRange]);
 
   const busyMap = useMemo(() => {
     const map = new Map();

@@ -54,7 +54,7 @@ function App() {
 }
 
 function AppShell({ setTheme, isDark }) {
-  const [selectedKey, setSelectedKey] = useState(todayKey);
+  const [selectedDateRange, setSelectedDateRange] = useState([todayKey, todayKey]);
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -89,7 +89,7 @@ function AppShell({ setTheme, isDark }) {
     busyMap,
     availableParticipants,
     busyParticipants,
-  } = useDaySelection(events, selectedKey, participants);
+  } = useDaySelection(events, selectedDateRange, participants);
 
   // "ดูตามคน" reuses the task_participants already embedded on every loaded
   // event, so picking any participant filters instantly with no extra API
@@ -149,10 +149,7 @@ function AppShell({ setTheme, isDark }) {
     };
   }, [showCreateForm]);
 
-  const selectedDate = useMemo(() => {
-    const [year, month, day] = selectedKey.split("-");
-    return `${Number(day)} ${monthNames[Number(month) - 1]} ${Number(year) + 543}`;
-  }, [selectedKey]);
+  // Note: selectedDate logic removed because we now pass selectedDateRange directly
 
   const { initError, retryInit } = useInitApp({
     setCurrentUser,
@@ -227,13 +224,16 @@ function AppShell({ setTheme, isDark }) {
               month={month}
               events={displayEvents}
               calendarRef={calendarRef}
-              selectedKey={selectedKey}
+              selectedDateRange={selectedDateRange}
               isUploading={isUploading}
               moveMonth={moveMonth}
-              goToday={() => goToday(setSelectedKey)}
+              goToday={() => {
+                goToday();
+                setSelectedDateRange([todayKey, todayKey]);
+              }}
               handleUpload={onFileChange}
               setMonth={setMonth}
-              setSelectedKey={setSelectedKey}
+              setSelectedDateRange={setSelectedDateRange}
               showMineOnly={showMineOnly}
               isLoadingMine={isLoadingMine}
               onToggleMine={onToggleMine}
@@ -248,7 +248,8 @@ function AppShell({ setTheme, isDark }) {
             />
 
             <CalendarSidebar
-              selectedDate={selectedDate}
+              selectedDateRange={selectedDateRange}
+              setSelectedDateRange={setSelectedDateRange}
               selectedEvents={selectedEvents}
               activeTab={activeTab}
               setActiveTab={setActiveTab}

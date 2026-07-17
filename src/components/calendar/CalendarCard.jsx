@@ -13,13 +13,13 @@ export default function CalendarCard({
     month,
     events,
     calendarRef,
-    selectedKey,
+    selectedDateRange,
     isUploading,
     moveMonth,
     goToday,
     handleUpload,
     setMonth,
-    setSelectedKey,
+    setSelectedDateRange,
     showMineOnly,
     isLoadingMine,
     onToggleMine,
@@ -175,9 +175,16 @@ export default function CalendarCard({
                     // (e.g. 6) squeezes them together with no gap to fit the
                     // fixed row height instead of showing them all cleanly.
                     dayMaxEvents={false}
-                    dayCellClassNames={(arg) =>
-                        dayjs(arg.date).format("YYYY-MM-DD") === selectedKey ? "selected-day" : ""
-                    }
+                    dayCellClassNames={(arg) => {
+                        if (!selectedDateRange || selectedDateRange.length < 2) return "";
+                        const cellDate = dayjs(arg.date).startOf("day");
+                        const rangeStart = dayjs(selectedDateRange[0]).startOf("day");
+                        const rangeEnd = dayjs(selectedDateRange[1]).startOf("day");
+                        
+                        return (cellDate.isAfter(rangeStart, "day") || cellDate.isSame(rangeStart, "day")) &&
+                               (cellDate.isBefore(rangeEnd, "day") || cellDate.isSame(rangeEnd, "day")) 
+                               ? "selected-day" : "";
+                    }}
                     datesSet={(arg) => {
                         const date = arg.view.currentStart;
                         setMonth({
@@ -186,7 +193,7 @@ export default function CalendarCard({
                         });
                     }}
                     dateClick={(info) => {
-                        setSelectedKey(info.dateStr);
+                        setSelectedDateRange([info.dateStr, info.dateStr]);
                     }}
                     eventClick={(info) => {
                         info.jsEvent.stopPropagation();
