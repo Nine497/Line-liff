@@ -1,5 +1,5 @@
 import {
-    Modal, Form, Input, Select, DatePicker, Button, Row, Col, Divider, message
+    Modal, Form, Input, Select, DatePicker, Button, Row, Col, Divider, message, AutoComplete
 } from "antd";
 
 import {
@@ -8,6 +8,7 @@ import {
     Clock,
     Users,
     AlignLeft,
+    MapPin,
 } from "lucide-react";
 
 import dayjs from "dayjs";
@@ -38,7 +39,35 @@ function CreateTaskModal({
 
     const debounceRef = useRef(null);
 
+    const [locationOptions, setLocationOptions] = useState([]);
+    const locationDebounceRef = useRef(null);
+
     const dateRange = Form.useWatch("dateRange", form);
+
+    const handleLocationSearch = (value) => {
+        if (!value) {
+            setLocationOptions([]);
+            return;
+        }
+
+        clearTimeout(locationDebounceRef.current);
+        locationDebounceRef.current = setTimeout(async () => {
+            try {
+                const res = await fetch(
+                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&addressdetails=1&limit=5&countrycodes=th`
+                );
+                const data = await res.json();
+                
+                const options = data.map((item) => ({
+                    value: item.display_name,
+                    label: item.display_name,
+                }));
+                setLocationOptions(options);
+            } catch (err) {
+                console.error("fetch location failed:", err);
+            }
+        }, 500);
+    };
 
     // 🟢 SMART FETCH (clean + safe + debounce)
     const handleDateChange = (value) => {
@@ -107,6 +136,7 @@ function CreateTaskModal({
                         start_time: values.dateRange?.[0]?.toISOString(),
                         end_time: values.dateRange?.[1]?.toISOString(),
                         participant_ids: values.participants || [],
+                        location: values.location?.trim() || "",
                     };
 
                     await onSubmit(payload);
@@ -115,6 +145,7 @@ function CreateTaskModal({
                     title: "",
                     description: "",
                     participants: [],
+                    location: "",
                 }}
             >
 
@@ -210,6 +241,21 @@ function CreateTaskModal({
                         </Form.Item>
                     </Col>
                 </Row>
+
+                {/* LOCATION */}
+                <Form.Item
+                    label={<span className="flex items-center gap-1.5 font-medium">
+                        <MapPin className="h-3.5 w-3.5 text-muted-foreground" /> สถานที่ (Location)
+                    </span>}
+                    name="location"
+                >
+                    <AutoComplete
+                        options={locationOptions}
+                        onSearch={handleLocationSearch}
+                        placeholder="ค้นหาสถานที่ หรือพิมพ์ระบุเอง..."
+                        size="large"
+                    />
+                </Form.Item>
 
                 {/* DESCRIPTION */}
                 <Form.Item
