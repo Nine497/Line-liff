@@ -69,29 +69,34 @@
 }
 
 .dark {
-  /* Octet Design: Dark header palette - shifted lighter so cards aren't black */
-  --background: #12131A;
-  --foreground: #F5F5F7;
-  --card: #2C2E3C; /* Lighter than background */
-  --card-foreground: #F5F5F7;
-  --popover: #2C2E3C;
-  --popover-foreground: #F5F5F7;
-  --primary: #145CE3;
-  --primary-foreground: #FFFFFF;
-  --secondary: #3A3C4B; /* Distinctly lighter on hover */
-  --secondary-foreground: #F5F5F7;
-  --muted: #3A3C4B;
-  --muted-foreground: #A1A1AA;
-  --accent: #3A3C4B;
-  --accent-foreground: #F5F5F7;
-  --destructive: #EF4444;
-  --destructive-tint: rgba(239, 68, 68, 0.15);
-  --border: #3A3C4B;
-  --border-strong: #717077;
+  /* A genuine dark counterpart to the slate/blue light theme, not an
+     inverted light palette: a near-black blue-gray base, a clearly
+     brighter/lighter card so surfaces read as elevated instead of flat,
+     translucent borders (rgba, not a mid-gray solid) that stay elegant
+     against black instead of chalky, and a primary lightened a shade so
+     it still pops on a dark background. */
+  --background: #0A0F1D;
+  --foreground: #E8ECF4;
+  --card: #131B2E;
+  --card-foreground: #E8ECF4;
+  --popover: #161F35;
+  --popover-foreground: #E8ECF4;
+  --primary: #3B82F6;
+  --primary-foreground: #071021;
+  --secondary: #1C2740;
+  --secondary-foreground: #C7D2E3;
+  --muted: #1C2740;
+  --muted-foreground: #8A97AF;
+  --accent: rgba(59, 130, 246, 0.16);
+  --accent-foreground: #BFDBFE;
+  --destructive: #F87171;
+  --destructive-tint: rgba(248, 113, 113, 0.16);
+  --border: rgba(148, 163, 184, 0.14);
+  --border-strong: rgba(148, 163, 184, 0.28);
   --input: var(--border);
-  --ring: rgba(20, 92, 227, 0.4);
-  --success: #10B981;
-  --success-tint: rgba(16, 185, 129, 0.15);
+  --ring: rgba(59, 130, 246, 0.45);
+  --success: #34D399;
+  --success-tint: rgba(52, 211, 153, 0.16);
 }
 
 * {

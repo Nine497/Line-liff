@@ -24,7 +24,7 @@ function InitialLoading({ open, currentUser }) {
                     <BarLoader
                         width={150}
                         height={3}
-                        color="#0B3D6B"
+                        color="var(--primary)"
                     />
 
                     <p className="font-display text-lg font-semibold">
