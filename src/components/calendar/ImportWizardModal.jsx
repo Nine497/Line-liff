@@ -284,6 +284,7 @@ export default function ImportWizardModal({
             maskClosable={false}
             footer={null}
             width={700}
+            centered
         >
             <div className="mt-6">
                 <Steps
