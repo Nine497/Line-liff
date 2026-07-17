@@ -183,7 +183,7 @@ function AppShell({ setTheme, isDark }) {
     });
 
   return (
-    <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground", isDark && "dark")}>
+    <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground xl:h-screen xl:overflow-hidden", isDark && "dark")}>
       <InitialLoading
         open={isInitializing}
         currentUser={currentUser}
@@ -204,7 +204,7 @@ function AppShell({ setTheme, isDark }) {
         </div>
       )}
 
-      <div className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-1 flex-col px-4 py-5 sm:px-6 lg:px-8 xl:min-h-0 xl:overflow-hidden">
         <Header
           currentUser={currentUser}
           isDark={isDark}
@@ -214,8 +214,8 @@ function AppShell({ setTheme, isDark }) {
           onCreateTask={() => setShowCreateForm(true)}
         />
 
-        <div className="flex flex-1 flex-col gap-6">
-          <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
+        <div className="flex flex-1 flex-col gap-6 xl:min-h-0">
+          <section className="grid gap-6 xl:min-h-0 xl:grid-cols-[minmax(0,1fr)_360px]" id="calendarjs">
 
             <CalendarCard
               month={month}

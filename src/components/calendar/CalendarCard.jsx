@@ -53,12 +53,16 @@ export default function CalendarCard({
     }, [events, month]);
 
     return (
-        <Card ref={cardRef} className="overflow-hidden shadow-sm" styles={{ body: { padding: 0 } }}>
+        <Card
+            ref={cardRef}
+            className="flex flex-col overflow-hidden shadow-sm xl:h-full"
+            styles={{ body: { padding: 0, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 } }}
+        >
             {/* Column on phones (each group stretches full-width via the
                 default flex-col stretch, so wrapped controls inside get a
                 real width to resolve against) — row on sm+ where everything
                 fits inline. */}
-            <div className="flex flex-col gap-3 border-b border-border px-4 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-b border-border px-4 py-3.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between xl:shrink-0">
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
@@ -155,7 +159,7 @@ export default function CalendarCard({
                 </div>
             </div>
 
-            <div className="px-2 pb-2 pt-1">
+            <div className="px-2 pb-2 pt-1 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
                 <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin, interactionPlugin]}
