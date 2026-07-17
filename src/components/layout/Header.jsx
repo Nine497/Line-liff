@@ -14,7 +14,7 @@ function Header({
     return (
         <nav className="flex items-center justify-between gap-3 pb-4">
             <a
-                className="flex items-center gap-3"
+                className="flex items-center gap-3 transition-transform duration-200 hover:scale-105 active:scale-95"
                 href="#calendarjs"
             >
                 <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm shrink-0">
@@ -22,7 +22,7 @@ function Header({
                         <img
                             src={currentUser.picture_url}
                             alt={currentUser.display_name ?? "ผู้ใช้งานปัจจุบัน"}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
                         />
                     ) : (
                         <CompassMark className="h-6 w-6" />
@@ -58,7 +58,7 @@ function Header({
                             : "เปลี่ยนเป็นโหมดมืด"
                     }
                     onClick={onToggleTheme}
-                    className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center"
+                    className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
                 >
                     <span className="relative h-[22px] w-[38px] rounded-full border border-border bg-secondary transition-colors">
                         <span

@@ -1,22 +1,20 @@
-import { useState } from "react";
 import { message, notification } from "antd";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createTask } from "../api/tasks";
 
 export function useCreateTask(fetchTaskEvents) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleCreateTask = async (payload, { onSuccess } = {}) => {
-    try {
-      setIsSubmitting(true);
-
-      await createTask(payload);
-
+  const mutation = useMutation({
+    mutationFn: createTask,
+    onSuccess: () => {
       message.success("เพิ่มงานสำเร็จ");
-
-      onSuccess?.();
-
-      await fetchTaskEvents();
-    } catch (error) {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      if (fetchTaskEvents) {
+        fetchTaskEvents();
+      }
+    },
+    onError: (error) => {
       console.error(error);
 
       if (error.status === 409) {
@@ -36,13 +34,19 @@ export function useCreateTask(fetchTaskEvents) {
       }
 
       message.error(error.message || "เกิดข้อผิดพลาด");
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+  });
+
+  const handleCreateTask = (payload, { onSuccess } = {}) => {
+    mutation.mutate(payload, {
+      onSuccess: () => {
+        onSuccess?.();
+      },
+    });
   };
 
   return {
-    isSubmitting,
+    isSubmitting: mutation.isPending,
     handleCreateTask,
   };
 }

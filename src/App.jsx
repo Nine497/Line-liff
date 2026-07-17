@@ -3,8 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import Header from "./components/layout/Header";
 import CalendarCard from "./components/calendar/CalendarCard";
 import CalendarSidebar from "./components/calendar/CalendarSidebar";
-import CreateTaskModal from "./components/modal/CreateTaskModal";
-import EventDetailModal from "./components/modal/EventDetailModal";
+import React, { Suspense } from "react";
+const CreateTaskModal = React.lazy(() => import("./components/modal/CreateTaskModal"));
+const EventDetailModal = React.lazy(() => import("./components/modal/EventDetailModal"));
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
 import { ConfigProvider, App as AntdApp, Form, theme as antdTheme, message } from "antd";
@@ -57,7 +58,9 @@ function AppShell({ setTheme, isDark }) {
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [hasOpenedCreate, setHasOpenedCreate] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [hasOpenedDetail, setHasOpenedDetail] = useState(false);
   const [calendarHeight, setCalendarHeight] = useState(null);
   const [selectedParticipantId, setSelectedParticipantId] = useState(null);
   const [participants, setParticipants] = useState([]);
@@ -211,7 +214,10 @@ function AppShell({ setTheme, isDark }) {
           onToggleTheme={() =>
             setTheme(isDark ? "light" : "dark")
           }
-          onCreateTask={() => setShowCreateForm(true)}
+          onCreateTask={() => {
+            setHasOpenedCreate(true);
+            setShowCreateForm(true);
+          }}
         />
 
         <div className="flex flex-1 flex-col gap-6 xl:min-h-0">
@@ -234,7 +240,10 @@ function AppShell({ setTheme, isDark }) {
               participants={participants}
               selectedParticipantId={selectedParticipantId}
               onSelectParticipant={setSelectedParticipantId}
-              onEventClick={setSelectedEvent}
+              onEventClick={(evt) => {
+                setHasOpenedDetail(true);
+                setSelectedEvent(evt);
+              }}
               onHeightChange={setCalendarHeight}
             />
 
@@ -273,23 +282,29 @@ function AppShell({ setTheme, isDark }) {
         </>
       )}
 
-      <EventDetailModal
-        event={selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-      />
+      <Suspense fallback={null}>
+        {hasOpenedDetail && (
+          <EventDetailModal
+            event={selectedEvent}
+            onClose={() => setSelectedEvent(null)}
+          />
+        )}
 
-      <CreateTaskModal
-        open={showCreateForm}
-        form={form}
-        taskTypes={taskTypes}
-        participants={participants}
-        isSubmitting={isSubmitting}
-        onSubmit={onSubmitTask}
-        onClose={() => {
-          setShowCreateForm(false);
-          form.resetFields();
-        }}
-      />
+        {hasOpenedCreate && (
+          <CreateTaskModal
+            open={showCreateForm}
+            form={form}
+            taskTypes={taskTypes}
+            participants={participants}
+            isSubmitting={isSubmitting}
+            onSubmit={onSubmitTask}
+            onClose={() => {
+              setShowCreateForm(false);
+              form.resetFields();
+            }}
+          />
+        )}
+      </Suspense>
     </main >
   );
 }

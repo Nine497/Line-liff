@@ -81,9 +81,11 @@
 
 /* Explicit gap between stacked event bars — without this, a day with many
    tasks (multi-day banners especially) renders them touching edge to edge
-   since FullCalendar's own default spacing here is ~1px. */
+   since FullCalendar's own default spacing here is ~1px. !important because
+   FullCalendar injects its own base stylesheet at runtime, after this one,
+   so a plain override loses on specificity/order otherwise. */
 .fc .fc-daygrid-event-harness {
-  margin-bottom: 3px;
+  margin-bottom: 4px !important;
 }
 
 /* ── More link ── */

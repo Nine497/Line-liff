@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { fetchMyTasks } from "../api/tasks";
 
 // Drives the "My Events" filter: resolves the participant linked to the
@@ -11,6 +12,7 @@ export function useMyEvents() {
   const [myTaskIds, setMyTaskIds] = useState(() => new Set());
   const [isLoadingMine, setIsLoadingMine] = useState(false);
   const [hasFetchedMine, setHasFetchedMine] = useState(false);
+  const queryClient = useQueryClient();
 
   const loadMyEvents = useCallback(async (lineId) => {
     if (!lineId) return null;
@@ -18,7 +20,11 @@ export function useMyEvents() {
     setIsLoadingMine(true);
 
     try {
-      const result = await fetchMyTasks(lineId);
+      const result = await queryClient.fetchQuery({
+        queryKey: ["myTasks", lineId],
+        queryFn: () => fetchMyTasks(lineId),
+        staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+      });
       const participant = result?.participant ?? null;
 
       setMyParticipant(participant);
@@ -29,7 +35,7 @@ export function useMyEvents() {
     } finally {
       setIsLoadingMine(false);
     }
-  }, []);
+  }, [queryClient]);
 
   // Returns { turnedOn, participant } so the caller can react to the fetch
   // result (e.g. notify when no participant is linked to this LINE account)
@@ -56,6 +62,9 @@ export function useMyEvents() {
     isLoadingMine,
     hasFetchedMine,
     toggleMineOnly,
-    reloadMyEvents: loadMyEvents,
+    reloadMyEvents: (lineId) => {
+      queryClient.invalidateQueries({ queryKey: ["myTasks", lineId] });
+      return loadMyEvents(lineId);
+    },
   };
 }

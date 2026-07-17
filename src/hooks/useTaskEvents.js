@@ -1,29 +1,22 @@
-import { useCallback, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { fetchTasks } from "../api/tasks";
 import { toCalendarEvent } from "../utils/taskMapper";
 
 export function useTaskEvents() {
-  const [events, setEvents] = useState([]);
-
-  const fetchTaskEvents = useCallback(async () => {
-    try {
+  const { data: events = [], refetch, isLoading, isError } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: async () => {
       const res = await fetchTasks();
-
-      const tasks = Array.isArray(res)
-        ? res
-        : res?.data ?? [];
-
-      const calendarEvents = tasks.map(toCalendarEvent);
-
-      setEvents(calendarEvents);
-    } catch (error) {
-      console.error("Fetch tasks error:", error);
-    }
-  }, []);
+      const tasks = Array.isArray(res) ? res : res?.data ?? [];
+      return tasks.map(toCalendarEvent);
+    },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+  });
 
   return {
     events,
-    setEvents,
-    fetchTaskEvents,
+    fetchTaskEvents: refetch, // Kept for backwards compatibility if any component calls it directly
+    isLoading,
+    isError,
   };
 }
