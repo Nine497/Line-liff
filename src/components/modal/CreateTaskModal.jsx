@@ -54,7 +54,7 @@ function CreateTaskModal({
         locationDebounceRef.current = setTimeout(async () => {
             try {
                 const res = await fetch(
-                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&addressdetails=1&limit=5&countrycodes=th`
+                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&addressdetails=1&limit=5&countrycodes=th&accept-language=th`
                 );
                 const data = await res.json();
                 
