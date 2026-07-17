@@ -80,15 +80,17 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
 .fc .fc-event:active { transform: scale(0.97); }
-.fc .fc-daygrid-event { min-height: 20px; }
+.fc .fc-daygrid-event { 
+  min-height: 20px; 
+  margin-top: 3px !important;
+  margin-bottom: 3px !important;
+}
 
-/* Explicit gap between stacked event bars — without this, a day with many
-   tasks (multi-day banners especially) renders them touching edge to edge
-   since FullCalendar's own default spacing here is ~1px. !important because
-   FullCalendar injects its own base stylesheet at runtime, after this one,
-   so a plain override loses on specificity/order otherwise. */
+/* FullCalendar uses absolute positioning for harnesses based on event height.
+   Therefore, we must NOT set margin on the harness itself, but on the event 
+   so FullCalendar measures it properly and calculates the 'top' offset. */
 .fc .fc-daygrid-event-harness {
-  margin-bottom: 6px !important;
+  /* removed margin-bottom */
 }
 
 /* ── More link ── */
