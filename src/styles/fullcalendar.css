@@ -41,7 +41,7 @@
 }
 .fc .fc-daygrid-day-frame { 
   position: relative; 
-  padding-bottom: 8px !important; /* เพิ่มช่องว่างด้านล่างเสมอ */
+  padding-bottom: 3px !important; /* ลดช่องว่างด้านล่างเหลือ 3px */
 }
 .fc .fc-day-other .fc-daygrid-day-number { color: var(--muted-foreground); opacity: .55; }
 
