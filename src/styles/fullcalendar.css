@@ -79,6 +79,13 @@
 .fc .fc-event:active { transform: scale(0.97); }
 .fc .fc-daygrid-event { min-height: 20px; }
 
+/* Explicit gap between stacked event bars — without this, a day with many
+   tasks (multi-day banners especially) renders them touching edge to edge
+   since FullCalendar's own default spacing here is ~1px. */
+.fc .fc-daygrid-event-harness {
+  margin-bottom: 3px;
+}
+
 /* ── More link ── */
 .fc .fc-daygrid-more-link {
   font-size: 11px;

@@ -1,5 +1,5 @@
 import { Modal } from "antd";
-import { AlignLeft, Users, CalendarDays } from "lucide-react";
+import { AlignLeft, Users, CalendarDays, ArrowRight } from "lucide-react";
 import { hexToRgba } from "../../utils/color";
 import { getEventColor } from "../../constants/eventColors";
 import { formatEventSchedule } from "../../utils/date";
@@ -15,9 +15,8 @@ function avatarColor(key) {
     return AVATAR_PALETTE[Math.abs(hash) % AVATAR_PALETTE.length];
 }
 
-// One endpoint ("เริ่ม"/"ถึง") of a multi-day span — kept as its own row so a
-// long date+time pair never has to compete for space on the same line as
-// its counterpart the way a single concatenated string used to.
+// One endpoint ("เริ่ม"/"ถึง") of a multi-day span, shown side by side with
+// its counterpart via an arrow rather than concatenated into one long string.
 function ScheduleEndpoint({ label, point, hex, showTime }) {
     return (
         <div className="flex items-center gap-3">
@@ -82,22 +81,23 @@ function EventDetailModal({ event, onClose }) {
         >
             <div className="mt-5 flex flex-col gap-4">
                 {/* Date & time — the first thing anyone checking an event needs.
-                    A multi-day span gets its own "เริ่ม/ถึง" row each so the two
-                    dates+times never have to squeeze onto one line together. */}
+                    A multi-day span shows "เริ่ม → ถึง" side by side so both
+                    ends of the range are compared at a glance instead of
+                    stacked vertically. */}
                 {schedule && (
                     <div
                         className="rounded-xl p-4"
                         style={{ background: hexToRgba(hex, 0.08), border: `1px solid ${hexToRgba(hex, 0.25)}` }}
                     >
                         {schedule.isMultiDay ? (
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-wrap items-center gap-3">
                                 <ScheduleEndpoint
                                     label="เริ่ม"
                                     point={schedule.start}
                                     hex={hex}
                                     showTime={!schedule.isAllDay}
                                 />
-                                <div className="ml-4 h-3 w-px bg-border-strong" />
+                                <ArrowRight className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
                                 <ScheduleEndpoint
                                     label="ถึง"
                                     point={schedule.end}
