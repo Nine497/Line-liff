@@ -2,10 +2,10 @@
 
 @theme inline {
   --font-sans:
-    "IBM Plex Sans Thai", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Sarabun", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", sans-serif;
   --font-display:
-    "Chakra Petch", "IBM Plex Sans Thai", ui-sans-serif, system-ui, sans-serif;
+    "Sarabun", ui-sans-serif, system-ui, sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

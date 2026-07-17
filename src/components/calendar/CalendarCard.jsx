@@ -169,6 +169,12 @@ export default function CalendarCard({
                     displayEventTime={false}
                     headerToolbar={false}
                     height="auto"
+                    // Let FullCalendar cap how many events a day cell shows and
+                    // fold the rest behind a "+N" link, based on the cell's
+                    // actual rendered height — otherwise a day with many tasks
+                    // (e.g. 6) squeezes them together with no gap to fit the
+                    // fixed row height instead of showing them all cleanly.
+                    dayMaxEvents={true}
                     dayCellClassNames={(arg) =>
                         dayjs(arg.date).format("YYYY-MM-DD") === selectedKey ? "selected-day" : ""
                     }
