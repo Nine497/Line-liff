@@ -28,6 +28,10 @@ export default function ImportWizardModal({
     const [excelHeaders, setExcelHeaders] = useState([]);
     const [excelData, setExcelData] = useState([]);
     const [mapping, setMapping] = useState({});
+    
+    // For Step 4 (Preview)
+    const [previewValidRows, setPreviewValidRows] = useState([]);
+    const [previewInvalidRows, setPreviewInvalidRows] = useState([]);
 
     // Reset when opened/closed
     useEffect(() => {
@@ -38,6 +42,8 @@ export default function ImportWizardModal({
             setExcelHeaders([]);
             setExcelData([]);
             setMapping({});
+            setPreviewValidRows([]);
+            setPreviewInvalidRows([]);
         }
     }, [isOpen]);
 
@@ -99,6 +105,38 @@ export default function ImportWizardModal({
         reader.readAsArrayBuffer(file);
         
         return false; // Prevent automatic upload by Antd
+    };
+
+    const handlePreview = () => {
+        // Calculate which rows are valid vs invalid based on current mapping
+        const valid = [];
+        const invalid = [];
+        
+        excelData.forEach((row, index) => {
+            let title = mapping["ชื่องาน"] ? row[mapping["ชื่องาน"]] : undefined;
+            let dateVal = mapping["วันที่"] ? row[mapping["วันที่"]] : undefined;
+            
+            if (isDuty) {
+                if (title === undefined) title = "การเข้าเวร";
+            }
+            
+            let missingReason = [];
+            if (title === undefined || String(title).trim() === "") missingReason.push("ขาดชื่องาน");
+            if (dateVal === undefined || String(dateVal).trim() === "") missingReason.push("ขาดวันที่");
+            
+            const displayTitle = title || "ไม่มีชื่องาน";
+            const displayDate = dateVal !== undefined ? String(dateVal) : "ไม่มีวันที่";
+            
+            if (missingReason.length === 0) {
+                valid.push({ index: index + 2, title: displayTitle, date: displayDate }); // +2 because index 0 is row 2 in excel (after headers)
+            } else {
+                invalid.push({ index: index + 2, title: displayTitle, date: displayDate, reason: missingReason.join(", ") });
+            }
+        });
+        
+        setPreviewValidRows(valid);
+        setPreviewInvalidRows(invalid);
+        setCurrentStep(3);
     };
 
     const handleConfirm = () => {
@@ -262,8 +300,86 @@ export default function ImportWizardModal({
                                 <Button onClick={onClose} disabled={isProcessing}>ยกเลิก</Button>
                                 <Button 
                                     type="primary" 
-                                    onClick={handleConfirm} 
+                                    onClick={handlePreview} 
                                     disabled={!isMappingValid || isProcessing}
+                                >
+                                    ถัดไป
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 3:
+                return (
+                    <div className="flex flex-col gap-4 py-4">
+                        <div className="text-center mb-2">
+                            <h3 className="text-lg font-semibold text-foreground">สรุปข้อมูลที่จะนำเข้า</h3>
+                            <p className="text-muted-foreground text-sm">ตรวจสอบข้อมูลก่อนกดยืนยัน</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* Valid Rows */}
+                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[300px]">
+                                <div className="bg-emerald-500/10 p-3 border-b border-emerald-500/20 text-emerald-600 flex justify-between items-center">
+                                    <span className="font-semibold">แถวที่ผ่าน (นำเข้าได้)</span>
+                                    <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">{previewValidRows.length}</span>
+                                </div>
+                                <div className="overflow-y-auto p-2 flex-1 bg-card">
+                                    {previewValidRows.length === 0 ? (
+                                        <div className="h-full flex items-center justify-center text-muted-foreground text-sm">ไม่มีข้อมูลที่ผ่าน</div>
+                                    ) : (
+                                        <ul className="space-y-1">
+                                            {previewValidRows.map(r => (
+                                                <li key={r.index} className="text-xs p-2 rounded hover:bg-secondary border border-transparent hover:border-border transition-colors">
+                                                    <div className="font-medium text-foreground truncate">{r.title}</div>
+                                                    <div className="text-muted-foreground truncate">บรรทัดที่ {r.index} | {r.date}</div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Invalid Rows */}
+                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[300px]">
+                                <div className="bg-destructive/10 p-3 border-b border-destructive/20 text-destructive flex justify-between items-center">
+                                    <span className="font-semibold">แถวที่ไม่ผ่าน (ถูกข้าม)</span>
+                                    <span className="bg-destructive text-white px-2 py-0.5 rounded-full text-xs font-bold">{previewInvalidRows.length}</span>
+                                </div>
+                                <div className="overflow-y-auto p-2 flex-1 bg-card">
+                                    {previewInvalidRows.length === 0 ? (
+                                        <div className="h-full flex items-center justify-center text-muted-foreground text-sm">ไม่มีข้อมูลที่ไม่ผ่าน</div>
+                                    ) : (
+                                        <ul className="space-y-1">
+                                            {previewInvalidRows.map(r => (
+                                                <li key={r.index} className="text-xs p-2 rounded hover:bg-destructive/5 border border-transparent hover:border-destructive/10 transition-colors">
+                                                    <div className="font-medium text-destructive truncate">{r.title}</div>
+                                                    <div className="text-muted-foreground truncate flex justify-between">
+                                                        <span>บ. {r.index} | {r.date}</span>
+                                                        <span className="text-destructive font-medium shrink-0 ml-2">({r.reason})</span>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {previewValidRows.length === 0 && (
+                            <Alert type="warning" message="ไม่มีข้อมูลที่สามารถนำเข้าได้เลย กรุณาย้อนกลับไปตรวจสอบการจับคู่ หรือตรวจสอบไฟล์ Excel ของคุณ" showIcon className="mt-2" />
+                        )}
+
+                        <div className="flex justify-between mt-4 pt-4 border-t border-border">
+                            <Button onClick={() => setCurrentStep(2)} disabled={isProcessing}>
+                                ย้อนกลับ
+                            </Button>
+                            <div className="flex gap-2">
+                                <Button onClick={onClose} disabled={isProcessing}>ยกเลิก</Button>
+                                <Button 
+                                    type="primary" 
+                                    onClick={handleConfirm} 
+                                    disabled={previewValidRows.length === 0 || isProcessing}
                                     loading={isProcessing}
                                 >
                                     ยืนยันและนำเข้า
@@ -294,6 +410,7 @@ export default function ImportWizardModal({
                         { title: 'เลือกรูปแบบ' },
                         { title: 'อัปโหลดไฟล์' },
                         { title: 'จับคู่ข้อมูล' },
+                        { title: 'ตรวจสอบ' },
                     ]}
                     className="mb-6"
                 />
