@@ -69,25 +69,25 @@
 }
 
 .dark {
-  /* Octet Design: Dark header palette */
+  /* Octet Design: Dark header palette - shifted lighter so cards aren't black */
   --background: #12131A;
   --foreground: #F5F5F7;
-  --card: #1E1F28;
+  --card: #2C2E3C; /* Lighter than background */
   --card-foreground: #F5F5F7;
-  --popover: #1E1F28;
+  --popover: #2C2E3C;
   --popover-foreground: #F5F5F7;
   --primary: #145CE3;
   --primary-foreground: #FFFFFF;
-  --secondary: #2C2E3C;
+  --secondary: #3A3C4B; /* Distinctly lighter on hover */
   --secondary-foreground: #F5F5F7;
-  --muted: #2C2E3C;
-  --muted-foreground: #717077;
+  --muted: #3A3C4B;
+  --muted-foreground: #A1A1AA;
   --accent: #3A3C4B;
   --accent-foreground: #F5F5F7;
   --destructive: #EF4444;
   --destructive-tint: rgba(239, 68, 68, 0.15);
-  --border: #2C2E3C;
-  --border-strong: #3A3C4B;
+  --border: #3A3C4B;
+  --border-strong: #717077;
   --input: var(--border);
   --ring: rgba(20, 92, 227, 0.4);
   --success: #10B981;
