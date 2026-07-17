@@ -191,17 +191,32 @@ export default function ImportWizardModal({
                         )}
 
                         <div className="border border-border rounded-lg overflow-hidden mt-2">
-                            <div className="grid grid-cols-2 bg-secondary/50 p-3 border-b border-border">
+                            <div className="grid grid-cols-[3fr_4fr_3fr] bg-secondary/50 p-3 border-b border-border gap-4">
                                 <div className="font-semibold text-sm">ข้อมูลที่ระบบต้องการ</div>
                                 <div className="font-semibold text-sm">คอลัมน์ในไฟล์ Excel</div>
+                                <div className="font-semibold text-sm">ตัวอย่างข้อมูล</div>
                             </div>
                             
                             <div className="flex flex-col max-h-[400px] overflow-y-auto p-1">
                                 {STANDARD_FIELDS.map((field) => {
-                                    const isAutoFilled = isDuty && (field.key === "ชื่องาน" || field.key === "ประเภท" || field.key === "เวลาเริ่ม" || field.key === "เวลาสิ้นสุด");
+                                    const mappedHeader = mapping[field.key];
+                                    
+                                    // Calculate sample value
+                                    let sampleValue = "-";
+                                    let isAutoFilled = false;
+                                    
+                                    if (mappedHeader && excelData.length > 0) {
+                                        const rawVal = excelData[0][mappedHeader];
+                                        sampleValue = rawVal !== undefined ? String(rawVal) : "-";
+                                    } else if (isDuty) {
+                                        if (field.key === "ชื่องาน") { sampleValue = "การเข้าเวร"; isAutoFilled = true; }
+                                        else if (field.key === "ประเภท") { sampleValue = "เวร"; isAutoFilled = true; }
+                                        else if (field.key === "เวลาเริ่ม") { sampleValue = "08:30"; isAutoFilled = true; }
+                                        else if (field.key === "เวลาสิ้นสุด") { sampleValue = "16:30"; isAutoFilled = true; }
+                                    }
                                     
                                     return (
-                                        <div key={field.key} className="grid grid-cols-2 items-center gap-4 p-2 hover:bg-secondary/20 rounded-md transition-colors">
+                                        <div key={field.key} className="grid grid-cols-[3fr_4fr_3fr] items-center gap-4 p-2 hover:bg-secondary/20 rounded-md transition-colors border-b border-border/40 last:border-0">
                                             <div className="text-sm">
                                                 <span className={field.required ? "font-medium text-foreground" : "text-muted-foreground"}>
                                                     {field.label}
@@ -218,6 +233,13 @@ export default function ImportWizardModal({
                                                     onChange={(val) => setMapping(prev => ({...prev, [field.key]: val}))}
                                                     options={excelHeaders.map(h => ({ value: h, label: h }))}
                                                 />
+                                            </div>
+                                            <div className="text-xs text-muted-foreground truncate" title={sampleValue}>
+                                                {isAutoFilled && !mappedHeader ? (
+                                                    <span className="text-primary/80 italic">{sampleValue}</span>
+                                                ) : (
+                                                    sampleValue
+                                                )}
                                             </div>
                                         </div>
                                     );
