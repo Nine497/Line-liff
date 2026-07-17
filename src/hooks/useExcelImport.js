@@ -44,16 +44,19 @@ export function useExcelImport(fetchTaskEvents) {
         return newRow;
       });
 
-      // Create a new Excel file
-      const newWorksheet = XLSX.utils.json_to_sheet(mappedData);
+      // Create a new Excel file, ensuring JS Dates are written as proper Excel Dates
+      const newWorksheet = XLSX.utils.json_to_sheet(mappedData, { cellDates: true });
       const newWorkbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(newWorkbook, newWorksheet, "Sheet1");
       
       // Write to array buffer
       const excelBuffer = XLSX.write(newWorkbook, { bookType: "xlsx", type: "array" });
       
-      // Convert to Blob/File
-      const newFile = new File([excelBuffer], selectedFile.name || "mapped_import.xlsx", {
+      // Convert to Blob/File, forcing .xlsx extension to avoid parser mismatch on the backend
+      const originalName = selectedFile.name || "import";
+      const newFileName = originalName.replace(/\.xlsx?$/, "") + "_mapped.xlsx";
+      
+      const newFile = new File([excelBuffer], newFileName, {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
       });
 

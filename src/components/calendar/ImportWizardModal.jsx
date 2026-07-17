@@ -71,7 +71,8 @@ export default function ImportWizardModal({
         reader.onload = (e) => {
             try {
                 const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: "array" });
+                // Use cellDates to convert Excel date serials to proper JS Date objects
+                const workbook = XLSX.read(data, { type: "array", cellDates: true });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 
@@ -83,8 +84,8 @@ export default function ImportWizardModal({
                 }
 
                 const headers = jsonData[0]; 
-                // raw: false ensures Excel dates are converted to strings rather than serial numbers
-                const rows = XLSX.utils.sheet_to_json(worksheet, { raw: false }); 
+                // raw: true + cellDates preserves dates as JS Dates
+                const rows = XLSX.utils.sheet_to_json(worksheet, { raw: true }); 
                 
                 setExcelHeaders(headers);
                 setExcelData(rows);
