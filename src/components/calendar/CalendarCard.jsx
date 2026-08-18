@@ -1,6 +1,6 @@
 import { useLayoutEffect, useEffect, useRef } from "react";
 import { Card, Button, Select } from "antd";
-import { Upload, ChevronLeft, ChevronRight, UserRound } from "lucide-react";
+import { Upload, ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
 import { monthNames } from "../../constants/calendar";
 import { unwrap } from "../../utils/unwrap";
@@ -20,9 +20,6 @@ export default function CalendarCard({
     onOpenImportWizard,
     setMonth,
     setSelectedDateRange,
-    showMineOnly,
-    isLoadingMine,
-    onToggleMine,
     participants,
     selectedParticipantId,
     onSelectParticipant,
@@ -111,20 +108,10 @@ export default function CalendarCard({
                         วันนี้
                     </button>
 
-                    <button
-                        type="button"
-                        onClick={onToggleMine}
-                        disabled={isLoadingMine}
-                        aria-pressed={showMineOnly}
-                        title="แสดงเฉพาะกำหนดการของฉัน"
-                        className={`flex h-11 items-center gap-1.5 rounded-[var(--radius-lg)] border px-3 font-display text-xs font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${showMineOnly
-                                ? "border-primary bg-primary text-primary-foreground"
-                                : "border-border bg-secondary text-secondary-foreground hover:border-primary/40 hover:bg-muted"
-                            }`}
-                    >
-                        <UserRound className="h-3.5 w-3.5" />
-                        {isLoadingMine ? "กำลังโหลด..." : "ของฉัน"}
-                    </button>
+                    {/* "ของฉัน" (mine-only) disabled temporarily on the standalone
+                        deploy — users authenticated via /users/standalone_login
+                        are auto-registered with no linked participant record,
+                        so this filter would just always come up empty. */}
 
                     {/* Same idea as "ของฉัน" but for anyone — filters the
                         already-loaded events by participant instead of the
