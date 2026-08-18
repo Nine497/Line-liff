@@ -9,7 +9,7 @@ import liff from "@line/liff";
 export const initLiff = async () => {
     try {
         await liff.init({
-            liffId: import.meta.env.VITE_LIFF_ID || "2010857401-KbWWhfT7",
+            liffId: import.meta.env.VITE_LIFF_ID || "2010276905-UkTP7t2o",
             withLoginOnExternalBrowser: true,
         });
     } catch (err) {
