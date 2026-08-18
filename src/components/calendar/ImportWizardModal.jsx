@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Modal, Select, Button, Steps, Alert, Upload as AntdUpload, message } from "antd";
+import { Modal, Select, Button, Steps, Alert, Upload as AntdUpload, App } from "antd";
 import { CalendarDays, ShieldAlert, Inbox } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -22,6 +22,7 @@ export default function ImportWizardModal({
     onConfirm,
     isProcessing
 }) {
+    const { message } = App.useApp();
     const [currentStep, setCurrentStep] = useState(0);
     const [importType, setImportType] = useState(null); // 'general' | 'duty'
     const [selectedFile, setSelectedFile] = useState(null);
@@ -204,7 +205,7 @@ export default function ImportWizardModal({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <button 
                                 onClick={() => { setImportType('general'); setCurrentStep(1); }}
-                                className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-secondary transition-all text-center group"
+                                className="flex flex-col items-center gap-3 p-6 rounded-[var(--radius-xl)] border-2 border-border bg-card hover:border-primary hover:bg-secondary transition-all text-center group"
                             >
                                 <div className="p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 text-primary transition-colors">
                                     <CalendarDays className="w-8 h-8" />
@@ -216,7 +217,7 @@ export default function ImportWizardModal({
                             </button>
                             <button 
                                 onClick={() => { setImportType('duty'); setCurrentStep(1); }}
-                                className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-border bg-card hover:border-primary hover:bg-secondary transition-all text-center group"
+                                className="flex flex-col items-center gap-3 p-6 rounded-[var(--radius-xl)] border-2 border-border bg-card hover:border-primary hover:bg-secondary transition-all text-center group"
                             >
                                 <div className="p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 text-primary transition-colors">
                                     <ShieldAlert className="w-8 h-8" />
@@ -269,12 +270,12 @@ export default function ImportWizardModal({
                             showIcon 
                         />
                         {isDuty && (
-                            <div className="bg-primary/10 p-3 rounded-lg border border-primary/20 text-sm text-foreground">
+                            <div className="bg-primary/10 p-3 rounded-[var(--radius-lg)] border border-primary/20 text-sm text-foreground">
                                 <span className="font-semibold">โหมดการเข้าเวร:</span> ระบบจะใช้ค่าเริ่มต้นสำหรับชื่องาน, ประเภท และเวลา หากไม่ได้จับคู่ไว้
                             </div>
                         )}
 
-                        <div className="border border-border rounded-lg overflow-hidden mt-2">
+                        <div className="border border-border rounded-[var(--radius-lg)] overflow-hidden mt-2">
                             <div className="grid grid-cols-[3fr_4fr_3fr] bg-secondary/50 p-3 border-b border-border gap-4">
                                 <div className="font-semibold text-sm">ข้อมูลที่ระบบต้องการ</div>
                                 <div className="font-semibold text-sm">คอลัมน์ในไฟล์ Excel</div>
@@ -300,7 +301,7 @@ export default function ImportWizardModal({
                                     }
                                     
                                     return (
-                                        <div key={field.key} className="grid grid-cols-[3fr_4fr_3fr] items-center gap-4 p-2 hover:bg-secondary/20 rounded-md transition-colors border-b border-border/40 last:border-0">
+                                        <div key={field.key} className="grid grid-cols-[3fr_4fr_3fr] items-center gap-4 p-2 hover:bg-secondary/20 rounded-[var(--radius-md)] transition-colors border-b border-border/40 last:border-0">
                                             <div className="text-sm">
                                                 <span className={field.required ? "font-medium text-foreground" : "text-muted-foreground"}>
                                                     {field.label}
@@ -364,7 +365,7 @@ export default function ImportWizardModal({
                         
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Valid Rows */}
-                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[350px]">
+                            <div className="border border-border rounded-[var(--radius-lg)] overflow-hidden flex flex-col h-[350px]">
                                 <div className="bg-emerald-500/10 p-3 border-b border-emerald-500/20 text-emerald-600 flex justify-between items-center">
                                     <span className="font-semibold">แถวที่ผ่าน (นำเข้าได้)</span>
                                     <span className="bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-bold">{previewValidRows.length}</span>
@@ -405,7 +406,7 @@ export default function ImportWizardModal({
                             </div>
                             
                             {/* Invalid Rows */}
-                            <div className="border border-border rounded-lg overflow-hidden flex flex-col h-[350px]">
+                            <div className="border border-border rounded-[var(--radius-lg)] overflow-hidden flex flex-col h-[350px]">
                                 <div className="bg-destructive/10 p-3 border-b border-destructive/20 text-destructive flex justify-between items-center">
                                     <span className="font-semibold">แถวที่ไม่ผ่าน (ถูกข้าม)</span>
                                     <span className="bg-destructive text-white px-2 py-0.5 rounded-full text-xs font-bold">{previewInvalidRows.length}</span>

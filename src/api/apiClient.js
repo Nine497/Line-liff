@@ -13,13 +13,21 @@ export async function apiClient(url, options = {}) {
   let authHeader = {};
   try {
     const token = liff.getIDToken?.();
-    if (token) authHeader = { Authorization: `Bearer ${token}` };
+    if (token) {
+      authHeader = { Authorization: `Bearer ${token}` };
+    } else {
+      const portalToken = localStorage.getItem("token");
+      if (portalToken) {
+        authHeader = { Authorization: `Bearer ${portalToken}` };
+      }
+    }
   } catch {
     // Not logged in yet (e.g. the very first /users call during init) —
     // proceed without it; routes that require auth will reject anyway.
   }
 
   const response = await fetch(`${apiUrl}${url}`, {
+    credentials: "include",
     ...options,
     headers: {
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
@@ -41,11 +49,11 @@ export async function apiClient(url, options = {}) {
       data?.error?.message || data?.message || "API Error"
     );
 
-    console.error("API Error:", {
-      url,
-      status: response.status,
-      data,
-    });
+    if (response.status >= 500) {
+      console.error("API Error:", { url, status: response.status, data });
+    } else {
+      console.warn("API Notice:", { url, status: response.status, data });
+    }
 
     error.status = response.status;
     error.code = data?.error?.code || "UNKNOWN_ERROR";

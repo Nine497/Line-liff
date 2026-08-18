@@ -9,7 +9,7 @@ function ParticipantCard({
 
     return (
         <div
-            className={`flex items-start justify-between gap-3 rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md
+            className={`flex items-start justify-between gap-3 rounded-[var(--radius-xl)] border bg-card p-4 shadow-sm transition-shadow hover:shadow-md
       ${isBusy
                     ? "border-destructive/25"
                     : "border-success/25"

@@ -71,7 +71,7 @@ function CalendarSidebar({
                         tabBarGutter={8}
                     />
                 ) : (
-                    <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-muted/40 p-8 text-center">
+                    <div className="flex flex-1 flex-col items-center justify-center rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-muted/40 p-8 text-center">
                         <p className="text-sm font-medium text-foreground">
                             ยังไม่มีกำหนดการในวันนี้
                         </p>

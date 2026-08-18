@@ -7,11 +7,12 @@ export const fetchTasks = async () => {
   return await apiClient("/tasks");
 };
 
-// =========================
-// My Tasks (filtered by LIFF line_id)
-// =========================
-export const fetchMyTasks = async (lineId) => {
-  return await apiClient(`/tasks/mine?line_id=${encodeURIComponent(lineId)}`);
+export const fetchMyTasks = async (lineId, userId) => {
+  const params = new URLSearchParams();
+  if (lineId && lineId !== "undefined" && lineId !== "null") params.append("line_id", lineId);
+  if (userId && userId !== "undefined" && userId !== "null") params.append("user_id", userId);
+  const queryStr = params.toString();
+  return await apiClient(`/tasks/mine${queryStr ? `?${queryStr}` : ""}`);
 };
 
 // =========================

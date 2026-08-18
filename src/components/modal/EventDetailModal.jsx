@@ -55,7 +55,7 @@ function EventDetailModal({ event, onClose }) {
                 // glance rather than buried at the bottom of the modal.
                 <div className="flex items-start gap-3 pr-8">
                     <span
-                        className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
+                        className="mt-0.5 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[var(--radius-xl)]"
                         style={{ background: hexToRgba(hex, 0.14) }}
                     >
                         <CalendarDays className="h-5 w-5" style={{ color: hex }} />
@@ -86,7 +86,7 @@ function EventDetailModal({ event, onClose }) {
                     stacked vertically. */}
                 {schedule && (
                     <div
-                        className="rounded-xl p-4"
+                        className="rounded-[var(--radius-xl)] p-4"
                         style={{ background: hexToRgba(hex, 0.08), border: `1px solid ${hexToRgba(hex, 0.25)}` }}
                     >
                         {schedule.isMultiDay ? (
@@ -146,7 +146,7 @@ function EventDetailModal({ event, onClose }) {
                     </p>
 
                     {participants.length > 0 ? (
-                        <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+                        <div className="divide-y divide-border overflow-hidden rounded-[var(--radius-xl)] border border-border">
                             {participants.map((tp) => {
                                 const name = tp.participant?.name ?? "ไม่ทราบชื่อ";
                                 const key = tp.id ?? tp.participant?.id;
@@ -166,7 +166,7 @@ function EventDetailModal({ event, onClose }) {
                             })}
                         </div>
                     ) : (
-                        <p className="rounded-xl border border-dashed border-border-strong bg-muted/40 p-4 text-center text-sm italic text-muted-foreground/60">
+                        <p className="rounded-[var(--radius-xl)] border border-dashed border-border-strong bg-muted/40 p-4 text-center text-sm italic text-muted-foreground/60">
                             ไม่มีผู้เข้าร่วม
                         </p>
                     )}
@@ -177,7 +177,7 @@ function EventDetailModal({ event, onClose }) {
                     type pill again. */}
                 {task?.description && (
                     <div
-                        className="rounded-xl bg-muted/40 p-4"
+                        className="rounded-[var(--radius-xl)] bg-muted/40 p-4"
                         style={{ borderLeft: `3px solid ${hex}` }}
                     >
                         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">

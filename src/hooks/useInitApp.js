@@ -15,17 +15,22 @@ export const useInitApp = ({
 
   const runInit = useCallback(async () => {
     try {
-      const liff = await initLiff();
-      if (!liff) return;
+      let user = null;
 
-      const user = await authUser(liff);
-      if (!user) return;
+      const liff = await initLiff();
+      if (liff && liff.isLoggedIn?.()) {
+        user = await authUser(liff);
+      }
+
+      if (!user) {
+        setInitError("กรุณาล็อกอินเข้าสู่ระบบก่อนใช้งาน");
+        return;
+      }
 
       setCurrentUser(user);
 
       const data = await loadInitialData();
 
-      // ✅ ถูกต้องแล้ว
       setParticipants(data.participants || []);
       setTaskTypes(data.types || []);
 
@@ -37,18 +42,11 @@ export const useInitApp = ({
     } finally {
       setIsInitializing(false);
     }
-    // Setters are stable, and fetchTaskEvents is memoized via useCallback.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    // Intentionally mount-only: LIFF login/init must run exactly once.
-    // runInit is shared with retryInit (a plain event handler), so the
-    // setState calls inside it are safe despite the static lint warning.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     runInit();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [runInit]);
 
   const retryInit = useCallback(() => {
     setIsInitializing(true);

@@ -19,8 +19,10 @@ export const authUser = async (liff) => {
   } catch (error) {
     console.error("authUser failed:", error);
 
-    if (error.status === 401 && !liff.isLoggedIn()) {
-      liff.login();
+    if (error.status === 401) {
+      if (liff.isLoggedIn()) {
+        liff.logout();
+      }
       return null;
     }
 

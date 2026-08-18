@@ -1,8 +1,9 @@
-import { message, notification } from "antd";
+import { App } from "antd";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createTask } from "../api/tasks";
 
 export function useCreateTask(fetchTaskEvents) {
+  const { message, notification } = App.useApp();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

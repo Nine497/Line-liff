@@ -7,16 +7,13 @@ import liff from "@line/liff";
 // return value used for the "redirecting to login" case below and leaving
 // the user on a blank screen with no explanation.
 export const initLiff = async () => {
-    await liff.init({
-        liffId: "2010276905-UkTP7t2o",
-        withLoginOnExternalBrowser: true,
-    });
-
-    // ถ้ายังไม่ login — this triggers a page redirect, not a failure, so
-    // it still returns null but never reaches the catch block above.
-    if (!liff.isLoggedIn()) {
-        liff.login();
-        return null;
+    try {
+        await liff.init({
+            liffId: import.meta.env.VITE_LIFF_ID || "2010857401-KbWWhfT7",
+            withLoginOnExternalBrowser: true,
+        });
+    } catch (err) {
+        console.warn("LIFF init warning:", err);
     }
 
     return liff;

@@ -17,7 +17,7 @@ function EventCard({ event }) {
 
     return (
         <div
-            className="flex flex-col gap-3 rounded-xl p-4 transition-colors"
+            className="flex flex-col gap-3 rounded-[var(--radius-xl)] p-4 transition-colors"
             style={{
                 background: bgColor,
                 border: `1px solid ${borderColor}`,

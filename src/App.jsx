@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Header from "./components/layout/Header";
 import CalendarCard from "./components/calendar/CalendarCard";
 import CalendarSidebar from "./components/calendar/CalendarSidebar";
@@ -7,10 +8,11 @@ import React, { Suspense } from "react";
 const CreateTaskModal = React.lazy(() => import("./components/modal/CreateTaskModal"));
 const EventDetailModal = React.lazy(() => import("./components/modal/EventDetailModal"));
 const ImportWizardModal = React.lazy(() => import("./components/calendar/ImportWizardModal"));
+const NotificationSettingsModal = React.lazy(() => import("./components/modal/NotificationSettingsModal"));
 import { cn } from "./lib/utils";
 import { SpinnerEmpty } from "./components/ui/spinnerEmpty";
-import { ConfigProvider, App as AntdApp, Form, theme as antdTheme, message } from "antd";
-import "./styles/fullcalendar.css"
+import { ConfigProvider, App as AntdApp, Form, theme as antdTheme } from "antd";
+import "./styles/fullcalendar.css";
 import { todayKey } from "./utils/date";
 import { useInitApp } from "./hooks/useInitApp";
 import { useTaskEvents } from "./hooks/useTaskEvents";
@@ -44,6 +46,8 @@ function writeStoredTheme(theme) {
   }
 }
 
+const queryClient = new QueryClient();
+
 function App() {
   const [theme, setTheme] = useState(readStoredTheme);
   const isDark = theme === "dark";
@@ -57,25 +61,30 @@ function App() {
   }, [theme]);
 
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
-        token: isDark ? navyDark : navyLight,
-      }}
-    >
-      <AntdApp>
-        <AppShell setTheme={setTheme} isDark={isDark} />
-      </AntdApp>
-    </ConfigProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConfigProvider
+        theme={{
+          algorithm: isDark ? antdTheme.darkAlgorithm : antdTheme.defaultAlgorithm,
+          token: isDark ? navyDark : navyLight,
+        }}
+      >
+        <AntdApp>
+          <AppShell setTheme={setTheme} isDark={isDark} />
+        </AntdApp>
+      </ConfigProvider>
+    </QueryClientProvider>
   );
 }
 
 function AppShell({ setTheme, isDark }) {
+  const { message } = AntdApp.useApp();
   const [selectedDateRange, setSelectedDateRange] = useState([todayKey, todayKey]);
   const [currentUser, setCurrentUser] = useState({});
   const [isInitializing, setIsInitializing] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [hasOpenedCreate, setHasOpenedCreate] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [hasOpenedSettings, setHasOpenedSettings] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [hasOpenedDetail, setHasOpenedDetail] = useState(false);
   const [calendarHeight, setCalendarHeight] = useState(null);
@@ -148,16 +157,24 @@ function AppShell({ setTheme, isDark }) {
 
   const onToggleMine = async () => {
     try {
-      const { turnedOn, participant, notReady } = await toggleMineOnly(currentUser.line_id);
+      if (!currentUser) {
+        message.warning("ไม่พบข้อมูลผู้ใช้งาน กรุณาลองใหม่อีกครั้ง");
+        return;
+      }
+      const { turnedOn, participant, notReady } = await toggleMineOnly(currentUser, participants);
 
       if (notReady) {
         message.info("กำลังโหลดข้อมูลผู้ใช้ กรุณาลองใหม่อีกครั้งในอีกสักครู่");
       } else if (turnedOn && !participant) {
-        message.info("ไม่พบข้อมูลผู้เข้าร่วมที่ผูกกับบัญชี LINE นี้ กรุณาติดต่อผู้ดูแลระบบ");
+        message.info("ยังไม่มีรายชื่อผู้เข้าร่วมที่ผูกกับบัญชีนี้ในระบบปฏิทิน");
       }
     } catch (err) {
-      console.error("Load my events error:", err);
-      message.error("โหลดกำหนดการของฉันไม่สำเร็จ");
+      if (err?.status === 401) {
+        message.warning("เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
+      } else {
+        console.warn("Load my events warning:", err?.message || err);
+        message.error(err?.message || "โหลดกำหนดการของฉันไม่สำเร็จ");
+      }
     }
   };
 
@@ -198,7 +215,7 @@ function AppShell({ setTheme, isDark }) {
     });
 
   return (
-    <main className={cn("relative flex min-h-screen flex-col bg-background text-foreground xl:h-screen xl:overflow-hidden", isDark && "dark")}>
+    <main className={cn("relative flex min-h-dvh flex-col bg-background text-foreground xl:h-dvh xl:overflow-hidden", isDark && "dark")}>
       <InitialLoading
         open={isInitializing}
         currentUser={currentUser}
@@ -211,7 +228,7 @@ function AppShell({ setTheme, isDark }) {
             <button
               type="button"
               onClick={retryInit}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              className="rounded-[var(--radius-lg)] bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
             >
               ลองใหม่
             </button>
@@ -229,6 +246,10 @@ function AppShell({ setTheme, isDark }) {
           onCreateTask={() => {
             setHasOpenedCreate(true);
             setShowCreateForm(true);
+          }}
+          onOpenSettings={() => {
+            setHasOpenedSettings(true);
+            setShowSettingsModal(true);
           }}
         />
 
@@ -318,6 +339,13 @@ function AppShell({ setTheme, isDark }) {
               setShowCreateForm(false);
               form.resetFields();
             }}
+          />
+        )}
+
+        {hasOpenedSettings && (
+          <NotificationSettingsModal
+            open={showSettingsModal}
+            onClose={() => setShowSettingsModal(false)}
           />
         )}
 

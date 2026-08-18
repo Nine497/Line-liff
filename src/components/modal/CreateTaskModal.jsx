@@ -1,5 +1,5 @@
 import {
-    Modal, Form, Input, Select, DatePicker, Button, Row, Col, Divider, message, AutoComplete
+    Modal, Form, Input, Select, DatePicker, Button, Row, Col, Divider, App, AutoComplete
 } from "antd";
 
 import {
@@ -28,6 +28,7 @@ function CreateTaskModal({
     onSubmit,
     onClose,
 }) {
+    const { message } = App.useApp();
 
     // Date-scoped participants for this modal only — null until a range is
     // picked and fetched, in which case `safeParticipants` below falls back
@@ -197,7 +198,7 @@ function CreateTaskModal({
                         <Clock className="h-3.5 w-3.5 text-muted-foreground" /> ช่วงเวลา
                     </span>}
                     name="dateRange"
-                    rules={[{ required: true }]}
+                    rules={[{ required: true, message: "กรุณาเลือกช่วงเวลา" }]}
                 >
                     <RangePicker
                         size="large"
@@ -220,7 +221,7 @@ function CreateTaskModal({
                                 <Tags className="h-3.5 w-3.5 text-muted-foreground" /> ประเภทงาน
                             </span>}
                             name="type_id"
-                            rules={[{ required: true }]}
+                            rules={[{ required: true, message: "กรุณาเลือกประเภทงาน" }]}
                         >
                             <Select
                                 size="large"

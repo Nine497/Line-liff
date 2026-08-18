@@ -1,43 +1,65 @@
-import { Sun, Moon } from "lucide-react";
+import { ArrowLeft, Bell, BellOff } from "lucide-react";
 import CompassMark from "./CompassMark";
 import AddEventButton from "./AddEventButton";
 import { useClock } from "../../hooks/useClock";
+import { useNotificationSettings } from "../../hooks/useNotificationSettings";
 
 function Header({
     currentUser,
-    isDark,
-    onToggleTheme,
     onCreateTask,
+    onBack,
+    onOpenSettings,
 }) {
     const { time, date } = useClock();
+    const { settings } = useNotificationSettings();
+    const isNotifEnabled = settings?.enabled ?? false;
 
     return (
         <nav className="flex items-center justify-between gap-3 pb-4">
-            <a
-                className="flex items-center gap-3 transition-transform duration-200 hover:scale-105 active:scale-95"
-                href="#calendarjs"
-            >
-                <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm shrink-0">
-                    {currentUser.picture_url ? (
-                        <img
-                            src={currentUser.picture_url}
-                            alt={currentUser.display_name ?? "ผู้ใช้งานปัจจุบัน"}
-                            className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
-                        />
-                    ) : (
-                        <CompassMark className="h-6 w-6" />
-                    )}
-                </span>
+            <div className="flex items-center gap-3">
+                {onBack && (
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-xl)] border border-border bg-card text-foreground transition-all duration-200 hover:scale-105 hover:bg-muted active:scale-95 shadow-sm"
+                        title="กลับสู่ระบบ Thai MECC"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </button>
+                )}
+                {(() => {
+                    const avatarUrl = currentUser.picture_url || currentUser.pictureUrl || currentUser.line_picture_url || currentUser.avatar || null;
+                    const displayName = currentUser.display_name || currentUser.line_display_name || currentUser.displayName || `${currentUser.first_name || ""} ${currentUser.last_name || ""}`.trim() || currentUser.username || "ศรชล.";
 
-                <span className="flex flex-col leading-tight">
-                    <span className="font-display font-bold text-base text-foreground">
-                        {currentUser.display_name ?? "ศรชล."}
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">
-                        ศรชล.
-                    </span>
-                </span>
-            </a>
+                    return (
+                        <a
+                            className="flex items-center gap-3 transition-transform duration-200 hover:scale-105 active:scale-95"
+                            href="#calendarjs"
+                        >
+                            <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary text-primary-foreground shadow-sm shrink-0">
+                                {avatarUrl ? (
+                                    <img
+                                        src={avatarUrl}
+                                        alt={displayName}
+                                        className="h-full w-full object-cover transition-transform duration-300 hover:scale-110"
+                                    />
+                                ) : (
+                                    <CompassMark className="h-6 w-6" />
+                                )}
+                            </span>
+
+                            <span className="flex flex-col leading-tight">
+                                <span className="font-display font-bold text-base text-foreground">
+                                    {displayName}
+                                </span>
+                                <span className="text-[11px] text-muted-foreground">
+                                    ศรชล.
+                                </span>
+                            </span>
+                        </a>
+                    );
+                })()}
+            </div>
 
             <div className="flex items-center gap-3">
                 <div className="hidden sm:flex flex-col items-end leading-tight font-display tabular-nums">
@@ -45,29 +67,31 @@ function Header({
                     <span className="text-[10.5px] text-muted-foreground">{date}</span>
                 </div>
 
-                {/* Hit area is 44x44 (touch-target min) even though the visible
-                    track stays a compact 22x38 pill — the track is purely
-                    visual and centered inside the real tappable button. */}
                 <button
                     type="button"
-                    role="switch"
-                    aria-checked={isDark}
-                    aria-label={
-                        isDark
-                            ? "เปลี่ยนเป็นโหมดสว่าง"
-                            : "เปลี่ยนเป็นโหมดมืด"
-                    }
-                    onClick={onToggleTheme}
-                    className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center transition-transform duration-200 hover:scale-110 active:scale-95"
+                    onClick={onOpenSettings}
+                    className={`group relative flex h-10 shrink-0 items-center justify-center rounded-2xl bg-white transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm border px-2.5 gap-1.5 ${
+                        isNotifEnabled 
+                            ? "text-slate-700 border-slate-200 hover:border-slate-300" 
+                            : "text-slate-400 border-slate-200 hover:text-slate-600"
+                    }`}
                 >
-                    <span className="relative h-[22px] w-[38px] rounded-full border border-border bg-secondary transition-colors">
-                        <span
-                            className={`absolute top-[1px] left-[1px] flex h-[18px] w-[18px] items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform ${isDark ? "translate-x-4" : "translate-x-0"
-                                }`}
-                        >
-                            {isDark ? <Moon className="h-2.5 w-2.5" /> : <Sun className="h-2.5 w-2.5" />}
-                        </span>
+                    {isNotifEnabled ? (
+                        <Bell className="h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
+                    ) : (
+                        <BellOff className="h-4 w-4 transition-transform duration-300" />
+                    )}
+                    <span className="text-xs font-semibold pr-0.5">
+                        {isNotifEnabled ? "เปิด" : "ปิด"}
                     </span>
+                    
+                    {/* Minimal Notification Dot (only when ON) */}
+                    {isNotifEnabled && (
+                        <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-2.5 w-2.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75"></span>
+                            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-blue-500 border border-white"></span>
+                        </span>
+                    )}
                 </button>
 
                 <AddEventButton onClick={onCreateTask} />

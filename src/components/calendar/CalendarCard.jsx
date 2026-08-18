@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useEffect, useRef } from "react";
 import { Card, Button, Select } from "antd";
 import { Upload, ChevronLeft, ChevronRight, UserRound } from "lucide-react";
 import dayjs from "dayjs";
@@ -51,10 +51,27 @@ export default function CalendarCard({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [events, month]);
 
+    const scrollToToday = () => {
+        const todayEl = cardRef.current?.querySelector(".fc-day-today");
+        if (todayEl) {
+            todayEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    };
+
+    useEffect(() => {
+        const timer = setTimeout(scrollToToday, 350);
+        return () => clearTimeout(timer);
+    }, [month]);
+
+    const handleGoToday = () => {
+        goToday();
+        setTimeout(scrollToToday, 100);
+    };
+
     return (
         <Card
             ref={cardRef}
-            className="flex flex-col overflow-hidden shadow-sm xl:h-full"
+            className="flex flex-col shadow-sm xl:h-full xl:overflow-hidden"
             styles={{ body: { padding: 0, display: "flex", flexDirection: "column", flex: 1, minHeight: 0 } }}
         >
             {/* Column on phones (each group stretches full-width via the
@@ -67,7 +84,7 @@ export default function CalendarCard({
                         type="button"
                         aria-label="เดือนก่อนหน้า"
                         onClick={() => moveMonth(-1)}
-                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-secondary text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
+                        className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-secondary text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </button>
@@ -78,7 +95,7 @@ export default function CalendarCard({
                         type="button"
                         aria-label="เดือนถัดไป"
                         onClick={() => moveMonth(1)}
-                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-secondary text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
+                        className="flex h-11 w-11 items-center justify-center rounded-[var(--radius-lg)] border border-border bg-secondary text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
                     >
                         <ChevronRight className="h-4 w-4" />
                     </button>
@@ -87,8 +104,8 @@ export default function CalendarCard({
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
-                        onClick={goToday}
-                        className="flex h-11 items-center gap-1.5 rounded-lg border border-border bg-secondary px-3 font-display text-xs font-semibold text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
+                        onClick={handleGoToday}
+                        className="flex h-11 items-center gap-1.5 rounded-[var(--radius-lg)] border border-border bg-secondary px-3 font-display text-xs font-semibold text-secondary-foreground transition-colors hover:border-primary/40 hover:bg-muted"
                     >
                         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                         วันนี้
@@ -100,7 +117,7 @@ export default function CalendarCard({
                         disabled={isLoadingMine}
                         aria-pressed={showMineOnly}
                         title="แสดงเฉพาะกำหนดการของฉัน"
-                        className={`flex h-11 items-center gap-1.5 rounded-lg border px-3 font-display text-xs font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${showMineOnly
+                        className={`flex h-11 items-center gap-1.5 rounded-[var(--radius-lg)] border px-3 font-display text-xs font-semibold transition-colors disabled:cursor-wait disabled:opacity-70 ${showMineOnly
                                 ? "border-primary bg-primary text-primary-foreground"
                                 : "border-border bg-secondary text-secondary-foreground hover:border-primary/40 hover:bg-muted"
                             }`}
